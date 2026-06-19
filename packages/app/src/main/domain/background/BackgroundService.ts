@@ -63,11 +63,11 @@ export class BackgroundService {
     // activating avatars) keeps the sim paused / overlay shown until ALL of it is
     // done, whichever finishes last.
     this.setTransition(true)
-    this.activity.begin('Generating background...')
+    this.activity.begin()
     try {
       await delay(BACKGROUND_TRANSITION_FADE_MS) // wait until the screen is black
       const prompt = await sim.getBackgroundPromptForCharacter(PLAYER_CHARACTER_ID)
-      await this.handle(prompt)
+      await this.handle(prompt, false, 'Generating background...')
     } catch (err) {
       console.error('[background] failed to regenerate background:', err)
     } finally {
@@ -143,7 +143,7 @@ export class BackgroundService {
    * disk cache is bypassed and a fresh image is generated with a random seed
    * (used by {@link regenerate} to re-roll an image).
    */
-  async handle(request: PromptRequest, force = false): Promise<void> {
+  async handle(request: PromptRequest, force = false, label?: string): Promise<void> {
     try {
       const hash = promptHash(request.positive, request.negative)
       const originalRel = this.originalRel(hash)
@@ -156,10 +156,10 @@ export class BackgroundService {
       // re-generates.
       if (force || !(await this.saveData.exists(originalRel))) {
         if (!settings.enabled) return // generation off and nothing cached → skip
-        const image = await this.imageGen.generate(
-          request,
-          force ? { forceRandomSeed: true } : undefined
-        )
+        const image = await this.imageGen.generate(request, {
+          forceRandomSeed: force || undefined,
+          label
+        })
         await this.saveData.writeBytes(originalRel, image.bytes)
       }
 
@@ -174,14 +174,14 @@ export class BackgroundService {
    *  prompt, falling back to the live sim for the player's location. Pauses the
    *  sim and shows an overlay while generating, like {@link regenerateForPlayer}. */
   async regenerate(): Promise<void> {
-    this.activity.begin('Regenerating background...')
+    this.activity.begin()
     try {
       const request = await this.loadPrompt()
       if (!request) {
         console.warn('[background] no prompt available to regenerate')
         return
       }
-      await this.handle(request, true)
+      await this.handle(request, true, 'Regenerating background...')
     } catch (err) {
       console.error('[background] failed to regenerate background:', err)
     } finally {

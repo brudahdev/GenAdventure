@@ -17,6 +17,10 @@ export interface GenerateOptions {
   /** Force a random seed for this generation, ignoring the configured fixed seed.
    *  Used by "regen" so re-rolling a prompt yields a different image. */
   forceRandomSeed?: boolean
+  /** Loading-overlay text shown while this request is being generated. Omitted →
+   *  no overlay for this request (e.g. scenario start drives its own overlay).
+   *  A cache hit never reaches generation, so it never shows an overlay. */
+  label?: string
 }
 
 /**

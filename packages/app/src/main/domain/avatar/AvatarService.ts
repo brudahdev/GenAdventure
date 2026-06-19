@@ -130,7 +130,7 @@ export class AvatarService {
    * disk cache is bypassed and a fresh image is generated with a random seed
    * (used by {@link regenerate} to re-roll an image).
    */
-  async handle(request: PromptRequest, force = false): Promise<void> {
+  async handle(request: PromptRequest, force = false, label?: string): Promise<void> {
     try {
       const characterId = request.characterId
       if (!characterId) {
@@ -154,10 +154,10 @@ export class AvatarService {
             negative: appendPrompt(request.negative, settings.transparencyNegativePrompt)
           }
           : request
-        const image = await this.imageGen.generate(
-          genRequest,
-          force ? { forceRandomSeed: true } : undefined
-        )
+        const image = await this.imageGen.generate(genRequest, {
+          forceRandomSeed: force || undefined,
+          label
+        })
         await this.saveData.writeBytes(originalRel, image.bytes)
       }
 
@@ -178,7 +178,7 @@ export class AvatarService {
       console.warn('[avatar] no prompt available to regenerate', characterId)
       return
     }
-    await this.handle(request, true)
+    await this.handle(request, true, 'Regenerating avatar...')
   }
 
   /** The prompt that produced the current avatar: the stored one, or a freshly

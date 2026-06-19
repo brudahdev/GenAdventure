@@ -45,7 +45,7 @@ export class CharacterActivationService {
     // GenerationActivity also owns the sim pause + loading overlay for the whole
     // batch, so the sim stays paused / the spinner stays up until everything is done.
     const name = this.characterService.getScenarioCharacterById(characterId)?.name
-    this.activity.begin(`Generating avatar for ${name ?? characterId}...`)
+    this.activity.begin()
     try {
       await this.voxtaClient.addChatParticipant(characterId)
 
@@ -53,7 +53,7 @@ export class CharacterActivationService {
       if (!sim) return
 
       const prompt = await sim.getAvatarPromptForCharacter(characterId)
-      await this.avatarService.handle(prompt)
+      await this.avatarService.handle(prompt, false, `Generating avatar for ${name ?? characterId}...`)
     } catch (err) {
       console.error('[activation] failed to generate avatar:', err)
     } finally {

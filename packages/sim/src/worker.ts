@@ -15,6 +15,7 @@ import { buildAvatarPrompt } from './game/character/characterViews'
 import { CharacterPoseKey } from './game/character/pose/CharacterPose'
 import { CharacterLocation, CharacterLocationKey } from './game/character/location/CharacterLocation'
 import { CharacterLocomotionKey } from './game/character/locomotion/CharacterLocomotion'
+import { NpcActivityKey } from './game/character/npc/NpcActivity'
 
 /** The worker's implementation of the surface the main process calls. Each run
  *  gets its own child container (provisioned with a mode-specific adapter set)
@@ -122,7 +123,7 @@ class SimService implements SimApi {
       return;
     }
 
-    if (characterId != PLAYER_CHARACTER_ID) {
+    if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
       main.imageRequest(buildAvatarPrompt(targetEntity))
     }
   }
@@ -144,7 +145,7 @@ class SimService implements SimApi {
 
     targetEntity.require(CharacterLocomotionKey).gotoNearbyLocation(locationId)
 
-    if (characterId != PLAYER_CHARACTER_ID) {
+    if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
       main.imageRequest(buildAvatarPrompt(targetEntity))
     }
   }
@@ -166,7 +167,7 @@ class SimService implements SimApi {
 
     targetEntity.require(CharacterPoseKey).setPoseById(poseId)
 
-    if (characterId != PLAYER_CHARACTER_ID) {
+    if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
       main.imageRequest(buildAvatarPrompt(targetEntity))
     }
   }
