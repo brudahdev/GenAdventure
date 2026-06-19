@@ -36,10 +36,21 @@ export interface PromptRequest {
 /** A generated avatar, pushed main → renderer. `url` is a renderer-loadable
  *  `genimg://` URL for the displayed (possibly transparency-edited) image, and
  *  `characterId` identifies which character it belongs to (for per-character
- *  demux on the chat page). */
+ *  demux on the chat page). `useFade` asks the chat page to animate the avatar
+ *  in (the NPC moved) vs. show it instantly (the player moved, handled under the
+ *  scene-change fade-to-black). */
 export interface AvatarGeneratedEvent {
   characterId: string
   url: string
+  useFade: boolean
+}
+
+/** An avatar removed (NPC deactivated), pushed main → renderer. `useFade` asks
+ *  the chat page to fade the avatar out (the NPC moved) vs. remove it instantly
+ *  (the player moved). */
+export interface AvatarRemovedEvent {
+  characterId: string
+  useFade: boolean
 }
 
 /** A generated background, pushed main → renderer. `url` is a renderer-loadable

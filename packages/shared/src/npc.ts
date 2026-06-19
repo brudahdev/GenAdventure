@@ -4,4 +4,5 @@
 export interface NpcActivationChange {
     characterId: string
     isActive: boolean
+    useFade: boolean
 }

@@ -9,7 +9,7 @@ import { toImageUrl } from '../imageGeneration/imageProtocol'
 import { applyTransparency } from '../imageGeneration/imageTransparency'
 
 type AvatarHandler = (event: AvatarGeneratedEvent) => void
-type AvatarRemovedHandler = (characterId: string) => void
+type AvatarRemovedHandler = (characterId: string, useFade: boolean) => void
 
 /** An avatar currently shown for a character, kept so transparency can be
  *  re-applied to all avatars on demand and so the current state can be replayed
@@ -17,6 +17,9 @@ type AvatarRemovedHandler = (characterId: string) => void
 interface ActiveAvatar {
   characterId: string
   hash: string
+  /** Whether the chat page should animate this avatar in/out (the NPC moved) or
+   *  show/hide it instantly (the player moved, handled under the scene fade). */
+  useFade: boolean
   /** The last emitted `genimg://` URL, set once `emit()` has run. */
   url?: string
 }
@@ -70,9 +73,9 @@ export class AvatarService {
   /** Drop a single character's avatar (e.g. the NPC left the player's location).
    *  Clears it from the active set so it isn't replayed to a remounting page,
    *  and notifies subscribers (the IPC layer → renderer). */
-  remove(characterId: string): void {
+  remove(characterId: string, useFade = true): void {
     if (!this.active.delete(characterId)) return
-    for (const handler of this.removedHandlers) handler(characterId)
+    for (const handler of this.removedHandlers) handler(characterId, useFade)
   }
 
   /** Re-apply the current transparency settings to every active avatar and
@@ -115,7 +118,8 @@ export class AvatarService {
   getActive(): AvatarGeneratedEvent[] {
     const events: AvatarGeneratedEvent[] = []
     for (const avatar of this.active.values()) {
-      if (avatar.url) events.push({ characterId: avatar.characterId, url: avatar.url })
+      // Replayed to a freshly mounted page → always instant, never animated.
+      if (avatar.url) events.push({ characterId: avatar.characterId, url: avatar.url, useFade: false })
     }
     return events
   }
@@ -130,7 +134,7 @@ export class AvatarService {
    * disk cache is bypassed and a fresh image is generated with a random seed
    * (used by {@link regenerate} to re-roll an image).
    */
-  async handle(request: PromptRequest, force = false, label?: string): Promise<void> {
+  async handle(request: PromptRequest, force = false, label?: string, useFade = true): Promise<void> {
     try {
       const characterId = request.characterId
       if (!characterId) {
@@ -161,7 +165,7 @@ export class AvatarService {
         await this.saveData.writeBytes(originalRel, image.bytes)
       }
 
-      const avatar: ActiveAvatar = { characterId, hash }
+      const avatar: ActiveAvatar = { characterId, hash, useFade }
       this.active.set(characterId, avatar)
       await this.emit(avatar, settings)
     } catch (err) {
@@ -219,7 +223,7 @@ export class AvatarService {
       }
 
       avatar.url = url // remember for replay / snapshot
-      for (const handler of this.handlers) handler({ characterId, url })
+      for (const handler of this.handlers) handler({ characterId, url, useFade: avatar.useFade })
     } catch (err) {
       console.error('[avatar] failed to emit avatar:', err)
     }

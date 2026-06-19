@@ -20,7 +20,8 @@ export class NpcActivity implements Component {
         this.charLocation = this.entity.require(CharacterLocationKey);
         eventSystem.on("location.changed", (args) => {
             if (args.characterId === this.entity.id || args.characterId === PLAYER_CHARACTER_ID) {
-                this.updateActiveState()
+                const useFade = args.characterId === this.entity.id
+                this.updateActiveState(true, useFade)
             }
         })
     }
@@ -28,29 +29,30 @@ export class NpcActivity implements Component {
     /** Second boot phase: resolves initial activity once every character has
      *  been placed. */
     init(): void {
-        this.updateActiveState(false)
+        this.updateActiveState(false, false)
     }
 
     get isActive(): boolean {
         return this.active
     }
 
-    private updateActiveState(emit = true): void {
+    private updateActiveState(emit: boolean, useFade: boolean): void {
         // active if at the same location as the player
         const shouldBeActive = this.charLocation.isAtSameLocationAsOther(PLAYER_CHARACTER_ID)
 
-        this.setActive(shouldBeActive, emit)
+        this.setActive(shouldBeActive, emit, useFade)
     }
 
-    private setActive(value: boolean, emit = true): void {
+    private setActive(value: boolean, emit: boolean, useFade: boolean): void {
         if (this.active === value) return
         this.active = value
 
-        if(emit){
-           
+        if (emit) {
+
             this.eventSystem.emit("npc.activation.changed", {
                 characterId: this.entity.id,
-                isActive: this.active
+                isActive: this.active,
+                useFade
             })
         }
     }

@@ -1,6 +1,10 @@
 import type { JSX } from 'solid-js'
 import { speakingCharacterId } from '../stores/audio-store'
 
+/** Duration (ms) of the avatar enter/exit slide-fade. Must match
+ *  `--avatar-transition-duration` in components.css so the store's delayed
+ *  removal lines up with the CSS exit animation. */
+export const AVATAR_FADE_MS = 450
 /** Target scale (%) of the avatar while its character is speaking (110 = +10%). */
 export const AVATAR_SPEAKING_SIZE_PERCENT = 110
 /** Time (ms) to smoothly lerp the avatar to/from its speaking size. */
@@ -13,6 +17,12 @@ export const NON_SPEAKING_AVATAR_DARKEN_TIME = 300
 interface ChatAvatarProps {
   characterId: string
   src: string
+  /** Slide + fade the avatar in on mount (the NPC moved). When false it appears
+   *  instantly (the player moved, shown under the scene fade-to-black). */
+  fadeIn?: boolean
+  /** Marks the avatar as leaving: plays the fade-out animation before the chat
+   *  page removes it from the store. */
+  exiting?: boolean
   /** Forwards the wrapper element to the parent (used for FLIP relayout). */
   ref?: (el: HTMLDivElement) => void
   /** Right-click handler — opens the per-character action context menu. */
@@ -22,7 +32,8 @@ interface ChatAvatarProps {
 /**
  * A single character's avatar. Renders a stable wrapper (the flex item the chat
  * page positions and animates) containing one image. When `src` changes the
- * image swaps instantly — no cross-fade, no slide.
+ * image swaps instantly — no cross-fade, no slide. The wrapper slide-fades in on
+ * mount when `fadeIn` is set and fades out when `exiting` is set.
  */
 export default function ChatAvatar(props: ChatAvatarProps): JSX.Element {
   // Speaking emphasis: grow this avatar while its character speaks; darken it
@@ -37,6 +48,7 @@ export default function ChatAvatar(props: ChatAvatarProps): JSX.Element {
   return (
     <div
       class="chat-avatar"
+      classList={{ 'is-fade-in': props.fadeIn, 'is-exiting': props.exiting }}
       ref={props.ref}
       onContextMenu={(e) => {
         if (!props.onContextMenu) return

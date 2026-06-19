@@ -32,14 +32,14 @@ export class CharacterActivationService {
   /** React to a single NPC's activation change. */
   async handle(change: NpcActivationChange): Promise<void> {
     if (change.isActive) {
-      await this.activate(change.characterId)
+      await this.activate(change.characterId, change.useFade)
     } else {
-      await this.deactivate(change.characterId)
+      await this.deactivate(change.characterId, change.useFade)
     }
   }
 
   /** Add the NPC to the chat and generate + show their avatar. */
-  private async activate(characterId: string): Promise<void> {
+  private async activate(characterId: string, useFade: boolean): Promise<void> {
     // Register the pending avatar work synchronously (before any await) so a scene
     // transition waiting on `whenIdle()` can't fade out before this avatar is done.
     // GenerationActivity also owns the sim pause + loading overlay for the whole
@@ -53,7 +53,7 @@ export class CharacterActivationService {
       if (!sim) return
 
       const prompt = await sim.getAvatarPromptForCharacter(characterId)
-      await this.avatarService.handle(prompt, false, `Generating avatar for ${name ?? characterId}...`)
+      await this.avatarService.handle(prompt, false, `Generating avatar for ${name ?? characterId}...`, useFade)
     } catch (err) {
       console.error('[activation] failed to generate avatar:', err)
     } finally {
@@ -62,9 +62,9 @@ export class CharacterActivationService {
   }
 
   /** Remove the NPC from the chat and drop their avatar from the chat page. */
-  private async deactivate(characterId: string): Promise<void> {
+  private async deactivate(characterId: string, useFade: boolean): Promise<void> {
     await this.voxtaClient.removeChatParticipant(characterId)
-    this.avatarService.remove(characterId)
+    this.avatarService.remove(characterId, useFade)
   }
 
   /** Reconcile Voxta chat participants against the sim's active character set.

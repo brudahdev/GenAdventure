@@ -9,6 +9,7 @@ import type {
   AudioCompleteAck,
   RecordingStartEvent,
   AvatarGeneratedEvent,
+  AvatarRemovedEvent,
   BackgroundGeneratedEvent,
   ImgGenSettings,
   ComfyGenericSettings,
@@ -142,10 +143,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on(ICP.AVATAR_GENERATED, listener)
       return () => ipcRenderer.removeListener(ICP.AVATAR_GENERATED, listener)
     },
-    // An avatar was removed (NPC deactivated); payload is the characterId.
-    // Returns an unsubscribe fn.
-    onRemoved: (callback: (characterId: string) => void): (() => void) => {
-      const listener = (_e: unknown, characterId: string): void => callback(characterId)
+    // An avatar was removed (NPC deactivated). `useFade` asks the page to fade it
+    // out (NPC moved) vs. remove it instantly (player moved). Returns an unsubscribe fn.
+    onRemoved: (callback: (characterId: string, useFade: boolean) => void): (() => void) => {
+      const listener = (_e: unknown, event: AvatarRemovedEvent): void =>
+        callback(event.characterId, event.useFade)
       ipcRenderer.on(ICP.AVATAR_REMOVED, listener)
       return () => ipcRenderer.removeListener(ICP.AVATAR_REMOVED, listener)
     },

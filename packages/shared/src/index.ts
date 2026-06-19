@@ -45,6 +45,7 @@ export { MIN_PIXELS, MAX_PIXELS, DEFAULT_COMFY_URL, BACKGROUND_TRANSITION_FADE_M
 export type {
   PromptRequest,
   AvatarGeneratedEvent,
+  AvatarRemovedEvent,
   BackgroundGeneratedEvent,
   ImgGenSettings,
   ComfyGenericSettings,

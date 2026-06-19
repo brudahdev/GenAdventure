@@ -35,6 +35,7 @@ import {
   setAvatar,
   removeAvatar,
   clearAvatars,
+  avatarRelayoutFade,
   backgroundImage,
   setBackgroundImage
 } from '../stores/image-store'
@@ -288,10 +289,10 @@ export default function ChatPage(): JSX.Element {
       else op()
     }
     const unsubAvatar = window.electronAPI.avatar.onGenerated((event) => {
-      runAvatarOp(() => setAvatar(event.characterId, event.url))
+      runAvatarOp(() => setAvatar(event.characterId, event.url, event.useFade))
     })
-    const unsubAvatarRemoved = window.electronAPI.avatar.onRemoved((characterId) => {
-      runAvatarOp(() => removeAvatar(characterId))
+    const unsubAvatarRemoved = window.electronAPI.avatar.onRemoved((characterId, useFade) => {
+      runAvatarOp(() => removeAvatar(characterId, useFade))
     })
     const unsubBackground = window.electronAPI.background.onGenerated((event) => {
       setBackgroundImage(event.url)
@@ -318,7 +319,7 @@ export default function ChatPage(): JSX.Element {
     // scenario start, whose live events we missed). Subscribe first (above), then
     // replay — generation is slow enough there's no realistic race.
     void window.electronAPI.avatar.list().then((list) => {
-      for (const a of list) setAvatar(a.characterId, a.url)
+      for (const a of list) setAvatar(a.characterId, a.url, a.useFade)
     })
     void window.electronAPI.background.current().then((url) => {
       if (url) setBackgroundImage(url)
@@ -332,8 +333,16 @@ export default function ChatPage(): JSX.Element {
   let prevRects = new Map<string, DOMRect>()
   createEffect(() => {
     avatars.length // track add/remove
+    const animate = avatarRelayoutFade()
     const nextRects = new Map<string, DOMRect>()
     for (const [id, el] of avatarEls) nextRects.set(id, el.getBoundingClientRect())
+
+    // Player-move (instant, under the scene fade) snaps survivors into place;
+    // record positions for the next animated relayout's baseline and bail.
+    if (!animate) {
+      prevRects = nextRects
+      return
+    }
 
     for (const [id, el] of avatarEls) {
       const prev = prevRects.get(id)
@@ -452,6 +461,8 @@ export default function ChatPage(): JSX.Element {
               <ChatAvatar
                 characterId={avatar.characterId}
                 src={avatar.src}
+                fadeIn={avatar.fadeIn}
+                exiting={avatar.exiting}
                 ref={(el) => avatarEls.set(avatar.characterId, el)}
                 onContextMenu={(id, x, y) => void openAvatarMenu(id, x, y)}
               />

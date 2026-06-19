@@ -731,11 +731,23 @@
      to overlap. width: fit-content alone isn't enough — max-width is required. */
   width: fit-content;
   max-width: 40vw;
-  animation: avatar-enter var(--avatar-transition-duration) var(--avatar-transition-easing);
   -webkit-user-drag: none;
   /* The .avatars row is pointer-events: none; re-enable here so right-click
      reaches the avatar for its context menu. */
   pointer-events: auto;
+}
+
+/* Slide + fade in only when the change should animate (the NPC moved); a
+   player-move shows the avatar instantly under the scene fade-to-black. */
+.chat-avatar.is-fade-in {
+  animation: avatar-enter var(--avatar-transition-duration) var(--avatar-transition-easing);
+}
+
+/* Leaving avatar: fade + slide out, holding the end state until the chat page
+   splices it from the store. */
+.chat-avatar.is-exiting {
+  animation: avatar-exit var(--avatar-transition-duration) var(--avatar-transition-easing) forwards;
+  pointer-events: none;
 }
 
 .chat-avatar-img {
@@ -766,6 +778,18 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes avatar-exit {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--avatar-slide-distance)));
   }
 }
 

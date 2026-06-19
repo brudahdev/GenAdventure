@@ -20,7 +20,9 @@ function broadcast(channel: string, payload?: unknown): void {
 export class AvatarIpcHandlers {
   constructor(private readonly avatarService: AvatarService) {
     this.avatarService.onAvatar((event) => broadcast(ICP.AVATAR_GENERATED, event))
-    this.avatarService.onAvatarRemoved((characterId) => broadcast(ICP.AVATAR_REMOVED, characterId))
+    this.avatarService.onAvatarRemoved((characterId, useFade) =>
+      broadcast(ICP.AVATAR_REMOVED, { characterId, useFade })
+    )
 
     ipcMain.handle(ICP.AVATAR_LIST, async () => this.avatarService.getActive())
     ipcMain.handle(ICP.IMG_GEN_RECALCULATE, async () => this.avatarService.recalculateAll())
