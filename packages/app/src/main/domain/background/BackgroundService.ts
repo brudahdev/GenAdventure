@@ -96,6 +96,16 @@ export class BackgroundService {
     return `img_gen/generated/locations/blur_${hash}_${Date.now()}.png`
   }
 
+  /** Delete previously emitted blur files for this hash so the timestamped copies
+   *  don't accumulate. Leaves the original `<hash>.png` and `prompt.json`. */
+  private async pruneEdited(hash: string): Promise<void> {
+    const dir = `img_gen/generated/locations`
+    const prefix = `blur_${hash}_`
+    for (const name of await this.saveData.listFiles(dir)) {
+      if (name.startsWith(prefix)) await this.saveData.delete(`${dir}/${name}`)
+    }
+  }
+
   /** Where the most recent background prompt is stored (alongside the images),
    *  so a "regen" can re-roll the prompt that produced the current background.
    *  Location ids don't exist yet, so there's a single most-recent file. */
@@ -185,6 +195,7 @@ export class BackgroundService {
         const original = await this.saveData.readBytes(originalRel)
         if (!original) return
         const blurred = await applyBlur(original, settings)
+        await this.pruneEdited(hash)
         rel = this.blurRel(hash)
         await this.saveData.writeBytes(rel, blurred)
         // The blur filename is already unique per emit (cache-busts itself).

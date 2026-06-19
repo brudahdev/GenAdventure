@@ -100,6 +100,16 @@ export class AvatarService {
     return `img_gen/generated/characters/${characterId}/trans_${hash}_${this.cacheBuster()}.png`
   }
 
+  /** Delete previously emitted transparency files for this hash so the timestamped
+   *  copies don't accumulate. Leaves the original `<hash>.png` and `prompt.json`. */
+  private async pruneEdited(characterId: string, hash: string): Promise<void> {
+    const dir = `img_gen/generated/characters/${characterId}`
+    const prefix = `trans_${hash}_`
+    for (const name of await this.saveData.listFiles(dir)) {
+      if (name.startsWith(prefix)) await this.saveData.delete(`${dir}/${name}`)
+    }
+  }
+
   /** Snapshot of the currently displayed avatars, for replay to a chat page that
    *  mounts after they were emitted (e.g. cache hits at scenario start). */
   getActive(): AvatarGeneratedEvent[] {
@@ -197,6 +207,7 @@ export class AvatarService {
         const original = await this.saveData.readBytes(originalRel)
         if (!original) return
         const edited = await applyTransparency(original, settings)
+        await this.pruneEdited(characterId, hash)
         rel = this.transRel(characterId, hash)
         await this.saveData.writeBytes(rel, edited)
         // The transparency filename is already unique per emit (cache-busts itself).

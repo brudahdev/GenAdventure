@@ -95,6 +95,23 @@ export class SaveDataService {
         }
     }
 
+    /** Names of immediate files under `relPath`. Empty array if absent. */
+    async listFiles(relPath: string): Promise<string[]> {
+        const target = this.resolveWithin(relPath)
+        try {
+            const entries = await readdir(target, { withFileTypes: true })
+            return entries.filter((e) => e.isFile()).map((e) => e.name)
+        } catch (err) {
+            if ((err as NodeJS.ErrnoException).code === 'ENOENT') return []
+            throw err
+        }
+    }
+
+    /** Deletes a single file under the save_data root. No-ops if absent. */
+    async delete(relPath: string): Promise<void> {
+        await rm(this.resolveWithin(relPath), { force: true })
+    }
+
     /** File mtime in ms, or null if the file does not exist. */
     async mtimeMs(relPath: string): Promise<number | null> {
         try {
