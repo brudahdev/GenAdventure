@@ -277,12 +277,19 @@ export default function ChatPage(): JSX.Element {
     onCleanup(unsubPartial)
 
     // Generated images: avatars are demuxed per character (upserted by id), the
-    // background fills the page.
+    // background fills the page. During a scene-change fade-to-black we buffer avatar
+    // adds/removes and apply them only once the screen is black (on fade-out), so NPCs
+    // don't visibly pop in/out against the old scene before/while it fades.
+    const pendingAvatarOps: Array<() => void> = []
+    const runAvatarOp = (op: () => void): void => {
+      if (sceneFading()) pendingAvatarOps.push(op)
+      else op()
+    }
     const unsubAvatar = window.electronAPI.avatar.onGenerated((event) => {
-      setAvatar(event.characterId, event.url)
+      runAvatarOp(() => setAvatar(event.characterId, event.url))
     })
     const unsubAvatarRemoved = window.electronAPI.avatar.onRemoved((characterId) => {
-      removeAvatar(characterId)
+      runAvatarOp(() => removeAvatar(characterId))
     })
     const unsubBackground = window.electronAPI.background.onGenerated((event) => {
       setBackgroundImage(event.url)
@@ -292,6 +299,9 @@ export default function ChatPage(): JSX.Element {
       setSceneFading(true)
     })
     const unsubTransitionHide = window.electronAPI.background.onTransitionHide(() => {
+      // Apply buffered avatar changes while still black, then fade out to reveal them.
+      for (const op of pendingAvatarOps) op()
+      pendingAvatarOps.length = 0
       setSceneFading(false)
     })
     onCleanup(unsubAvatar)

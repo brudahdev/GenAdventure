@@ -43,6 +43,9 @@ export class MainSync implements GameSystem {
             this.pushClothingOptions(characterId)
         })
 
+        // Early order (-100): runs before the default-order NPC activation listeners so
+        // the scene-transition (backgroundChanged) is posted to main before any avatar
+        // add/remove — the renderer must start the fade before avatars change.
         this.eventSystem.on("location.changed", (args) => {
             if (!this.initialized.has(args.characterId)) return
             this.pushLocationOptions(args.characterId);
@@ -50,7 +53,7 @@ export class MainSync implements GameSystem {
             if(args.characterId == PLAYER_CHARACTER_ID && args.locationId != args.previousLocationId){
                 void this.remoteMain.backgroundChanged()
             }
-        })
+        }, -100)
 
         this.eventSystem.on("pose.changed", (args) => {
             if (!this.initialized.has(args.characterId)) return

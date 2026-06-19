@@ -143,6 +143,10 @@ class SimService implements SimApi {
     }
 
     targetEntity.require(CharacterLocomotionKey).gotoNearbyLocation(locationId)
+
+    if (characterId != PLAYER_CHARACTER_ID) {
+      main.imageRequest(buildAvatarPrompt(targetEntity))
+    }
   }
 
   poseUiAction(
