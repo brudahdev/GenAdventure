@@ -1,5 +1,5 @@
 import { singleton } from 'tsyringe'
-import { PLAYER_CHARACTER_ID } from '@gen-adventure/shared'
+import { PLAYER_CHARACTER_ID, BACKGROUND_TRANSITION_FADE_MS } from '@gen-adventure/shared'
 import type { BackgroundGeneratedEvent, PromptRequest } from '@gen-adventure/shared'
 import { SimManager } from '../sim/SimManager'
 import { OverlayService } from '../overlay/OverlayService'
@@ -12,6 +12,10 @@ import { applyBlur } from '../imageGeneration/imageBlur'
 import type { ImgGenSettings } from '@gen-adventure/shared'
 
 type BackgroundHandler = (event: BackgroundGeneratedEvent) => void
+type TransitionHandler = (visible: boolean) => void
+
+/** Resolve after `ms` milliseconds. */
+const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * Owns background image requests coming from the sim. Caches generated images on
@@ -26,6 +30,7 @@ type BackgroundHandler = (event: BackgroundGeneratedEvent) => void
 @singleton()
 export class BackgroundService {
   private readonly handlers: BackgroundHandler[] = []
+  private readonly transitionHandlers: TransitionHandler[] = []
   /** The last emitted background URL, for replay to a chat page that mounts after
    *  it was emitted (e.g. a cache hit at scenario start). */
   private lastUrl: string | null = null
@@ -53,13 +58,18 @@ export class BackgroundService {
     const sim = this.sim.getSim()
     if (!sim) return
     this.sim.pauseTime()
+    // Fade the scene to black, generate the new background while it's hidden, then
+    // fade back in to reveal it (scene-change transition).
+    this.setTransition(true)
     try {
+      await delay(BACKGROUND_TRANSITION_FADE_MS) // wait until the screen is black
       const prompt = await sim.getBackgroundPromptForCharacter(PLAYER_CHARACTER_ID)
       await this.handle(prompt)
     } catch (err) {
       console.error('[background] failed to regenerate background:', err)
     } finally {
       this.overlay.hide()
+      this.setTransition(false)
       this.sim.resumeTime()
     }
   }
@@ -67,6 +77,16 @@ export class BackgroundService {
   /** Subscribe to generated background events. */
   onBackground(handler: BackgroundHandler): void {
     this.handlers.push(handler)
+  }
+
+  /** Subscribe to scene-transition events (true = fade to black, false = fade out). */
+  onTransition(handler: TransitionHandler): void {
+    this.transitionHandlers.push(handler)
+  }
+
+  /** Fan a scene-transition state out to subscribers (the IPC layer → renderer). */
+  private setTransition(visible: boolean): void {
+    for (const handler of this.transitionHandlers) handler(visible)
   }
 
   /** The currently displayed background URL, or null if none. */

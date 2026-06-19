@@ -8,7 +8,7 @@ import type {
   NearbyLocationSummary,
   TouchOptions
 } from '@gen-adventure/shared'
-import { PLAYER_CHARACTER_ID } from '@gen-adventure/shared'
+import { PLAYER_CHARACTER_ID, BACKGROUND_TRANSITION_FADE_MS } from '@gen-adventure/shared'
 import ContextMenu from '../components/ContextMenu'
 import type { ContextMenuItem } from '../components/ContextMenu'
 import ChatInputBox from '../components/ChatInputBox'
@@ -162,6 +162,7 @@ export default function ChatPage(): JSX.Element {
   let typedSeq = 0
   const [headerOpen, setHeaderOpen] = createSignal(false)
   const [showImagePanel, setShowImagePanel] = createSignal(false)
+  const [sceneFading, setSceneFading] = createSignal(false)
   const [showSaveModal, setShowSaveModal] = createSignal(false)
   const [showQuitConfirm, setShowQuitConfirm] = createSignal(false)
   const [partialText, setPartialText] = createSignal('')
@@ -286,9 +287,18 @@ export default function ChatPage(): JSX.Element {
     const unsubBackground = window.electronAPI.background.onGenerated((event) => {
       setBackgroundImage(event.url)
     })
+    // Scene-change transition: fade to black while the new background generates.
+    const unsubTransitionShow = window.electronAPI.background.onTransitionShow(() => {
+      setSceneFading(true)
+    })
+    const unsubTransitionHide = window.electronAPI.background.onTransitionHide(() => {
+      setSceneFading(false)
+    })
     onCleanup(unsubAvatar)
     onCleanup(unsubAvatarRemoved)
     onCleanup(unsubBackground)
+    onCleanup(unsubTransitionShow)
+    onCleanup(unsubTransitionHide)
 
     // Replay images generated before this page mounted (e.g. cache hits fired at
     // scenario start, whose live events we missed). Subscribe first (above), then
@@ -352,6 +362,12 @@ export default function ChatPage(): JSX.Element {
       <Show when={backgroundImage()}>
         {(src) => <img class="chat-background" src={src()} alt="" />}
       </Show>
+
+      <div
+        class="chat-transition"
+        classList={{ 'is-active': sceneFading() }}
+        style={`--bg-transition-ms:${BACKGROUND_TRANSITION_FADE_MS}ms`}
+      />
 
 
 

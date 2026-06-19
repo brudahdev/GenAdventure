@@ -17,6 +17,9 @@ function broadcast(channel: string, payload?: unknown): void {
 export class BackgroundIpcHandlers {
   constructor(private readonly backgroundService: BackgroundService) {
     this.backgroundService.onBackground((event) => broadcast(ICP.BACKGROUND_GENERATED, event))
+    this.backgroundService.onTransition((visible) =>
+      broadcast(visible ? ICP.BACKGROUND_TRANSITION_SHOW : ICP.BACKGROUND_TRANSITION_HIDE)
+    )
 
     ipcMain.handle(ICP.BACKGROUND_CURRENT, async () => this.backgroundService.getCurrent())
     ipcMain.handle(ICP.IMG_GEN_RECALCULATE_BACKGROUND, async () =>

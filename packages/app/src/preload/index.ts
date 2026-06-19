@@ -166,7 +166,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // Current background URL, or null (replay for a freshly mounted page).
     current: (): Promise<string | null> => ipcRenderer.invoke(ICP.BACKGROUND_CURRENT),
     // Re-roll the background (regenerate from its stored prompt).
-    regenerate: (): Promise<void> => ipcRenderer.invoke(ICP.BACKGROUND_REGENERATE)
+    regenerate: (): Promise<void> => ipcRenderer.invoke(ICP.BACKGROUND_REGENERATE),
+    // Scene-change transition: fade the chat scene to black. Returns an unsubscribe fn.
+    onTransitionShow: (callback: () => void): (() => void) => {
+      const listener = (): void => callback()
+      ipcRenderer.on(ICP.BACKGROUND_TRANSITION_SHOW, listener)
+      return () => ipcRenderer.removeListener(ICP.BACKGROUND_TRANSITION_SHOW, listener)
+    },
+    // Scene-change transition: fade the chat scene back in. Returns an unsubscribe fn.
+    onTransitionHide: (callback: () => void): (() => void) => {
+      const listener = (): void => callback()
+      ipcRenderer.on(ICP.BACKGROUND_TRANSITION_HIDE, listener)
+      return () => ipcRenderer.removeListener(ICP.BACKGROUND_TRANSITION_HIDE, listener)
+    }
   },
 
   imageGen: {

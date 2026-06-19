@@ -83,6 +83,8 @@ declare global {
         onGenerated(callback: (event: BackgroundGeneratedEvent) => void): () => void
         current(): Promise<string | null>
         regenerate(): Promise<void>
+        onTransitionShow(callback: () => void): () => void
+        onTransitionHide(callback: () => void): () => void
       }
       imageGen: {
         getSettings(): Promise<ImgGenSettings>

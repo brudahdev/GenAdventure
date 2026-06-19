@@ -41,7 +41,7 @@ export type { Taggable, IDable } from './Taggable'
 export type { CharacterConfig, PlayerConfig, PronounsConfig, ArousalData } from './config/CharacterConfig'
 export { DEFAULT_VOXTA_URL } from './config'
 export type { VoxtaConfig, PublicVoxtaConfig } from './config'
-export { MIN_PIXELS, MAX_PIXELS, DEFAULT_COMFY_URL } from './imageGeneration'
+export { MIN_PIXELS, MAX_PIXELS, DEFAULT_COMFY_URL, BACKGROUND_TRANSITION_FADE_MS } from './imageGeneration'
 export type {
   PromptRequest,
   AvatarGeneratedEvent,

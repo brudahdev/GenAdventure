@@ -998,6 +998,23 @@
 
 }
 
+/* ---- Scene-change transition (fade whole scene to black while regenerating) ---- */
+.chat-transition {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  /* Above background/avatars/messages (z 0); below footer (10), header (20), and
+     the loading overlay (200) so the spinner stays visible while generating. */
+  z-index: 5;
+  transition: opacity var(--bg-transition-ms, 500ms) ease;
+}
+
+.chat-transition.is-active {
+  opacity: 1;
+}
+
 
 
 /* ---- Game clock overlay ---- */

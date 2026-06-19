@@ -29,6 +29,8 @@ export const ICP = {
     BACKGROUND_GENERATED: 'background:generated', // main → renderer (send)
     BACKGROUND_CURRENT: 'background:current',     // renderer → main (invoke): replay snapshot
     BACKGROUND_REGENERATE: 'background:regenerate', // renderer → main (invoke): re-roll the background
+    BACKGROUND_TRANSITION_SHOW: 'background:transition-show', // main → renderer (send): fade scene to black
+    BACKGROUND_TRANSITION_HIDE: 'background:transition-hide', // main → renderer (send): fade scene back in
     IMG_GEN_SETTINGS_GET: 'image-gen:settings:get',
     IMG_GEN_SETTINGS_SET: 'image-gen:settings:set',
     IMG_GEN_RECALCULATE: 'image-gen:recalculate', // re-apply transparency to all avatars

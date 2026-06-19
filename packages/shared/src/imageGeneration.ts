@@ -15,6 +15,11 @@ export const MAX_PIXELS = 2_097_152 // ~2 MP
 /** Default ComfyUI server URL used before the user configures one. */
 export const DEFAULT_COMFY_URL = 'http://localhost:8000'
 
+/** Duration (ms) of the chat-page fade-to-black / fade-out when the background is
+ *  regenerated on a scene change. Shared so the main-side wait and the renderer
+ *  CSS transition stay in lockstep. */
+export const BACKGROUND_TRANSITION_FADE_MS = 500
+
 /** A request to generate one image, emitted by the sim. */
 export interface PromptRequest {
   type: 'avatar' | 'background'
