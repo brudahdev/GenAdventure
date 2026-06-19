@@ -4,3 +4,5 @@ A modern text-adventure simulation game that integrates with Voxta AI platform f
 
 
 # todo
+
+test branch protection
