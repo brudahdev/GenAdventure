@@ -2,7 +2,6 @@ import { singleton } from 'tsyringe'
 import { PLAYER_CHARACTER_ID, BACKGROUND_TRANSITION_FADE_MS } from '@gen-adventure/shared'
 import type { BackgroundGeneratedEvent, PromptRequest } from '@gen-adventure/shared'
 import { SimManager } from '../sim/SimManager'
-import { OverlayService } from '../overlay/OverlayService'
 import { SaveDataService } from '../save/SaveDataService'
 import { ComfyConfigStore } from '../../integration/comfyui/comfyConfig'
 import { ImageGenerationService } from '../imageGeneration/ImageGenerationService'
@@ -43,7 +42,6 @@ export class BackgroundService {
     private readonly imageGen: ImageGenerationService,
     private readonly saveData: SaveDataService,
     private readonly config: ComfyConfigStore,
-    private readonly overlay: OverlayService,
     private readonly activity: GenerationActivity
   ) {
     this.sim.onImageRequest((request) => {
@@ -59,23 +57,25 @@ export class BackgroundService {
   async regenerateForPlayer(): Promise<void> {
     const sim = this.sim.getSim()
     if (!sim) return
-    this.sim.pauseTime()
     // Fade the scene to black, generate the new background while it's hidden, then
-    // fade back in to reveal it (scene-change transition).
+    // fade back in to reveal it (scene-change transition). GenerationActivity owns
+    // the sim pause + loading overlay; counting the background here (alongside the
+    // activating avatars) keeps the sim paused / overlay shown until ALL of it is
+    // done, whichever finishes last.
     this.setTransition(true)
+    this.activity.begin('Generating background...')
     try {
       await delay(BACKGROUND_TRANSITION_FADE_MS) // wait until the screen is black
       const prompt = await sim.getBackgroundPromptForCharacter(PLAYER_CHARACTER_ID)
       await this.handle(prompt)
-      // Hold the black until the activating NPCs' avatars are also ready, so the
-      // reveal never happens while characters are still generating.
-      await this.activity.whenIdle()
     } catch (err) {
       console.error('[background] failed to regenerate background:', err)
     } finally {
-      this.overlay.hide()
+      this.activity.end() // background unit done (resumes + hides only if it was the last)
+      // Hold the black until the activating NPCs' avatars are also ready, so the
+      // reveal never happens while characters are still generating.
+      await this.activity.whenIdle()
       this.setTransition(false)
-      this.sim.resumeTime()
     }
   }
 
@@ -156,8 +156,6 @@ export class BackgroundService {
       // re-generates.
       if (force || !(await this.saveData.exists(originalRel))) {
         if (!settings.enabled) return // generation off and nothing cached → skip
-        this.overlay.show('Generating background...')
-
         const image = await this.imageGen.generate(
           request,
           force ? { forceRandomSeed: true } : undefined
@@ -176,8 +174,7 @@ export class BackgroundService {
    *  prompt, falling back to the live sim for the player's location. Pauses the
    *  sim and shows an overlay while generating, like {@link regenerateForPlayer}. */
   async regenerate(): Promise<void> {
-    this.sim.pauseTime()
-    this.overlay.show('Regenerating background...')
+    this.activity.begin('Regenerating background...')
     try {
       const request = await this.loadPrompt()
       if (!request) {
@@ -188,8 +185,7 @@ export class BackgroundService {
     } catch (err) {
       console.error('[background] failed to regenerate background:', err)
     } finally {
-      this.overlay.hide()
-      this.sim.resumeTime()
+      this.activity.end()
     }
   }
 
