@@ -14,6 +14,7 @@ import type { WorldSaveable } from "../core/save/Saveable";
 import { atomicWriteFileSync } from "../core/save/atomicWrite";
 import { MainSync } from "../core/bridge/MainSync";
 import { Time } from "../core/time/Time";
+import { Scheduler } from "../core/time/Scheduler";
 import { EntityRegistry } from "./entity/EntityRegistry";
 import { CharacterSpawner } from "./entity/CharacterSpawner";
 import { WorldState } from "./world/WorldState";
@@ -51,9 +52,10 @@ export class SimWorld {
         public readonly locationManager: LocationManager,
         public readonly contextManager: ContextManager,
         private readonly characterSpawner: CharacterSpawner,
+        scheduler: Scheduler,
     ) {
         this.systems = [eventSystem, time, mainSync, characterSpawner]
-        this.worldSaveables = [time, worldState]
+        this.worldSaveables = [time, worldState, scheduler]
     }
 
     /** Second boot phase: the whole graph is constructed, so systems can emit
