@@ -1,4 +1,4 @@
-import { createSignal, For, Show, onCleanup, onMount, createEffect } from 'solid-js'
+import { createSignal, For, Show, onCleanup, onMount, createEffect, untrack } from 'solid-js'
 import microphoneSvg from '../assets/icons/microphone.svg?raw'
 import type { JSX } from 'solid-js'
 import { useNavigate, useLocation } from '@solidjs/router'
@@ -332,10 +332,19 @@ export default function ChatPage(): JSX.Element {
   // get their CSS slide-in instead.)
   let prevRects = new Map<string, DOMRect>()
   createEffect(() => {
-    avatars.length // track add/remove
-    const animate = avatarRelayoutFade()
+    avatars.length // track add/remove — the ONLY dependency, so a leaving
+    // avatar's fade (which marks `exiting` but doesn't change length) never
+    // relayouts the survivors; they move only once it's actually spliced.
+    // `avatarRelayoutFade` is read untracked so flipping it can't fire a stale
+    // FLIP pass (which caused the survivor to jerk before the real glide).
+    const animate = untrack(avatarRelayoutFade)
     const nextRects = new Map<string, DOMRect>()
-    for (const [id, el] of avatarEls) nextRects.set(id, el.getBoundingClientRect())
+    // Skip avatars mid-exit: their CSS fade-out owns their transform, and they'd
+    // pollute the survivors' baseline.
+    for (const [id, el] of avatarEls) {
+      if (el.classList.contains('is-exiting')) continue
+      nextRects.set(id, el.getBoundingClientRect())
+    }
 
     // Player-move (instant, under the scene fade) snaps survivors into place;
     // record positions for the next animated relayout's baseline and bail.
@@ -345,6 +354,7 @@ export default function ChatPage(): JSX.Element {
     }
 
     for (const [id, el] of avatarEls) {
+      if (el.classList.contains('is-exiting')) continue
       const prev = prevRects.get(id)
       const next = nextRects.get(id)
       if (!prev || !next) continue
