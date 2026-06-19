@@ -3,6 +3,7 @@ import type { PromptRequest } from './imageGeneration'
 import type { ClothingStateChangeOptionsSummary } from './clothing'
 import type { NearbyLocationSummary } from './location'
 import type { TouchOptions } from './touch'
+import type { NpcActivationChange } from './npc'
 
 // The worker and main process talk over Comlink as if calling each other's
 // methods. Each side `expose()`s its own implementation and `wrap()`s a typed
@@ -55,6 +56,11 @@ export interface MainApi {
   /** Push a character's current available touch options up to TouchService. */
   touchOptions(characterId: string, options: TouchOptions): void,
 
+  /** An NPC became active/inactive (co-located with the player). Drives Voxta
+   *  participant add/remove and avatar generation/removal. */
+  npcActivationChanged(change: NpcActivationChange): void,
+  /** The player changed location; the background should be regenerated. */
+  backgroundChanged(): void,
 
   syncContext(context: SimContextItem): void,
 }

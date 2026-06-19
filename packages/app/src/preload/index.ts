@@ -142,6 +142,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on(ICP.AVATAR_GENERATED, listener)
       return () => ipcRenderer.removeListener(ICP.AVATAR_GENERATED, listener)
     },
+    // An avatar was removed (NPC deactivated); payload is the characterId.
+    // Returns an unsubscribe fn.
+    onRemoved: (callback: (characterId: string) => void): (() => void) => {
+      const listener = (_e: unknown, characterId: string): void => callback(characterId)
+      ipcRenderer.on(ICP.AVATAR_REMOVED, listener)
+      return () => ipcRenderer.removeListener(ICP.AVATAR_REMOVED, listener)
+    },
     // Snapshot of currently displayed avatars (replay for a freshly mounted page).
     list: (): Promise<AvatarGeneratedEvent[]> => ipcRenderer.invoke(ICP.AVATAR_LIST)
   },

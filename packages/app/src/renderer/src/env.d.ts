@@ -75,6 +75,7 @@ declare global {
       }
       avatar: {
         onGenerated(callback: (event: AvatarGeneratedEvent) => void): () => void
+        onRemoved(callback: (characterId: string) => void): () => void
         list(): Promise<AvatarGeneratedEvent[]>
       }
       background: {

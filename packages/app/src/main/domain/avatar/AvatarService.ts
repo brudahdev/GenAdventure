@@ -9,6 +9,7 @@ import { toImageUrl } from '../imageGeneration/imageProtocol'
 import { applyTransparency } from '../imageGeneration/imageTransparency'
 
 type AvatarHandler = (event: AvatarGeneratedEvent) => void
+type AvatarRemovedHandler = (characterId: string) => void
 
 /** An avatar currently shown for a character, kept so transparency can be
  *  re-applied to all avatars on demand and so the current state can be replayed
@@ -40,6 +41,7 @@ function appendPrompt(base: string, extra: string): string {
 @singleton()
 export class AvatarService {
   private readonly handlers: AvatarHandler[] = []
+  private readonly removedHandlers: AvatarRemovedHandler[] = []
   /** characterId → the avatar currently displayed for it. */
   private readonly active = new Map<string, ActiveAvatar>()
 
@@ -57,6 +59,20 @@ export class AvatarService {
   /** Subscribe to generated avatar events. */
   onAvatar(handler: AvatarHandler): void {
     this.handlers.push(handler)
+  }
+
+  /** Subscribe to avatar-removed events (an NPC deactivated and should no longer
+   *  be shown on the chat page). */
+  onAvatarRemoved(handler: AvatarRemovedHandler): void {
+    this.removedHandlers.push(handler)
+  }
+
+  /** Drop a single character's avatar (e.g. the NPC left the player's location).
+   *  Clears it from the active set so it isn't replayed to a remounting page,
+   *  and notifies subscribers (the IPC layer → renderer). */
+  remove(characterId: string): void {
+    if (!this.active.delete(characterId)) return
+    for (const handler of this.removedHandlers) handler(characterId)
   }
 
   /** Re-apply the current transparency settings to every active avatar and

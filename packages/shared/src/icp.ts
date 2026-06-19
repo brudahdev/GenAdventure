@@ -23,6 +23,7 @@ export const ICP = {
     VOA_CONFIG_SET: 'voxta-config:set',
     // Image generation: generated images pushed main → renderer; on/off settings.
     AVATAR_GENERATED: 'avatar:generated',         // main → renderer (send)
+    AVATAR_REMOVED: 'avatar:removed',             // main → renderer (send): payload characterId
     AVATAR_LIST: 'avatar:list',                   // renderer → main (invoke): replay snapshot
     BACKGROUND_GENERATED: 'background:generated', // main → renderer (send)
     BACKGROUND_CURRENT: 'background:current',     // renderer → main (invoke): replay snapshot

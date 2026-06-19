@@ -6,6 +6,7 @@ import { container, singleton } from 'tsyringe'
 import { VoxtaClient } from '../../integration/voxta/voxtaClient';
 import { ChatService } from '../chat/ChatService';
 import { CharacterService } from '../character/CharacterService';
+import { CharacterActivationService } from '../character/CharacterActivationService';
 import { AvatarService } from '../avatar/AvatarService';
 import { BackgroundService } from '../background/BackgroundService';
 import { OverlayService } from '../overlay/OverlayService';
@@ -70,8 +71,10 @@ export class ScenarioService {
     chatService.onChatStarted(chatId)
 
     // Reconcile Voxta participants against the sim's active set (drops roster
-    // characters the sim hasn't activated).
-    await this.syncActiveCharacters(npcIds)
+    // characters the sim hasn't activated). Resolved lazily (not at module scope)
+    // so IMAGE_PROVIDER — pulled in transitively via AvatarService — is registered
+    // by the time this runs.
+    await container.resolve(CharacterActivationService).syncActiveCharacters(npcIds)
 
     overlayService.hide()
     return true
@@ -139,7 +142,7 @@ export class ScenarioService {
     simManager.resumeTime()
     chatService.onChatStarted(chatId)
 
-    await this.syncActiveCharacters(npcIds)
+    await container.resolve(CharacterActivationService).syncActiveCharacters(npcIds)
 
     overlayService.hide()
     return true
@@ -182,20 +185,6 @@ export class ScenarioService {
       await avatarService.handle(avatarPrompt)
     }
     return npcIds
-  }
-
-  /** Reconcile Voxta chat participants against the sim's active character set.
-   *  Characters in the roster whose id appears in `activeCharacterIds`
-   *  are added; the rest are removed. */
-  async syncActiveCharacters(activeCharacterIds: string[]): Promise<void> {
-    const active = new Set(activeCharacterIds)
-    for (const character of characterService.getScenarioCharacters()) {
-      if (active.has(character.characterId)) {
-        await voxtaClient.addChatParticipant(character.characterId)
-      } else {
-        await voxtaClient.removeChatParticipant(character.characterId)
-      }
-    }
   }
 
   /** Tear down the running scenario: stop the Voxta chat and the sim. */

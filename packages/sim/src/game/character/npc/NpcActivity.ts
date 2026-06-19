@@ -58,10 +58,3 @@ export class NpcActivity implements Component {
 
 export const npcActivityFactory = defineFactory(NpcActivityKey, (entity, c) =>
     new NpcActivity(entity, c.resolve(EventSystem)))
-
-
-
-export interface NpcActivationChange {
-    characterId: string
-    isActive: boolean
-}

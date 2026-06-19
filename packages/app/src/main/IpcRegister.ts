@@ -3,6 +3,7 @@ import { ScenarioIpcHandlers } from './domain/scenario/ScenarioIpcHandlers'
 import { ChatIpcHandlers } from './domain/chat/ChatIpcHandlers'
 import { AudioIpcHandlers } from './domain/audio/AudioIpcHandlers'
 import { CharacterIpcHandlers } from './domain/character/CharacterIpcHandlers'
+import { CharacterActivationService } from './domain/character/CharacterActivationService'
 import { SaveDataIpcHandlers } from './domain/save/SaveDataIpcHandlers'
 import { VoxtaConfigIcpHandler } from './integration/voxta/config/voxtaConfigIcpHandler'
 import { ImageGenerationIpcHandlers } from './domain/imageGeneration/ImageGenerationIpcHandlers'
@@ -27,6 +28,9 @@ export function registerIpcHandlers(): void {
   container.resolve(ChatIpcHandlers)
   container.resolve(AudioIpcHandlers)
   container.resolve(CharacterIpcHandlers)
+  // No IPC handlers of its own, but must be resolved so it subscribes to sim
+  // NPC-activation events at startup.
+  container.resolve(CharacterActivationService)
   container.resolve(SaveDataIpcHandlers)
   container.resolve(VoxtaConfigIcpHandler)
   container.resolve(ImageGenerationIpcHandlers)

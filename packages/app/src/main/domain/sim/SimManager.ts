@@ -3,6 +3,7 @@ import {
     SimResumeData,
     SimStartResult,
     PromptRequest,
+    NpcActivationChange,
     SimApi,
     MainApi,
     withTimeout,
@@ -32,6 +33,8 @@ const voxtaClient = container.resolve(VoxtaClient);
 const START_TIMEOUT_MS = 30_000
 
 type ImageRequestHandler = (request: PromptRequest) => void
+type NpcActivationHandler = (change: NpcActivationChange) => void
+type BackgroundChangedHandler = () => void
 
 @singleton()
 export class SimManager {
@@ -41,6 +44,8 @@ export class SimManager {
     private simRunning = false
 
     private readonly imageRequestHandlers: ImageRequestHandler[] = []
+    private readonly npcActivationHandlers: NpcActivationHandler[] = []
+    private readonly backgroundChangedHandlers: BackgroundChangedHandler[] = []
 
     constructor() { }
 
@@ -70,6 +75,18 @@ export class SimManager {
 
         touchOptions: (characterId, options) => {
             touchService.onTouchOptions(characterId, options)
+        },
+
+        npcActivationChanged: (change) => {
+            for (const handler of this.npcActivationHandlers) {
+                handler(change)
+            }
+        },
+
+        backgroundChanged: () => {
+            for (const handler of this.backgroundChangedHandlers) {
+                handler()
+            }
         },
 
         syncContext: (context) => {
@@ -122,6 +139,14 @@ export class SimManager {
 
     onImageRequest(handler: ImageRequestHandler): void {
         this.imageRequestHandlers.push(handler)
+    }
+
+    onNpcActivationChanged(handler: NpcActivationHandler): void {
+        this.npcActivationHandlers.push(handler)
+    }
+
+    onBackgroundChanged(handler: BackgroundChangedHandler): void {
+        this.backgroundChangedHandlers.push(handler)
     }
 
     async startSim(

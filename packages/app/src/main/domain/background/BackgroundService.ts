@@ -1,6 +1,8 @@
 import { singleton } from 'tsyringe'
+import { PLAYER_CHARACTER_ID } from '@gen-adventure/shared'
 import type { BackgroundGeneratedEvent, PromptRequest } from '@gen-adventure/shared'
 import { SimManager } from '../sim/SimManager'
+import { OverlayService } from '../overlay/OverlayService'
 import { SaveDataService } from '../save/SaveDataService'
 import { ComfyConfigStore } from '../../integration/comfyui/comfyConfig'
 import { ImageGenerationService } from '../imageGeneration/ImageGenerationService'
@@ -34,11 +36,33 @@ export class BackgroundService {
     private readonly sim: SimManager,
     private readonly imageGen: ImageGenerationService,
     private readonly saveData: SaveDataService,
-    private readonly config: ComfyConfigStore
+    private readonly config: ComfyConfigStore,
+    private readonly overlay: OverlayService
   ) {
     this.sim.onImageRequest((request) => {
       if (request.type === 'background') void this.handle(request)
     })
+    // The player changed location: regenerate the background for their new POV.
+    this.sim.onBackgroundChanged(() => void this.regenerateForPlayer())
+  }
+
+  /** Regenerate the background from the player's current location. Pauses the sim
+   *  and shows an overlay while generating (the sim is live at this point, unlike
+   *  scenario start). */
+  async regenerateForPlayer(): Promise<void> {
+    const sim = this.sim.getSim()
+    if (!sim) return
+    this.sim.pauseTime()
+    this.overlay.show('Generating background...')
+    try {
+      const prompt = await sim.getBackgroundPromptForCharacter(PLAYER_CHARACTER_ID)
+      await this.handle(prompt)
+    } catch (err) {
+      console.error('[background] failed to regenerate background:', err)
+    } finally {
+      this.overlay.hide()
+      this.sim.resumeTime()
+    }
   }
 
   /** Subscribe to generated background events. */

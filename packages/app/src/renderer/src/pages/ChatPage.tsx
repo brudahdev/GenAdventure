@@ -33,6 +33,7 @@ import type { DisplayMessage } from '../stores/chat-store'
 import {
   avatars,
   setAvatar,
+  removeAvatar,
   clearAvatars,
   backgroundImage,
   setBackgroundImage
@@ -278,10 +279,14 @@ export default function ChatPage(): JSX.Element {
     const unsubAvatar = window.electronAPI.avatar.onGenerated((event) => {
       setAvatar(event.characterId, event.url)
     })
+    const unsubAvatarRemoved = window.electronAPI.avatar.onRemoved((characterId) => {
+      removeAvatar(characterId)
+    })
     const unsubBackground = window.electronAPI.background.onGenerated((event) => {
       setBackgroundImage(event.url)
     })
     onCleanup(unsubAvatar)
+    onCleanup(unsubAvatarRemoved)
     onCleanup(unsubBackground)
 
     // Replay images generated before this page mounted (e.g. cache hits fired at

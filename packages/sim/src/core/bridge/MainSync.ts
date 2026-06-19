@@ -48,7 +48,7 @@ export class MainSync implements GameSystem {
             this.pushLocationOptions(args.characterId);
 
             if(args.characterId == PLAYER_CHARACTER_ID && args.locationId != args.previousLocationId){
-                //todo push to main, background change.
+                void this.remoteMain.backgroundChanged()
             }
         })
 
@@ -63,9 +63,8 @@ export class MainSync implements GameSystem {
 
 
         this.eventSystem.on("npc.activation.changed", (args) => {
-            console.log("this.eventSystem.on(npc.activation.changed")
-
-            // todo push to main, also move NpcActivationChange to shared
+            if (!this.initialized.has(args.characterId)) return
+            void this.remoteMain.npcActivationChanged(args)
         })
 
 

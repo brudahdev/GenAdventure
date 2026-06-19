@@ -29,6 +29,16 @@ export function setAvatar(characterId: string, src: string): void {
   )
 }
 
+/** Remove a single character's avatar (e.g. the NPC left the player's location). */
+export function removeAvatar(characterId: string): void {
+  setAvatars(
+    produce((list) => {
+      const i = list.findIndex((a) => a.characterId === characterId)
+      if (i !== -1) list.splice(i, 1)
+    })
+  )
+}
+
 /** Remove all avatars (e.g. when (re)entering a chat). */
 export function clearAvatars(): void {
   setAvatars([])
