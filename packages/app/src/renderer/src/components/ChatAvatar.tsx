@@ -2,9 +2,15 @@ import type { JSX } from 'solid-js'
 import { speakingCharacterId } from '../stores/audio-store'
 
 /** Duration (ms) of the avatar enter/exit slide-fade. Must match
- *  `--avatar-transition-duration` in components.css so the store's delayed
+ *  `--avatar-transition-duration` in components.css so the chat page's delayed
  *  removal lines up with the CSS exit animation. */
 export const AVATAR_FADE_MS = 450
+/** Duration (ms) of the FLIP relayout glide — surviving avatars sliding to their
+ *  new even-spaced positions when one is added/removed. Kept separate from (and
+ *  calmer than) the snappy enter/exit fade. */
+export const AVATAR_RELAYOUT_MS = 600
+/** Easing for the relayout glide: a smooth, decelerating settle. */
+export const AVATAR_RELAYOUT_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
 /** Target scale (%) of the avatar while its character is speaking (110 = +10%). */
 export const AVATAR_SPEAKING_SIZE_PERCENT = 110
 /** Time (ms) to smoothly lerp the avatar to/from its speaking size. */

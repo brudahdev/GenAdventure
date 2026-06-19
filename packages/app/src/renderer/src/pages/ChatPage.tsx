@@ -1,4 +1,4 @@
-import { createSignal, For, Show, onCleanup, onMount, createEffect, untrack } from 'solid-js'
+import { createSignal, For, Show, onCleanup, onMount, createEffect } from 'solid-js'
 import microphoneSvg from '../assets/icons/microphone.svg?raw'
 import type { JSX } from 'solid-js'
 import { useNavigate, useLocation } from '@solidjs/router'
@@ -15,7 +15,11 @@ import ChatInputBox from '../components/ChatInputBox'
 import AudioController from '../components/AudioController'
 import CharReveal, { CHAR_FADE_MS } from '../components/CharReveal'
 import ImageConfigForm from '../components/ImageConfigForm'
-import ChatAvatar from '../components/ChatAvatar'
+import ChatAvatar, {
+  AVATAR_FADE_MS,
+  AVATAR_RELAYOUT_MS,
+  AVATAR_RELAYOUT_EASING
+} from '../components/ChatAvatar'
 import GameClock from '../components/GameClock'
 import SaveSlotModal from '../components/SaveSlotModal'
 import ConfirmModal from '../components/ConfirmModal'
@@ -33,9 +37,9 @@ import type { DisplayMessage } from '../stores/chat-store'
 import {
   avatars,
   setAvatar,
-  removeAvatar,
+  markAvatarExiting,
+  spliceAvatar,
   clearAvatars,
-  avatarRelayoutFade,
   backgroundImage,
   setBackgroundImage
 } from '../stores/image-store'
@@ -262,6 +266,43 @@ export default function ChatPage(): JSX.Element {
 
   // Wrapper element per character avatar, used for FLIP relayout animation.
   const avatarEls = new Map<string, HTMLElement>()
+  // In-flight relayout glides, so a rapid second relayout cancels the prior one
+  // (no stacked transforms / stale baselines) without touching CSS enter/exit.
+  const relayoutAnims = new WeakMap<HTMLElement, Animation>()
+
+  // FLIP relayout: when the avatar row changes (`space-evenly` re-centers the
+  // items), glide the surviving avatars from their old positions to the new ones.
+  // Measure each survivor's real rect immediately before AND after the mutation —
+  // Solid applies the `<For>` DOM update synchronously inside `mutate()`, so the
+  // "after" rect is already reflowed — making the delta correct by construction
+  // (no reliance on stored baselines or effect ordering). `animate=false` snaps
+  // (player-move under the scene fade). New avatars have no "before" rect and get
+  // their CSS slide-in instead; mid-exit avatars are left to their fade-out.
+  const relayout = (mutate: () => void, animate: boolean): void => {
+    if (!animate) {
+      mutate()
+      return
+    }
+    const first = new Map<string, DOMRect>()
+    for (const [id, el] of avatarEls) {
+      if (el.classList.contains('is-exiting')) continue
+      relayoutAnims.get(el)?.cancel()
+      first.set(id, el.getBoundingClientRect())
+    }
+    mutate()
+    for (const [id, el] of avatarEls) {
+      if (el.classList.contains('is-exiting')) continue
+      const f = first.get(id)
+      if (!f) continue
+      const dx = f.left - el.getBoundingClientRect().left
+      if (dx === 0) continue
+      const anim = el.animate(
+        [{ transform: `translateX(${dx}px)` }, { transform: 'translateX(0)' }],
+        { duration: AVATAR_RELAYOUT_MS, easing: AVATAR_RELAYOUT_EASING }
+      )
+      relayoutAnims.set(el, anim)
+    }
+  }
 
   onMount(() => {
     reset() // fresh message list for this chat
@@ -289,10 +330,22 @@ export default function ChatPage(): JSX.Element {
       else op()
     }
     const unsubAvatar = window.electronAPI.avatar.onGenerated((event) => {
-      runAvatarOp(() => setAvatar(event.characterId, event.url, event.useFade))
+      runAvatarOp(() =>
+        relayout(() => setAvatar(event.characterId, event.url, event.useFade), event.useFade)
+      )
     })
     const unsubAvatarRemoved = window.electronAPI.avatar.onRemoved((characterId, useFade) => {
-      runAvatarOp(() => removeAvatar(characterId, useFade))
+      runAvatarOp(() => {
+        if (!useFade) {
+          // Player-move (under the scene fade): snap survivors, no glide.
+          relayout(() => spliceAvatar(characterId), false)
+          return
+        }
+        // NPC walked out: fade it in place (survivors frozen), then once it's
+        // gone glide the survivors to their new spots.
+        markAvatarExiting(characterId)
+        setTimeout(() => relayout(() => spliceAvatar(characterId), true), AVATAR_FADE_MS)
+      })
     })
     const unsubBackground = window.electronAPI.background.onGenerated((event) => {
       setBackgroundImage(event.url)
@@ -324,51 +377,6 @@ export default function ChatPage(): JSX.Element {
     void window.electronAPI.background.current().then((url) => {
       if (url) setBackgroundImage(url)
     })
-  })
-
-  // FLIP relayout: when an avatar is added the row re-centers via `space-evenly`;
-  // animate existing avatars from their previous positions to the new ones so the
-  // layout glides rather than snapping. (New avatars have no previous position and
-  // get their CSS slide-in instead.)
-  let prevRects = new Map<string, DOMRect>()
-  createEffect(() => {
-    avatars.length // track add/remove — the ONLY dependency, so a leaving
-    // avatar's fade (which marks `exiting` but doesn't change length) never
-    // relayouts the survivors; they move only once it's actually spliced.
-    // `avatarRelayoutFade` is read untracked so flipping it can't fire a stale
-    // FLIP pass (which caused the survivor to jerk before the real glide).
-    const animate = untrack(avatarRelayoutFade)
-    const nextRects = new Map<string, DOMRect>()
-    // Skip avatars mid-exit: their CSS fade-out owns their transform, and they'd
-    // pollute the survivors' baseline.
-    for (const [id, el] of avatarEls) {
-      if (el.classList.contains('is-exiting')) continue
-      nextRects.set(id, el.getBoundingClientRect())
-    }
-
-    // Player-move (instant, under the scene fade) snaps survivors into place;
-    // record positions for the next animated relayout's baseline and bail.
-    if (!animate) {
-      prevRects = nextRects
-      return
-    }
-
-    for (const [id, el] of avatarEls) {
-      if (el.classList.contains('is-exiting')) continue
-      const prev = prevRects.get(id)
-      const next = nextRects.get(id)
-      if (!prev || !next) continue
-      const dx = prev.left - next.left
-      if (dx === 0) continue
-      el.style.transition = 'none'
-      el.style.transform = `translateX(${dx}px)`
-      requestAnimationFrame(() => {
-        el.style.transition =
-          'transform var(--avatar-transition-duration) var(--avatar-transition-easing)'
-        el.style.transform = ''
-      })
-    }
-    prevRects = nextRects
   })
 
   const performQuit = (): void => {

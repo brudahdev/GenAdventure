@@ -1,6 +1,5 @@
 import { createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
-import { AVATAR_FADE_MS } from '../components/ChatAvatar'
 
 /**
  * Generated images shown on the Chat page, each a `genimg://` URL.
@@ -10,6 +9,9 @@ import { AVATAR_FADE_MS } from '../components/ChatAvatar'
  * keeps its row (and DOM node) so the avatar cross-fades; a new `characterId` is
  * prepended so a fresh avatar slides in on the left (and existing ones glide
  * right). `backgroundImage` fills the page behind everything.
+ *
+ * Relayout/animation timing is owned by the chat page (it measures the avatars
+ * around each mutation for a correct FLIP); these mutators only touch state.
  */
 export interface AvatarEntry {
   characterId: string
@@ -23,53 +25,38 @@ export interface AvatarEntry {
 
 export const [avatars, setAvatars] = createStore<AvatarEntry[]>([])
 
-/** Whether the most recent add/remove should animate the *other* avatars'
- *  relayout (FLIP). Mirrors the op's `useFade` so a player-move (instant, under
- *  the scene fade) snaps survivors into place instead of gliding them. */
-export const [avatarRelayoutFade, setAvatarRelayoutFade] = createSignal(true)
-
 /** Upsert an avatar by characterId: update in place (cross-fade) or prepend so a
- *  new avatar slides in on the left. `useFade` drives whether the new avatar
- *  animates in and whether existing avatars glide to their new positions. */
-export function setAvatar(characterId: string, src: string, useFade: boolean): void {
-  setAvatarRelayoutFade(useFade)
+ *  new avatar slides in on the left. `fadeIn` drives whether the new avatar
+ *  animates in (vs. appears instantly under the scene fade). */
+export function setAvatar(characterId: string, src: string, fadeIn: boolean): void {
   setAvatars(
     produce((list) => {
       const existing = list.find((a) => a.characterId === characterId)
       if (existing) existing.src = src
-      else list.unshift({ characterId, src, fadeIn: useFade })
+      else list.unshift({ characterId, src, fadeIn })
     })
   )
 }
 
-/** Remove a single character's avatar (e.g. the NPC left the player's location).
- *  When `useFade`, mark it exiting and splice after the fade-out finishes;
- *  otherwise splice immediately. */
-export function removeAvatar(characterId: string, useFade: boolean): void {
-  setAvatarRelayoutFade(useFade)
-  if (!useFade) {
-    setAvatars(
-      produce((list) => {
-        const i = list.findIndex((a) => a.characterId === characterId)
-        if (i !== -1) list.splice(i, 1)
-      })
-    )
-    return
-  }
+/** Mark an avatar as leaving so it plays its CSS fade-out animation. The chat
+ *  page splices it (via {@link spliceAvatar}) once the fade finishes. */
+export function markAvatarExiting(characterId: string): void {
   setAvatars(
     produce((list) => {
       const exiting = list.find((a) => a.characterId === characterId)
       if (exiting) exiting.exiting = true
     })
   )
-  setTimeout(() => {
-    setAvatars(
-      produce((list) => {
-        const i = list.findIndex((a) => a.characterId === characterId)
-        if (i !== -1) list.splice(i, 1)
-      })
-    )
-  }, AVATAR_FADE_MS)
+}
+
+/** Remove a single character's avatar entry. */
+export function spliceAvatar(characterId: string): void {
+  setAvatars(
+    produce((list) => {
+      const i = list.findIndex((a) => a.characterId === characterId)
+      if (i !== -1) list.splice(i, 1)
+    })
+  )
 }
 
 /** Remove all avatars (e.g. when (re)entering a chat). */
