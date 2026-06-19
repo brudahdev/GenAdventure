@@ -49,6 +49,7 @@ export class MainSync implements GameSystem {
         this.eventSystem.on("location.changed", (args) => {
             if (!this.initialized.has(args.characterId)) return
             this.pushLocationOptions(args.characterId);
+            this.pushPoseOptions(args.characterId);
 
             if(args.characterId == PLAYER_CHARACTER_ID && args.locationId != args.previousLocationId){
                 void this.remoteMain.backgroundChanged()
