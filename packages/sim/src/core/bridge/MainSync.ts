@@ -1,6 +1,6 @@
 import { inject, Lifecycle, scoped } from "tsyringe";
 import type { Remote } from "comlink";
-import type { MainApi, TouchOptions } from "@gen-adventure/shared";
+import { PLAYER_CHARACTER_ID, type MainApi, type TouchOptions } from "@gen-adventure/shared";
 import { REMOTE_MAIN } from "./remoteMain";
 import { EventSystem } from "../../game/EventSystem";
 import { EntityRegistry } from "../../game/entity/EntityRegistry";
@@ -46,6 +46,10 @@ export class MainSync implements GameSystem {
         this.eventSystem.on("location.changed", (args) => {
             if (!this.initialized.has(args.characterId)) return
             this.pushLocationOptions(args.characterId);
+
+            if(args.characterId == PLAYER_CHARACTER_ID && args.locationId != args.previousLocationId){
+                //todo push to main, background change.
+            }
         })
 
         this.eventSystem.on("pose.changed", (args) => {
@@ -53,10 +57,15 @@ export class MainSync implements GameSystem {
             this.pushPoseOptions(args.characterId);
         })
 
-
-
         this.eventSystem.on("context", (simContextItem) => {
             this.remoteMain.syncContext(simContextItem)
+        })
+
+
+        this.eventSystem.on("npc.activation.changed", (args) => {
+            console.log("this.eventSystem.on(npc.activation.changed")
+
+            // todo push to main, also move NpcActivationChange to shared
         })
 
 

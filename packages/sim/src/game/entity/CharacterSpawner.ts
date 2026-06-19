@@ -31,8 +31,8 @@ const PLAYER_BLUEPRINT: ComponentFactory[] = [
 ]
 const NPC_BLUEPRINT: ComponentFactory[] = [
     npcIdentityFactory,
-    npcActivityFactory,
     characterLocationFactory,
+    npcActivityFactory,
     characterLocomotionFactory,
     characterPoseFactory,
     appearanceFactory,

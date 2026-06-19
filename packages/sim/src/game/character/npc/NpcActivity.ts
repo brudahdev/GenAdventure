@@ -2,7 +2,7 @@ import { PLAYER_CHARACTER_ID } from "@gen-adventure/shared"
 import type { Component } from "../../../core/ec/Component"
 import type { Entity } from "../../../core/ec/Entity"
 import { EventSystem } from "../../EventSystem"
-import { CharacterLocationKey } from "../location/CharacterLocation"
+import { CharacterLocation, CharacterLocationKey } from "../location/CharacterLocation"
 import { defineKey } from "../../../core/ec/ComponentKey"
 import { defineFactory } from "../../../core/ec/ComponentFactory"
 
@@ -14,7 +14,10 @@ export const NpcActivityKey = defineKey<NpcActivity>("character.npcActivity")
 export class NpcActivity implements Component {
     private active = false
 
-    constructor(private readonly entity: Entity, eventSystem: EventSystem) {
+    private charLocation: CharacterLocation;
+
+    constructor(private readonly entity: Entity, private eventSystem: EventSystem) {
+        this.charLocation = this.entity.require(CharacterLocationKey);
         eventSystem.on("location.changed", (args) => {
             if (args.characterId === this.entity.id || args.characterId === PLAYER_CHARACTER_ID) {
                 this.updateActiveState()
@@ -25,25 +28,40 @@ export class NpcActivity implements Component {
     /** Second boot phase: resolves initial activity once every character has
      *  been placed. */
     init(): void {
-        this.updateActiveState()
+        this.updateActiveState(false)
     }
 
     get isActive(): boolean {
         return this.active
     }
 
-    private updateActiveState(): void {
+    private updateActiveState(emit = true): void {
         // active if at the same location as the player
-        this.setActive(this.entity.require(CharacterLocationKey).isAtSameLocationAsOther(PLAYER_CHARACTER_ID))
+        const shouldBeActive = this.charLocation.isAtSameLocationAsOther(PLAYER_CHARACTER_ID)
+
+        this.setActive(shouldBeActive, emit)
     }
 
-    private setActive(value: boolean): void {
+    private setActive(value: boolean, emit = true): void {
         if (this.active === value) return
         this.active = value
-        console.log(value ? "ACTIVE " + this.entity.id : "NOT ACTIVE " + this.entity.id)
+
+        if(emit){
+           
+            this.eventSystem.emit("npc.activation.changed", {
+                characterId: this.entity.id,
+                isActive: this.active
+            })
+        }
     }
 }
 
 export const npcActivityFactory = defineFactory(NpcActivityKey, (entity, c) =>
     new NpcActivity(entity, c.resolve(EventSystem)))
 
+
+
+export interface NpcActivationChange {
+    characterId: string
+    isActive: boolean
+}

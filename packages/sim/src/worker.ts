@@ -13,6 +13,8 @@ import { SimWorld } from './game/SimWorld'
 import { ClothingManagerKey } from "./game/character/clothing/ClothingManager"
 import { buildAvatarPrompt } from './game/character/characterViews'
 import { CharacterPoseKey } from './game/character/pose/CharacterPose'
+import { CharacterLocation, CharacterLocationKey } from './game/character/location/CharacterLocation'
+import { CharacterLocomotionKey } from './game/character/locomotion/CharacterLocomotion'
 
 /** The worker's implementation of the surface the main process calls. Each run
  *  gets its own child container (provisioned with a mode-specific adapter set)
@@ -133,6 +135,14 @@ class SimService implements SimApi {
     if (characterId == PLAYER_CHARACTER_ID) {
       //todo user acting
     }
+
+    const targetEntity = this.world?.registry.getById(characterId);
+    if (!targetEntity) {
+      console.log(`[sim] unable to get character with id ${characterId}`)
+      return;
+    }
+
+    targetEntity.require(CharacterLocomotionKey).gotoNearbyLocation(locationId)
   }
 
   poseUiAction(
