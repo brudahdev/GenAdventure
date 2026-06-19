@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "electron.vite.config.*",
+    "src/main/**/*",
+    "src/preload/**/*",
+    "../shared/src/**/*",
+    "../sim/src/**/*"
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "../..",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "out",
+    "paths": {
+      "@gen-adventure/shared": ["../shared/src/index.ts"]
+    }
+  }
+}

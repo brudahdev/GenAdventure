@@ -1,0 +1,24 @@
+[
+  {
+    "roleOrder": 0,
+    "startingLocationId": "{{user}}s_bed_room",
+    "startingSubLocationId": "{{user}}s_bed_room_middle",
+    "startingPoseId": "stand",
+    "startingOutfit": "anime"
+  },
+  {
+    "roleOrder": 1,
+    "startingLocationId": "{{user}}s_bed_room",
+    "startingSubLocationId": "{{user}}s_bed_room_bed",
+    "startingPoseId": "stand",
+    "startingOutfit": "anime"
+  },
+  {
+    "roleOrder": -1,
+    "startingLocationId": "{{user}}s_bed_room",
+    "startingSubLocationId": "{{user}}s_bed_room_middle",
+    "startingPoseId": "stand",
+    "startingOutfit": "dressy",
+    "personaId": "default"
+  }
+]

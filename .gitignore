@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+node_modules/*
+.pnpm-store/*
+todo/
+todo/*
+# Build outputs
+packages/*/out/
+packages/*/dist/
+out/
+dist/
+.claude
+*/claude/*
+# Electron builder
+*.exe
+*.dmg
+todo
+todo/*
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Env
+.env
+.env.local

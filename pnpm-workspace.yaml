@@ -1,0 +1,7 @@
+packages:
+  - 'packages/*'
+allowBuilds:
+  '@swc/core': true
+  electron: true
+  esbuild: true
+  sharp: true

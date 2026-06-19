@@ -1,0 +1,392 @@
+[
+  {
+    "id": "bow_tie_red",
+    "name": "bow tie",
+    "context": "red bow tie",
+    "tags": [
+      "tie",
+      "bow"
+    ],
+    "excludetags": [
+      "panties"
+    ],
+    "states": [
+      {
+        "id": "on",
+        "enteries": [
+          {
+            "img_txt": "red bow tie",
+            "forAppearanceClass": "chest"
+          }
+        ]
+      },
+      {
+        "id": "off",
+        "tags": [
+          "off",
+          "drop",
+          "untie",
+          "remove"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "button_up_blouse_white",
+    "name": "blouse",
+    "context": "short sleeve button up blouse",
+    "tags": [
+      "top",
+      "shirt",
+      "blouse"
+    ],
+    "isATop": true,
+    "transParentIfWet": true,
+    "slot": "top_inner",
+    "states": [
+      {
+        "id": "off",
+        "tags": [
+          "remove",
+          "off",
+          "drop"
+        ]
+      },
+      {
+        "id": "open",
+        "state_context": "opened",
+        "tags": [
+          "opened",
+          "unbutton",
+          "open"
+        ],
+        "enteries": [
+          {
+            "img_txt": "white button up blouse, short sleeves, plain white shirt"
+          },
+          {
+            "img_txt": "collared shirt",
+            "forAppearanceClass": "chest"
+          },
+          {
+            "img_txt": "open unbuttoned shirt",
+            "forAppearanceClass": "chest"
+          }
+        ]
+      },
+      {
+        "id": "on",
+        "tags": [
+          "on",
+          "close",
+          "button"
+        ],
+        "coversAppearanceClasses": [
+          "torso"
+        ],
+        "enteries": [
+          {
+            "img_txt": "white button up blouse, closed shirt, short sleeves, plain white shirt"
+          },
+          {
+            "img_txt": "collared shirt",
+            "forAppearanceClass": "chest"
+          }
+        ],
+        "occludesSubItems": true,
+        "obstructsSubItems": true
+      }
+    ]
+  },
+  {
+    "id": "button_up_shirt",
+    "name": "shirt",
+    "context": "button up dress shirt",
+    "tags": [
+      "top",
+      "shirt"
+    ],
+    "isATop": true,
+    "transParentIfWet": true,
+    "slot": "top_inner",
+    "states": [
+      {
+        "id": "off",
+        "tags": [
+          "remove",
+          "off",
+          "drop"
+        ]
+      },
+      {
+        "id": "open",
+        "state_context": "opened",
+        "tags": [
+          "opened",
+          "unbutton",
+          "open"
+        ],
+        "enteries": [
+          {
+            "img_txt": "button up dress shirt"
+          },
+          {
+            "img_txt": "collared shirt",
+            "forAppearanceClass": "chest"
+          },
+          {
+            "img_txt": "open unbuttoned shirt",
+            "forAppearanceClass": "chest"
+          }
+        ]
+      },
+      {
+        "id": "on",
+        "tags": [
+          "on",
+          "close",
+          "button"
+        ],
+        "coversAppearanceClasses": [
+          "torso"
+        ],
+        "enteries": [
+          {
+            "img_txt": "button up dress shirt"
+          },
+          {
+            "img_txt": "collared shirt",
+            "forAppearanceClass": "chest"
+          }
+        ],
+        "occludesSubItems": true,
+        "obstructsSubItems": true
+      }
+    ]
+  },
+  {
+    "id": "skirt_pleated_blue",
+    "name": "pleated skirt",
+    "context": "navy blue pleated skirt",
+    "tags": [
+      "skirt",
+      "dress"
+    ],
+    "slot": "lower",
+    "states": [
+      {
+        "id": "on",
+        "tags": [
+          "on",
+          "down",
+          "lowered"
+        ],
+        "coversAppearanceClasses": [
+          "pelvic"
+        ],
+        "enteries": [
+          {
+            "img_txt": "navy blue pleated skirt"
+          }
+        ],
+        "occludesSubItems": true
+      },
+      {
+        "id": "lifted",
+        "state_context": "lifted",
+        "tags": [
+          "lift",
+          "hike",
+          "up"
+        ],
+        "coversAppearanceClasses": [
+          "ass"
+        ],
+        "enteries": [
+          {
+            "img_txt": "navy blue pleated skirt"
+          }
+        ],
+        "occludesSubItems": false
+      },
+      {
+        "id": "off",
+        "tags": [
+          "remove",
+          "off",
+          "drop",
+          "drop"
+        ],
+        "img_txt": ""
+      }
+    ]
+  },
+  {
+    "id": "dress_pants_black",
+    "name": "black dress pants",
+    "context": "black dress pants",
+    "tags": [
+      "pants",
+      "dress"
+    ],
+    "slot": "lower",
+    "states": [
+      {
+        "id": "on",
+        "tags": [
+          "on",
+          "down",
+          "lowered"
+        ],
+        "coversAppearanceClasses": [
+          "pelvic"
+        ],
+        "enteries": [
+          {
+            "img_txt": "black dress pants"
+          }
+        ],
+        "occludesSubItems": true
+      },
+      {
+        "id": "off",
+        "tags": [
+          "remove",
+          "off",
+          "drop",
+          "drop",
+          "lower",
+          "zip"
+        ],
+        "img_txt": ""
+      }
+    ]
+  },
+  {
+    "id": "bra_white",
+    "name": "bra",
+    "context": "white bra",
+    "tags": [
+      "bra"
+    ],
+    "isATop": true,
+    "slot": "top_under",
+    "states": [
+      {
+        "id": "on",
+        "tags": [
+          "on"
+        ],
+        "coversAppearanceClasses": [
+          "nipples"
+        ],
+        "enteries": [
+          {
+            "img_txt": "white bra"
+          }
+        ]
+      },
+      {
+        "id": "lifted",
+        "state_context": "lifted",
+        "tags": [
+          "lift",
+          "up"
+        ],
+        "enteries": [
+          {
+            "img_txt": "white bra"
+          },
+          {
+            "img_txt": "bra up, bra up",
+            "img_txt_neg": "bra down",
+            "forAppearanceClass": "chest"
+          }
+        ],
+        "transitions": [
+          {
+            "tags": [
+              "low",
+              "down"
+            ],
+            "id": "on"
+          }
+        ]
+      },
+      {
+        "id": "lowered",
+        "state_context": "lowered",
+        "tags": [
+          "low",
+          "down"
+        ],
+        "enteries": [
+          {
+            "img_txt": "white bra"
+          },
+          {
+            "img_txt": "bra down",
+            "img_txt_neg": "bra up",
+            "forAppearanceClass": "chest"
+          }
+        ],
+        "transitions": [
+          {
+            "tags": [
+              "lift",
+              "up"
+            ],
+            "id": "on"
+          }
+        ]
+      },
+      {
+        "id": "off",
+        "tags": [
+          "off",
+          "drop",
+          "unhooked",
+          "remove"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "panties_pink",
+    "name": "panties",
+    "context": "pink panties",
+    "tags": [
+      "panties",
+      "underwear",
+      "undies"
+    ],
+    "slot": "lower_under",
+    "states": [
+      {
+        "id": "on",
+        "tags": [
+          "on"
+        ],
+        "coversAppearanceClasses": [
+          "penis",
+          "pussy"
+        ],
+        "enteries": [
+          {
+            "img_txt": "pink panties"
+          }
+        ]
+      },
+      {
+        "id": "off",
+        "tags": [
+          "remove",
+          "off",
+          "drop",
+          "pull",
+          "lowered"
+        ]
+      }
+    ]
+  }
+]

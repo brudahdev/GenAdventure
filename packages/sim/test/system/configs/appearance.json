@@ -1,0 +1,932 @@
+{
+  "appearanceClasses": [
+    {
+      "class": "head",
+      "subClasses": [
+        {
+          "class": "face",
+          "subClasses": [
+            {
+              "class": "eyes"
+            },
+            {
+              "class": "mouth"
+            },
+            {
+              "class": "lips"
+            },
+            {
+              "class": "teeth"
+            }
+          ]
+        },
+        {
+          "class": "hair"
+        },
+        {
+          "class": "ears"
+        }
+      ]
+    },
+    {
+      "class": "torso",
+      "subClasses": [
+        {
+          "class": "chest",
+          "subClasses": [
+            {
+              "class": "nipples"
+            }
+          ]
+        },
+        {
+          "class": "stomach"
+        },
+        {
+          "class": "back"
+        }
+      ]
+    },
+    {
+      "class": "arms",
+      "subClasses": [
+        {
+          "class": "hands"
+        }
+      ]
+    },
+    {
+      "class": "lowerBody",
+      "subClasses": [
+        {
+          "class": "thighs"
+        },
+        {
+          "class": "feet"
+        },
+        {
+          "class": "pelvic",
+          "subClasses": [
+            {
+              "class": "ass"
+            },
+            {
+              "class": "penis"
+            },
+            {
+              "class": "pussy"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "appearance": [
+    {
+      "id": "eye_color_blue",
+      "items": [
+        {
+          "class": "eyes",
+          "id": "eye_color",
+          "img_txt": "blue eyes",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "eye_color_green",
+      "items": [
+        {
+          "class": "eyes",
+          "id": "eye_color",
+          "img_txt": "green eyes",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "eye_color_red",
+      "items": [
+        {
+          "class": "eyes",
+          "id": "eye_color",
+          "img_txt": "red eyes",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "eye_color_brown",
+      "items": [
+        {
+          "class": "eyes",
+          "id": "eye_color",
+          "img_txt": "brown eyes",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "eye_lashes_default",
+      "items": [
+        {
+          "class": "eyes",
+          "id": "eye_lash"
+        }
+      ]
+    },
+    {
+      "id": "eye_lashes_long",
+      "items": [
+        {
+          "class": "eyes",
+          "id": "eye_lash",
+          "img_txt": "long eyelashes",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_color_black",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_color",
+          "img_txt": "black hair",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_color_white",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_color",
+          "img_txt": "white hair",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_color_orange",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_color",
+          "img_txt": "orange hair",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_color_blonde",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_color",
+          "img_txt": "light blonde hair",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_color_red",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_color",
+          "img_txt": "red hair",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_color_purple",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_color",
+          "img_txt": "light purple hair",
+          "ctx_txt": "purple hair"
+        }
+      ]
+    },
+    {
+      "id": "hair_length_short",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_length",
+          "img_txt": "short hair",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_length_long",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_length",
+          "img_txt": "long hair",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_style_buzz",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_style",
+          "img_txt": "buzz cut",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_style_hairline_receeding",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_style",
+          "img_txt": "receeding hairline",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_style_braid",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_style",
+          "img_txt": "hair braid"
+        }
+      ]
+    },
+    {
+      "id": "hair_style_bob",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_style",
+          "img_txt": "bob cut hair",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_style_twin_tail",
+      "items": [
+        {
+          "class": "hair",
+          "id": "hair_style",
+          "img_txt": "long pig tails",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "hair_bangs_flat",
+      "items": [
+        {
+          "class": "face",
+          "id": "bangs",
+          "img_txt": "straight thick bangs"
+        }
+      ]
+    },
+    {
+      "id": "hair_bangs_none",
+      "items": [
+        {
+          "class": "face",
+          "id": "bangs",
+          "img_txt": "forehead"
+        }
+      ]
+    },
+    {
+      "id": "ears_normal",
+      "items": [
+        {
+          "class": "ears",
+          "id": "ears"
+        }
+      ]
+    },
+    {
+      "id": "ears_elf",
+      "items": [
+        {
+          "class": "ears",
+          "id": "ears",
+          "img_txt": "elf ears",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "ears_cat",
+      "items": [
+        {
+          "class": "ears",
+          "id": "ears",
+          "img_txt": "cat ears",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "face_default",
+      "items": [
+        {
+          "class": "face",
+          "id": "face",
+          "img_txt": "face"
+        }
+      ]
+    },
+    {
+      "id": "face_handsome",
+      "items": [
+        {
+          "class": "face",
+          "id": "face",
+          "img_txt": "handsome face",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "face_cute",
+      "items": [
+        {
+          "class": "face",
+          "id": "face",
+          "img_txt": "cute face",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "face_pretty",
+      "items": [
+        {
+          "class": "face",
+          "id": "face",
+          "img_txt": "pretty face",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "face_cat",
+      "items": [
+        {
+          "class": "face",
+          "id": "face",
+          "img_txt": "cute face, whiskers",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "head_size_default",
+      "items": [
+        {
+          "class": "head",
+          "id": "head_size",
+          "img_txt": ""
+        }
+      ]
+    },
+    {
+      "id": "head_size_big",
+      "items": [
+        {
+          "class": "head",
+          "id": "head_size",
+          "img_txt": "big head"
+        }
+      ]
+    },
+    {
+      "id": "skin_type_tan",
+      "items": [
+        {
+          "id": "skin_type",
+          "img_txt": "tan skin",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "skin_type_white",
+      "items": [
+        {
+          "id": "skin_type"
+        }
+      ]
+    },
+    {
+      "id": "skin_type_red",
+      "items": [
+        {
+          "id": "skin_type",
+          "img_txt": "freckles",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "skin_type_grey",
+      "items": [
+        {
+          "id": "skin_type",
+          "img_txt": "grey skin",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "skin_type_green",
+      "items": [
+        {
+          "id": "skin_type",
+          "img_txt": "green skin",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "skin_type_furry_white",
+      "items": [
+        {
+          "id": "skin_type",
+          "img_txt": "furry, white fur",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "chest_style_default",
+      "items": [
+        {
+          "class": "chest",
+          "id": "chest_style",
+          "img_txt": "chest"
+        }
+      ]
+    },
+    {
+      "id": "chest_style_breast_big",
+      "items": [
+        {
+          "class": "chest",
+          "id": "chest_style",
+          "img_txt": "big breasts",
+          "ctx_txt": "big breasts",
+          "ingnore_clothing_covering": true
+        }
+      ]
+    },
+    {
+      "id": "chest_style_breast_medium_large",
+      "items": [
+        {
+          "class": "chest",
+          "id": "chest_style",
+          "img_txt": "medium large breasts",
+          "ctx_txt": "large breasts",
+          "ingnore_clothing_covering": true
+        }
+      ]
+    },
+    {
+      "id": "chest_style_breast_medium",
+      "items": [
+        {
+          "class": "chest",
+          "id": "chest_style",
+          "img_txt": "medium breasts",
+          "ctx_txt": "medium sized breasts",
+          "ingnore_clothing_covering": true
+        }
+      ]
+    },
+    {
+      "id": "chest_style_breast_small",
+      "items": [
+        {
+          "class": "chest",
+          "id": "chest_style",
+          "img_txt": "small breasts",
+          "include_in_ctx": true,
+          "ingnore_clothing_covering": true
+        }
+      ]
+    },
+    {
+      "id": "chest_style_muscular",
+      "items": [
+        {
+          "class": "chest",
+          "id": "chest_style",
+          "img_txt": "muscular chest",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "chest_hair_none",
+      "items": [
+        {
+          "class": "chest",
+          "id": "chest_hair"
+        }
+      ]
+    },
+    {
+      "id": "chest_hair",
+      "items": [
+        {
+          "class": "chest",
+          "id": "chest_hair",
+          "img_txt": "hairy chest",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "nipple_size_small",
+      "items": [
+        {
+          "class": "nipples",
+          "id": "nipple_size",
+          "img_txt": "small nipples",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "nipple_size_normal",
+      "items": [
+        {
+          "class": "nipples",
+          "id": "nipple_size",
+          "img_txt": "nipples"
+        }
+      ]
+    },
+    {
+      "id": "nipple_size_large",
+      "items": [
+        {
+          "class": "nipples",
+          "id": "nipple_size",
+          "img_txt": "large nipples",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "thighs_default",
+      "items": [
+        {
+          "class": "thighs",
+          "id": "thighs"
+        }
+      ]
+    },
+    {
+      "id": "thighs_thick",
+      "items": [
+        {
+          "class": "thighs",
+          "id": "thighs",
+          "img_txt": "thick thighs"
+        }
+      ]
+    },
+    {
+      "id": "ass_size_big",
+      "items": [
+        {
+          "class": "ass",
+          "id": "ass_size",
+          "img_txt": "big ass",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "ass_size_normal",
+      "items": [
+        {
+          "class": "ass",
+          "id": "ass_size",
+          "img_txt": "ass"
+        }
+      ]
+    },
+    {
+      "id": "ass_size_small",
+      "items": [
+        {
+          "class": "ass",
+          "id": "ass_size",
+          "img_txt": "small ass",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "penis_girth_big",
+      "items": [
+        {
+          "class": "penis",
+          "id": "penis_size",
+          "img_txt": "girthy cock"
+        }
+      ]
+    },
+    {
+      "id": "penis_length_long",
+      "items": [
+        {
+          "class": "penis",
+          "id": "penis_length",
+          "img_txt": "long penis"
+        }
+      ]
+    },
+    {
+      "id": "penis_color_white",
+      "items": [
+        {
+          "class": "penis",
+          "id": "penis_color",
+          "img_txt": "white penis"
+        }
+      ]
+    },
+    {
+      "id": "pussy",
+      "items": [
+        {
+          "class": "pussy",
+          "id": "pussy",
+          "img_txt": "pussy",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "feet_defult",
+      "items": [
+        {
+          "class": "feet",
+          "id": "feet"
+        }
+      ]
+    },
+    {
+      "id": "back_default",
+      "items": [
+        {
+          "class": "back",
+          "id": "back",
+          "img_txt": "back",
+          "ingnore_clothing_covering": true
+        }
+      ]
+    },
+    {
+      "id": "back_muscular",
+      "items": [
+        {
+          "class": "back",
+          "id": "back",
+          "img_txt": "muscular back",
+          "include_in_ctx": true,
+          "ingnore_clothing_covering": true
+        }
+      ]
+    },
+    {
+      "id": "arms_default",
+      "items": [
+        {
+          "class": "arms",
+          "id": "arms"
+        }
+      ]
+    },
+    {
+      "id": "arms_muscular",
+      "items": [
+        {
+          "class": "arms",
+          "id": "arms",
+          "img_txt": "big arms",
+          "include_in_ctx": true
+        }
+      ]
+    },
+    {
+      "id": "humanoid",
+      "overrides": [
+        "nipple_size_small",
+        "back_default",
+        "chest_style_default",
+        "arms_default",
+        "ass_size_normal",
+        "feet_defult",
+        "thighs_default",
+        "head_size_default"
+      ]
+    },
+    {
+      "id": "human",
+      "overrides": [
+        "humanoid",
+        "ears_normal"
+      ]
+    },
+    {
+      "id": "elf",
+      "overrides": [
+        "humanoid",
+        "ears_elf"
+      ]
+    },
+    {
+      "id": "cat",
+      "overrides": [
+        "humanoid",
+        "ears_cat",
+        "face_cat"
+      ]
+    },
+    {
+      "id": "male",
+      "overrides": [
+        "eye_lashes_default",
+        "face_handsome",
+        "back_muscular",
+        "chest_hair",
+        "chest_style_muscular",
+        "arms_muscular",
+        "penis_girth_big",
+        "penis_length_long",
+        "penis_color_white",
+        "ass_size_normal",
+        "thighs_default"
+      ],
+      "items": [
+        {
+          "id": "noun",
+          "ctx_txt": "guy"
+        },
+        {
+          "id": "height",
+          "ctx_txt": "5 ft. 10 in. tall"
+        }
+      ]
+    },
+    {
+      "id": "female",
+      "overrides": [
+        "eye_lashes_long",
+        "face_pretty",
+        "chest_hair_none",
+        "chest_style_breast_medium_large",
+        "back_default",
+        "arms_default",
+        "pussy",
+        "ass_size_big",
+        "back_default",
+        "thighs_default"
+      ],
+      "items": [
+        {
+          "id": "noun",
+          "ctx_txt": "girl"
+        },
+        {
+          "id": "height",
+          "ctx_txt": "5 ft. 2 in. tall"
+        }
+      ]
+    },
+    {
+      "id": "race_high_elf",
+      "overrides": [
+        "elf",
+        "skin_type_white",
+        "hair_color_blonde",
+        "eye_color_blue"
+      ],
+      "items": [
+        {
+          "id": "race",
+          "ctx_txt": "high elf"
+        }
+      ]
+    },
+    {
+      "id": "race_dark_elf",
+      "overrides": [
+        "elf",
+        "skin_type_grey",
+        "hair_color_black",
+        "eye_color_red"
+      ],
+      "items": [
+        {
+          "id": "race",
+          "ctx_txt": "dark elf"
+        }
+      ]
+    },
+    {
+      "id": "race_goblin",
+      "overrides": [
+        "elf",
+        "skin_type_green",
+        "hair_color_black",
+        "eye_color_red"
+      ],
+      "items": [
+        {
+          "id": "race",
+          "ctx_txt": "goblin"
+        }
+      ]
+    },
+    {
+      "id": "race_caucasian",
+      "overrides": [
+        "human",
+        "skin_type_white",
+        "hair_color_blonde",
+        "eye_color_blue"
+      ],
+      "items": [
+        {
+          "id": "race",
+          "ctx_txt": "caucasian"
+        }
+      ]
+    },
+    {
+      "id": "race_japanese",
+      "overrides": [
+        "human",
+        "skin_type_white",
+        "hair_color_black",
+        "eye_color_brown"
+      ],
+      "items": [
+        {
+          "id": "race",
+          "ctx_txt": "Japanese"
+        }
+      ]
+    },
+    {
+      "id": "race_cat_girl",
+      "overrides": [
+        "female",
+        "cat",
+        "hair_color_white",
+        "skin_type_furry_white"
+      ],
+      "items": [
+        {
+          "id": "race",
+          "ctx_txt": "cat girl"
+        },
+        {
+          "id": "noun",
+          "ctx_txt": "cat girl"
+        }
+      ]
+    },
+    {
+      "id": "eye_color_pink",
+      "items": [
+        {
+          "id": "eye_color",
+          "class": "eyes",
+          "img_txt": "pink eyes",
+          "ctx_txt": "pink eyes",
+          "include_in_ctx": true
+        }
+      ]
+    }
+  ]
+}

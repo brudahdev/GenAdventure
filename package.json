@@ -1,0 +1,20 @@
+{
+  "name": "gen-adventure",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @gen-adventure/app dev",
+    "build": "pnpm -r build",
+    "package": "pnpm --filter @gen-adventure/app package",
+    "test": "pnpm --filter @gen-adventure/sim test",
+    "simT": "pnpm --filter @gen-adventure/sim test",
+    "simT:watch": "pnpm --filter @gen-adventure/sim test:watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "tsyringe": "^4.10.0"
+  }
+}

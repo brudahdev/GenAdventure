@@ -1,0 +1,86 @@
+[
+  {
+    "id": "stand",
+    "tags": [
+      "stand",
+      "stood"
+    ],
+    "occludedAppearanceClasses": [
+      "back",
+      "ass"
+    ]
+  },
+  {
+    "id": "squat",
+    "tags": [
+      "squat",
+      "crouch"
+    ],
+    "occludedAppearanceClasses": [
+      "back",
+      "ass"
+    ]
+  },
+  {
+    "id": "sit",
+    "tags": [
+      "sit",
+      "sat"
+    ],
+    "occludedAppearanceClasses": [
+      "back",
+      "ass"
+    ]
+  },
+  {
+    "id": "kneel",
+    "tags": [
+      "knee",
+      "knelt"
+    ],
+    "occludedAppearanceClasses": [
+      "back",
+      "ass"
+    ]
+  },
+  {
+    "id": "lay_on_stomach",
+    "tags": [
+      "stomach"
+    ],
+    "occludedAppearanceClasses": [
+      "back",
+      "ass"
+    ]
+  },
+  {
+    "id": "lay_on_side",
+    "tags": [
+      "side"
+    ]
+  },
+  {
+    "id": "lay_on_back",
+    "tags": [
+      "back",
+      "lay",
+      "lie",
+      "lying"
+    ],
+    "occludedAppearanceClasses": [
+      "back",
+      "ass"
+    ]
+  },
+  {
+    "id": "bent_over",
+    "tags": [
+      "bend",
+      "bent"
+    ],
+    "occludedAppearanceClasses": [
+      "chest",
+      "face"
+    ]
+  }
+]

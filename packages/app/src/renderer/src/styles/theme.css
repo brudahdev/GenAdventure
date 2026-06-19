@@ -1,0 +1,40 @@
+:root {
+  /* Dark grey background; grouping surfaces are a lighter grey. */
+  --bg-app: #1e1e1e;
+  --bg-group: #2b2b2b;
+  --bg-group-raised: #353535;
+  --bg-input: #1a1a1a;
+  --border: #444;
+
+  --text: #ffffff;
+  --text-muted: #b0b0b0;
+
+  --accent: #4a7dff;
+  --accent-hover: #5e8cff;
+
+  --bar-height: 52px;
+  --radius: 6px;
+  --space: 16px;
+  --header-collapse-duration: 300ms;
+
+  --font-ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+  --chat-footer-height: 3%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text);
+  font-family: var(--font-ui);
+}

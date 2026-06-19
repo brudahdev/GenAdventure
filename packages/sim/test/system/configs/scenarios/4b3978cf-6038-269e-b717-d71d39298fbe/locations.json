@@ -1,0 +1,289 @@
+[
+  {
+    "id": "{{user}}s_bed_room",
+    "onEnterText": "into {{user}}'s bed room",
+    "context": "in {{user}}'s bedroom. It is clean. There is an unmade bed in the corner facing a large desk across the room. On the desk is a large desktop and two big monitors on arms.",
+    "connectedLocations": [
+      {
+        "locationId": "{{user}}s_bathroom",
+        "defaultSubLocationId": "{{user}}s_bathroom_sink",
+        "distance": 0
+      }
+    ],
+    "subLocations": [
+      {
+        "id": "{{user}}s_bed_room_middle",
+        "onEnterText": "to the middle of the room",
+        "poses": [
+          {
+            "poseId": "stand",
+            "context": "standing on the floor",
+            "img_txt": "standing"
+          },
+          {
+            "poseId": "sit",
+            "context": "sitting on the floor",
+            "img_txt": "sitting on the floor"
+          },
+          {
+            "poseId": "squat",
+            "context": "squatting on the floor",
+            "img_txt": "squatting on the floor"
+          },
+          {
+            "poseId": "kneel",
+            "context": "kneeling on the floor",
+            "img_txt": "kneeling on the floor"
+          },
+          {
+            "poseId": "lay_on_stomach",
+            "context": "lying on {{_subject_pronoun}} stomach on the floor",
+            "img_txt": "lying on stomach on floor"
+          },
+          {
+            "poseId": "lay_on_back",
+            "context": "lying on {{_subject_pronoun}} back on the floor",
+            "img_txt": "lying on back on floor"
+          },
+          {
+            "poseId": "lay_on_side",
+            "context": "lying on {{_subject_pronoun}} side on the floor",
+            "img_txt": "lying on side"
+          }
+        ],
+        "tags": [
+          "middle"
+        ],
+        "img_txt": "window"
+      },
+      {
+        "id": "{{user}}s_bed_room_bed",
+        "onEnterText": "to the bed",
+        "poses": [
+          {
+            "poseId": "stand",
+            "context": "standing in front of the bed",
+            "img_txt": "standing, bed background"
+          },
+          {
+            "poseId": "sit",
+            "context": "sitting on the bed",
+            "img_txt": "sitting on bed"
+          },
+          {
+            "poseId": "squat",
+            "context": "squatting on the bed",
+            "img_txt": "squatting on bed"
+          },
+          {
+            "poseId": "lay_on_stomach",
+            "context": "lying on {{_subject_pronoun}} stomach on the bed",
+            "img_txt": "lying on stomach"
+          },
+          {
+            "poseId": "lay_on_back",
+            "context": "lying on {{_subject_pronoun}} back on the bed",
+            "img_txt": "lying on back"
+          },
+          {
+            "poseId": "lay_on_side",
+            "context": "lying on {{_subject_pronoun}} side on the bed",
+            "img_txt": "lying on side"
+          },
+          {
+            "poseId": "bent_over",
+            "context": "bent over the bed",
+            "img_txt": "bent over"
+          }
+        ],
+        "tags": [
+          "bed"
+        ],
+        "img_txt": "window, white sheets, white pillow"
+      },
+      {
+        "id": "{{user}}s_bed_room_desk",
+        "onEnterText": "to the desk",
+        "poses": [
+          {
+            "poseId": "stand",
+            "context": "standing in front of the desk",
+            "img_txt": "standing"
+          },
+          {
+            "poseId": "sit",
+            "context": "sitting on the desk",
+            "img_txt": "sitting on desk"
+          },
+          {
+            "poseId": "squat",
+            "context": "squatting on the desk",
+            "img_txt": "squatting on desk"
+          },
+          {
+            "poseId": "lay_on_back",
+            "context": "lying on {{_subject_pronoun}} back on the desk",
+            "img_txt": "lying on back on desk"
+          },
+          {
+            "poseId": "lay_on_side",
+            "context": "lying on {{_subject_pronoun}} side on the desk",
+            "img_txt": "lying on side on desk"
+          },
+          {
+            "poseId": "bent_over",
+            "context": "bent over the desk",
+            "img_txt": "bent over desk"
+          },
+          {
+            "poseId": "kneel",
+            "context": "kneeling on floor in front of the desk",
+            "img_txt": "kneeling on floor"
+          }
+        ],
+        "tags": [
+          "desk"
+        ],
+        "img_txt": "desk in background, lamp"
+      }
+    ],
+    "tags": [
+      "bed"
+    ],
+    "img_txt": "white wall, blue rug",
+    "background_img_txt": "bedroom, window, bed, lamp on desk, single desk",
+    "background_img_txt_neg": "people, woman man, 1girl, 1guy, solo, face, nose, eyes, mouth, hands, feet, hair"
+  },
+  {
+    "id": "{{user}}s_bathroom",
+    "onEnterText": "into {{user}}'s bathroom",
+    "context": "in {{user}}'s bathroom. It its pretty small. There's a toilet between the sink and she shower. There are shaving supplies on the sink and beard clippings in the sink.",
+    "connectedLocations": [
+      {
+        "locationId": "{{user}}s_bed_room",
+        "defaultSubLocationId": "{{user}}s_bed_room_middle",
+        "distance": 0
+      }
+    ],
+    "subLocations": [
+      {
+        "id": "{{user}}s_bathroom_sink",
+        "onEnterText": "to the sink",
+        "poses": [
+          {
+            "poseId": "stand",
+            "context": "standing in front of the sink",
+            "img_txt": "standing"
+          },
+          {
+            "poseId": "sit",
+            "context": "sitting on the sink",
+            "img_txt": "sitting on sink"
+          },
+          {
+            "poseId": "bent_over",
+            "context": "bent over the sink",
+            "img_txt": "bent over"
+          },
+          {
+            "poseId": "kneel",
+            "context": "kneeling on the floor",
+            "img_txt": "kneeling on floor"
+          },
+          {
+            "poseId": "lay_on_back",
+            "context": "lying on {{_subject_pronoun}} back on the floor",
+            "img_txt": "lying on back on floor"
+          },
+          {
+            "poseId": "lay_on_side",
+            "context": "lying on {{_subject_pronoun}} side on the floor",
+            "img_txt": "lying on side on floor"
+          }
+        ],
+        "tags": [
+          "sink",
+          "wash"
+        ],
+        "img_txt": "sink"
+      },
+      {
+        "id": "{{user}}s_bathroom_shower",
+        "onEnterText": "into the shower",
+        "poses": [
+          {
+            "poseId": "stand",
+            "context": "standing in the shower",
+            "img_txt": "standing"
+          },
+          {
+            "poseId": "sit",
+            "context": "sitting in the shower",
+            "img_txt": "sitting on floor"
+          },
+          {
+            "poseId": "kneel",
+            "context": "kneeling on the floor",
+            "img_txt": "kneeling on floor"
+          },
+          {
+            "poseId": "lay_on_back",
+            "context": "lying on {{_subject_pronoun}} back on the floor",
+            "img_txt": "lying on back on floor"
+          },
+          {
+            "poseId": "lay_on_side",
+            "context": "lying on {{_subject_pronoun}} side on the floor",
+            "img_txt": "lying on side on floor"
+          },
+          {
+            "poseId": "squat",
+            "context": "squatting in the shower",
+            "img_txt": "squatting"
+          },
+          {
+            "poseId": "bent_over",
+            "context": "bent over in the shower",
+            "img_txt": "bent over"
+          }
+        ],
+        "tags": [
+          "tub",
+          "shower",
+          "bath"
+        ],
+        "img_txt": "shower, glass door"
+      },
+      {
+        "id": "{{user}}s_bathroom_toilet",
+        "onEnterText": "to the toilet",
+        "poses": [
+          {
+            "poseId": "stand",
+            "context": "standing in front of the toilet",
+            "img_txt": "standing"
+          },
+          {
+            "poseId": "sit",
+            "context": "sitting on the toilet",
+            "img_txt": "sitting on toilet"
+          }
+        ],
+        "tags": [
+          "toilet",
+          "pee",
+          "piss",
+          "poop",
+          "shit"
+        ],
+        "img_txt": "toilet, toilet paper"
+      }
+    ],
+    "tags": [
+      "bath"
+    ],
+    "img_txt": "white tiles, bathroom",
+    "background_img_txt_neg": "people, woman man, 1girl, 1guy, solo, face, nose, eyes, mouth, hands, feet, hair",
+    "background_img_txt": "bathroom, white tile, sink, shower"
+  }
+]

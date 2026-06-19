@@ -1,0 +1,21 @@
+appId: com.genAdventure.app
+productName: GenAdventure
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**/*
+asarUnpack:
+  - '**/node_modules/sharp/**'
+  - '**/node_modules/@img/**'
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64

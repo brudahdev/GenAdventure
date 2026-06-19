@@ -1,0 +1,44 @@
+{
+  "outfitSlotConfig": [
+    {
+      "id": "top_outer",
+      "subItems": [
+        {
+          "id": "top_inner",
+          "subItems": [
+            {
+              "id": "top_under"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lower",
+      "subItems": [
+        {
+          "id": "lower_under"
+        }
+      ]
+    }
+  ],
+  "outfits": [
+    {
+      "id": "anime",
+      "clothingItemIds": [
+        "bow_tie_red",
+        "button_up_blouse_white",
+        "skirt_pleated_blue",
+        "bra_white",
+        "panties_pink"
+      ]
+    },
+    {
+      "id": "dressy",
+      "clothingItemIds": [
+        "button_up_shirt",
+        "dress_pants_black"
+      ]
+    }
+  ]
+}

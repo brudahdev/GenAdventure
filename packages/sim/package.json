@@ -1,0 +1,20 @@
+{
+  "name": "@gen-adventure/sim",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@gen-adventure/shared": "workspace:*",
+    "@swc/core": "^1.10.0",
+    "@types/node": "^20.14.0",
+    "comlink": "^4.4.2",
+    "reflect-metadata": "^0.2.2",
+    "tsyringe": "^4.10.0",
+    "typescript": "^5.4.5",
+    "unplugin-swc": "^1.5.1",
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "paths": {
+      "@gen-adventure/shared": ["../shared/src/index.ts"]
+    }
+  }
+}
