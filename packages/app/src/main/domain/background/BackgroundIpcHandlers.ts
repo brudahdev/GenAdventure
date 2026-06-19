@@ -22,5 +22,6 @@ export class BackgroundIpcHandlers {
     ipcMain.handle(ICP.IMG_GEN_RECALCULATE_BACKGROUND, async () =>
       this.backgroundService.recalculate()
     )
+    ipcMain.handle(ICP.BACKGROUND_REGENERATE, async () => this.backgroundService.regenerate())
   }
 }

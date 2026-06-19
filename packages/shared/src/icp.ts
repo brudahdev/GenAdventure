@@ -25,8 +25,10 @@ export const ICP = {
     AVATAR_GENERATED: 'avatar:generated',         // main → renderer (send)
     AVATAR_REMOVED: 'avatar:removed',             // main → renderer (send): payload characterId
     AVATAR_LIST: 'avatar:list',                   // renderer → main (invoke): replay snapshot
+    AVATAR_REGENERATE: 'avatar:regenerate',       // renderer → main (invoke): re-roll a character's avatar
     BACKGROUND_GENERATED: 'background:generated', // main → renderer (send)
     BACKGROUND_CURRENT: 'background:current',     // renderer → main (invoke): replay snapshot
+    BACKGROUND_REGENERATE: 'background:regenerate', // renderer → main (invoke): re-roll the background
     IMG_GEN_SETTINGS_GET: 'image-gen:settings:get',
     IMG_GEN_SETTINGS_SET: 'image-gen:settings:set',
     IMG_GEN_RECALCULATE: 'image-gen:recalculate', // re-apply transparency to all avatars

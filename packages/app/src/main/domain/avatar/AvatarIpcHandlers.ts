@@ -24,5 +24,8 @@ export class AvatarIpcHandlers {
 
     ipcMain.handle(ICP.AVATAR_LIST, async () => this.avatarService.getActive())
     ipcMain.handle(ICP.IMG_GEN_RECALCULATE, async () => this.avatarService.recalculateAll())
+    ipcMain.handle(ICP.AVATAR_REGENERATE, async (_, characterId: string) =>
+      this.avatarService.regenerate(characterId)
+    )
   }
 }

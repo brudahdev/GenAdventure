@@ -4,6 +4,7 @@ import { container, singleton } from 'tsyringe'
 import type { ComfyGenericSettings, PromptRequest } from '@gen-adventure/shared'
 import type {
   GenerateCallbacks,
+  GenerateOptions,
   ImageBytes,
   ImageProvider
 } from '../../domain/imageGeneration/ImageProvider'
@@ -49,7 +50,11 @@ export class ComfyUiClient implements ImageProvider {
   /** prompt_id of the node block currently executing (for routing previews). */
   private executingPromptId: string | null = null
 
-  async generate(request: PromptRequest, callbacks: GenerateCallbacks): Promise<ImageBytes> {
+  async generate(
+    request: PromptRequest,
+    callbacks: GenerateCallbacks,
+    options?: GenerateOptions
+  ): Promise<ImageBytes> {
     const settings = await this.config.getGenericSettings()
     if (!settings.selectedWorkflow) {
       throw new Error('No ComfyUI workflow selected')
@@ -65,7 +70,7 @@ export class ComfyUiClient implements ImageProvider {
     const targetPixels =
       request.type === 'avatar' ? settings.avatarTargetPixels : settings.backgroundTargetPixels
     const { width, height } = toWidthHeight(request.aspectRatio, targetPixels)
-    const seed = settings.seed === -1 ? randomSeed() : settings.seed
+    const seed = options?.forceRandomSeed || settings.seed === -1 ? randomSeed() : settings.seed
 
     // Prepend the per-workflow prompt overrides.
     const positive = prependOverride(bindings.positivePromptOverride, request.positive)

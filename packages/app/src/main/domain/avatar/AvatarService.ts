@@ -88,6 +88,13 @@ export class AvatarService {
     return `img_gen/generated/characters/${characterId}/${hash}.png`
   }
 
+  /** Where the most recent prompt for a character is stored (alongside its
+   *  images), so a "regen" can re-roll the exact prompt that produced the
+   *  currently displayed avatar. */
+  private promptRel(characterId: string): string {
+    return `img_gen/generated/characters/${characterId}/prompt.json`
+  }
+
   private cacheBuster = () => { return Date.now() }
   private transRel(characterId: string, hash: string): string {
     return `img_gen/generated/characters/${characterId}/trans_${hash}_${this.cacheBuster()}.png`
@@ -108,7 +115,12 @@ export class AvatarService {
     this.active.clear()
   }
 
-  async handle(request: PromptRequest): Promise<void> {
+  /**
+   * Resolve, cache, and emit an avatar for a prompt. When `force` is true the
+   * disk cache is bypassed and a fresh image is generated with a random seed
+   * (used by {@link regenerate} to re-roll an image).
+   */
+  async handle(request: PromptRequest, force = false): Promise<void> {
     try {
       const characterId = request.characterId
       if (!characterId) {
@@ -119,8 +131,11 @@ export class AvatarService {
       const originalRel = this.originalRel(characterId, hash)
       const settings = await this.config.getImgGenSettings()
 
-      // Cache check is always against the unedited original.
-      if (!(await this.saveData.exists(originalRel))) {
+      // Remember the raw (pre-transparency) prompt so it can be re-rolled later.
+      await this.saveData.write(this.promptRel(characterId), JSON.stringify(request))
+
+      // Cache check is always against the unedited original; `force` re-generates.
+      if (force || !(await this.saveData.exists(originalRel))) {
         if (!settings.enabled) return // generation off and nothing cached → skip
         const genRequest: PromptRequest = settings.transparencyEnabled
           ? {
@@ -129,7 +144,10 @@ export class AvatarService {
             negative: appendPrompt(request.negative, settings.transparencyNegativePrompt)
           }
           : request
-        const image = await this.imageGen.generate(genRequest)
+        const image = await this.imageGen.generate(
+          genRequest,
+          force ? { forceRandomSeed: true } : undefined
+        )
         await this.saveData.writeBytes(originalRel, image.bytes)
       }
 
@@ -141,6 +159,32 @@ export class AvatarService {
     }
   }
 
+  /** Re-roll the avatar for a character: re-generate (random seed) from the
+   *  stored prompt that produced the current image, falling back to the live
+   *  sim for avatars generated before prompts were persisted. */
+  async regenerate(characterId: string): Promise<void> {
+    const request = await this.loadPrompt(characterId)
+    if (!request) {
+      console.warn('[avatar] no prompt available to regenerate', characterId)
+      return
+    }
+    await this.handle(request, true)
+  }
+
+  /** The prompt that produced the current avatar: the stored one, or a freshly
+   *  built one from the live sim as a fallback. */
+  private async loadPrompt(characterId: string): Promise<PromptRequest | null> {
+    const stored = await this.saveData.read(this.promptRel(characterId))
+    if (stored) {
+      try {
+        return JSON.parse(stored) as PromptRequest
+      } catch {
+        // fall through to the sim fallback below
+      }
+    }
+    return (await this.sim.getSim()?.getAvatarPromptForCharacter(characterId)) ?? null
+  }
+
   /** Build the displayed image (transparency-applied if enabled) and emit it. */
   private async emit(avatar: ActiveAvatar, settings: ImgGenSettings): Promise<void> {
     try {
@@ -148,15 +192,21 @@ export class AvatarService {
       const originalRel = this.originalRel(characterId, hash)
 
       let rel = originalRel
+      let url: string
       if (settings.transparencyEnabled) {
         const original = await this.saveData.readBytes(originalRel)
         if (!original) return
         const edited = await applyTransparency(original, settings)
         rel = this.transRel(characterId, hash)
         await this.saveData.writeBytes(rel, edited)
+        // The transparency filename is already unique per emit (cache-busts itself).
+        url = toImageUrl(this.saveData.resolveWithin(rel))
+      } else {
+        // The original filename is stable, so a regen overwrites the same path —
+        // bust the URL so the renderer reloads instead of showing the cached image.
+        url = `${toImageUrl(this.saveData.resolveWithin(rel))}?v=${this.cacheBuster()}`
       }
 
-      const url = toImageUrl(this.saveData.resolveWithin(rel))
       avatar.url = url // remember for replay / snapshot
       for (const handler of this.handlers) handler({ characterId, url })
     } catch (err) {

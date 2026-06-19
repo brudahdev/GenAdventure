@@ -195,7 +195,8 @@ export default function ChatPage(): JSX.Element {
         { label: 'Clothing', children: buildClothingItemsMenu(characterId, options) },
         { label: 'Move', children: buildLocationMenu(characterId, locations) },
         { label: 'Pose', children: buildPoseMenu(characterId, poses) },
-        { label: 'Touch', childLabel: 'Target Part', children: buildTouchMenu(characterId, touch) }
+        { label: 'Touch', childLabel: 'Target Part', children: buildTouchMenu(characterId, touch) },
+        { label: 'Regen Avatar', onSelect: () => void window.electronAPI.avatar.regenerate(characterId) }
       ]
     })
   }
@@ -361,14 +362,15 @@ export default function ChatPage(): JSX.Element {
           <button class="chat-quit-btn" onClick={() => setShowQuitConfirm(true)}>
             Quit
           </button>
-          <div class="chat-audio-controls">
-            <button
+          <button
               class="chat-audio-btn"
               title="Save game"
               onClick={() => setShowSaveModal(true)}
             >
               Save
             </button>
+          <div class="chat-audio-controls">
+            
             <button
               class="chat-audio-btn"
               classList={{ 'is-muted': speakerMuted(), 'is-active': playbackStatus() === 'playing' }}
@@ -384,6 +386,13 @@ export default function ChatPage(): JSX.Element {
               onClick={() => setShowImagePanel((v) => !v)}
             >
               Image
+            </button>
+            <button
+              class="chat-audio-btn"
+              title="Regenerate the background image"
+              onClick={() => void window.electronAPI.background.regenerate()}
+            >
+              Regen Background
             </button>
           </div>
         </div>

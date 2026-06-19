@@ -53,7 +53,6 @@ export class BackgroundService {
     const sim = this.sim.getSim()
     if (!sim) return
     this.sim.pauseTime()
-    this.overlay.show('Generating background...')
     try {
       const prompt = await sim.getBackgroundPromptForCharacter(PLAYER_CHARACTER_ID)
       await this.handle(prompt)
@@ -97,16 +96,37 @@ export class BackgroundService {
     return `img_gen/generated/locations/blur_${hash}_${Date.now()}.png`
   }
 
-  async handle(request: PromptRequest): Promise<void> {
+  /** Where the most recent background prompt is stored (alongside the images),
+   *  so a "regen" can re-roll the prompt that produced the current background.
+   *  Location ids don't exist yet, so there's a single most-recent file. */
+  private promptRel(): string {
+    return `img_gen/generated/locations/prompt.json`
+  }
+
+  /**
+   * Resolve, cache, and emit a background for a prompt. When `force` is true the
+   * disk cache is bypassed and a fresh image is generated with a random seed
+   * (used by {@link regenerate} to re-roll an image).
+   */
+  async handle(request: PromptRequest, force = false): Promise<void> {
     try {
       const hash = promptHash(request.positive, request.negative)
       const originalRel = this.originalRel(hash)
       const settings = await this.config.getImgGenSettings()
 
-      // Cache existence is always checked against the unedited original.
-      if (!(await this.saveData.exists(originalRel))) {
+      // Remember the prompt so it can be re-rolled later.
+      await this.saveData.write(this.promptRel(), JSON.stringify(request))
+
+      // Cache existence is always checked against the unedited original; `force`
+      // re-generates.
+      if (force || !(await this.saveData.exists(originalRel))) {
         if (!settings.enabled) return // generation off and nothing cached → skip
-        const image = await this.imageGen.generate(request)
+        this.overlay.show('Generating background...')
+
+        const image = await this.imageGen.generate(
+          request,
+          force ? { forceRandomSeed: true } : undefined
+        )
         await this.saveData.writeBytes(originalRel, image.bytes)
       }
 
@@ -117,21 +137,64 @@ export class BackgroundService {
     }
   }
 
+  /** Re-roll the current background: re-generate (random seed) from the stored
+   *  prompt, falling back to the live sim for the player's location. Pauses the
+   *  sim and shows an overlay while generating, like {@link regenerateForPlayer}. */
+  async regenerate(): Promise<void> {
+    this.sim.pauseTime()
+    this.overlay.show('Regenerating background...')
+    try {
+      const request = await this.loadPrompt()
+      if (!request) {
+        console.warn('[background] no prompt available to regenerate')
+        return
+      }
+      await this.handle(request, true)
+    } catch (err) {
+      console.error('[background] failed to regenerate background:', err)
+    } finally {
+      this.overlay.hide()
+      this.sim.resumeTime()
+    }
+  }
+
+  /** The prompt that produced the current background: the stored one, or a
+   *  freshly built one from the player's location as a fallback. */
+  private async loadPrompt(): Promise<PromptRequest | null> {
+    const stored = await this.saveData.read(this.promptRel())
+    if (stored) {
+      try {
+        return JSON.parse(stored) as PromptRequest
+      } catch {
+        // fall through to the sim fallback below
+      }
+    }
+    const sim = this.sim.getSim()
+    if (!sim) return null
+    return sim.getBackgroundPromptForCharacter(PLAYER_CHARACTER_ID)
+  }
+
   /** Build the displayed background (blurred if enabled) and emit it. */
   private async emit(hash: string, settings: ImgGenSettings): Promise<void> {
     try {
       const originalRel = this.originalRel(hash)
 
       let rel = originalRel
+      let url: string
       if (settings.blurBackground) {
         const original = await this.saveData.readBytes(originalRel)
         if (!original) return
         const blurred = await applyBlur(original, settings)
         rel = this.blurRel(hash)
         await this.saveData.writeBytes(rel, blurred)
+        // The blur filename is already unique per emit (cache-busts itself).
+        url = toImageUrl(this.saveData.resolveWithin(rel))
+      } else {
+        // The original filename is stable, so a regen overwrites the same path —
+        // bust the URL so the renderer reloads instead of showing the cached image.
+        url = `${toImageUrl(this.saveData.resolveWithin(rel))}?v=${Date.now()}`
       }
 
-      const url = toImageUrl(this.saveData.resolveWithin(rel))
       this.lastUrl = url // remember for replay / snapshot
       for (const handler of this.handlers) handler({ url })
     } catch (err) {

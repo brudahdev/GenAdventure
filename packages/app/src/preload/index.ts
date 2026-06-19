@@ -150,7 +150,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return () => ipcRenderer.removeListener(ICP.AVATAR_REMOVED, listener)
     },
     // Snapshot of currently displayed avatars (replay for a freshly mounted page).
-    list: (): Promise<AvatarGeneratedEvent[]> => ipcRenderer.invoke(ICP.AVATAR_LIST)
+    list: (): Promise<AvatarGeneratedEvent[]> => ipcRenderer.invoke(ICP.AVATAR_LIST),
+    // Re-roll a character's avatar (regenerate from its stored prompt).
+    regenerate: (characterId: string): Promise<void> =>
+      ipcRenderer.invoke(ICP.AVATAR_REGENERATE, characterId)
   },
 
   background: {
@@ -161,7 +164,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return () => ipcRenderer.removeListener(ICP.BACKGROUND_GENERATED, listener)
     },
     // Current background URL, or null (replay for a freshly mounted page).
-    current: (): Promise<string | null> => ipcRenderer.invoke(ICP.BACKGROUND_CURRENT)
+    current: (): Promise<string | null> => ipcRenderer.invoke(ICP.BACKGROUND_CURRENT),
+    // Re-roll the background (regenerate from its stored prompt).
+    regenerate: (): Promise<void> => ipcRenderer.invoke(ICP.BACKGROUND_REGENERATE)
   },
 
   imageGen: {

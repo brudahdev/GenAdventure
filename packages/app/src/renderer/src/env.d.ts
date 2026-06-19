@@ -77,10 +77,12 @@ declare global {
         onGenerated(callback: (event: AvatarGeneratedEvent) => void): () => void
         onRemoved(callback: (characterId: string) => void): () => void
         list(): Promise<AvatarGeneratedEvent[]>
+        regenerate(characterId: string): Promise<void>
       }
       background: {
         onGenerated(callback: (event: BackgroundGeneratedEvent) => void): () => void
         current(): Promise<string | null>
+        regenerate(): Promise<void>
       }
       imageGen: {
         getSettings(): Promise<ImgGenSettings>

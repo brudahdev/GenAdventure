@@ -2,12 +2,14 @@ import { inject, singleton } from 'tsyringe'
 import type { PromptRequest } from '@gen-adventure/shared'
 import {
   IMAGE_PROVIDER,
+  type GenerateOptions,
   type ImageBytes,
   type ImageProvider
 } from './ImageProvider'
 
 interface QueueEntry {
   request: PromptRequest
+  options?: GenerateOptions
   resolve: (image: ImageBytes) => void
   reject: (err: unknown) => void
 }
@@ -31,9 +33,9 @@ export class ImageGenerationService {
 
   /** Generate one image. Resolves with the final bytes once this request's turn
    *  in the queue completes. */
-  generate(request: PromptRequest): Promise<ImageBytes> {
+  generate(request: PromptRequest, options?: GenerateOptions): Promise<ImageBytes> {
     return new Promise<ImageBytes>((resolve, reject) => {
-      this.queue.push({ request, resolve, reject })
+      this.queue.push({ request, options, resolve, reject })
       void this.drain()
     })
   }
@@ -46,7 +48,11 @@ export class ImageGenerationService {
       while (this.queue.length > 0) {
         const entry = this.queue.shift()!
         try {
-          const image = await this.provider.generate(entry.request, { onPreview: () => {} })
+          const image = await this.provider.generate(
+            entry.request,
+            { onPreview: () => {} },
+            entry.options
+          )
           entry.resolve(image)
         } catch (err) {
           entry.reject(err)
