@@ -6,6 +6,7 @@ import { OverlayService } from '../overlay/OverlayService'
 import { SaveDataService } from '../save/SaveDataService'
 import { ComfyConfigStore } from '../../integration/comfyui/comfyConfig'
 import { ImageGenerationService } from '../imageGeneration/ImageGenerationService'
+import { GenerationActivity } from '../imageGeneration/GenerationActivity'
 import { promptHash } from '../imageGeneration/promptHash'
 import { toImageUrl } from '../imageGeneration/imageProtocol'
 import { applyBlur } from '../imageGeneration/imageBlur'
@@ -42,7 +43,8 @@ export class BackgroundService {
     private readonly imageGen: ImageGenerationService,
     private readonly saveData: SaveDataService,
     private readonly config: ComfyConfigStore,
-    private readonly overlay: OverlayService
+    private readonly overlay: OverlayService,
+    private readonly activity: GenerationActivity
   ) {
     this.sim.onImageRequest((request) => {
       if (request.type === 'background') void this.handle(request)
@@ -65,6 +67,9 @@ export class BackgroundService {
       await delay(BACKGROUND_TRANSITION_FADE_MS) // wait until the screen is black
       const prompt = await sim.getBackgroundPromptForCharacter(PLAYER_CHARACTER_ID)
       await this.handle(prompt)
+      // Hold the black until the activating NPCs' avatars are also ready, so the
+      // reveal never happens while characters are still generating.
+      await this.activity.whenIdle()
     } catch (err) {
       console.error('[background] failed to regenerate background:', err)
     } finally {

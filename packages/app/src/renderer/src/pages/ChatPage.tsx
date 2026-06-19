@@ -38,6 +38,7 @@ import {
   backgroundImage,
   setBackgroundImage
 } from '../stores/image-store'
+import { sceneFading, setSceneFading, setSceneBlack } from '../stores/transition-store'
 
 /** What to render for a message: a static `revealed` prefix plus the currently
  *  voicing `playing` chunk (revealed character-by-character over `duration`).
@@ -162,7 +163,6 @@ export default function ChatPage(): JSX.Element {
   let typedSeq = 0
   const [headerOpen, setHeaderOpen] = createSignal(false)
   const [showImagePanel, setShowImagePanel] = createSignal(false)
-  const [sceneFading, setSceneFading] = createSignal(false)
   const [showSaveModal, setShowSaveModal] = createSignal(false)
   const [showQuitConfirm, setShowQuitConfirm] = createSignal(false)
   const [partialText, setPartialText] = createSignal('')
@@ -265,6 +265,8 @@ export default function ChatPage(): JSX.Element {
   onMount(() => {
     reset() // fresh message list for this chat
     clearAvatars() // fresh avatars for this chat
+    setSceneFading(false) // fresh transition state for this chat
+    setSceneBlack(false)
     const unsubscribe = window.electronAPI.chat.onMessage((message) => {
       upsertFinalText(message)
       if (message.role === 'user') setPartialText('')
@@ -296,12 +298,14 @@ export default function ChatPage(): JSX.Element {
     })
     // Scene-change transition: fade to black while the new background generates.
     const unsubTransitionShow = window.electronAPI.background.onTransitionShow(() => {
+      setSceneBlack(false)
       setSceneFading(true)
     })
     const unsubTransitionHide = window.electronAPI.background.onTransitionHide(() => {
       // Apply buffered avatar changes while still black, then fade out to reveal them.
       for (const op of pendingAvatarOps) op()
       pendingAvatarOps.length = 0
+      setSceneBlack(false)
       setSceneFading(false)
     })
     onCleanup(unsubAvatar)
@@ -377,6 +381,11 @@ export default function ChatPage(): JSX.Element {
         class="chat-transition"
         classList={{ 'is-active': sceneFading() }}
         style={`--bg-transition-ms:${BACKGROUND_TRANSITION_FADE_MS}ms`}
+        onTransitionEnd={(e) => {
+          // The fade-in just reached solid black (ignore the fade-out, where
+          // sceneFading is already false). Unblocks the gated loading spinner.
+          if (e.propertyName === 'opacity' && sceneFading()) setSceneBlack(true)
+        }}
       />
 
 

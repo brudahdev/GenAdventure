@@ -5,6 +5,7 @@ import { AvatarService } from '../avatar/AvatarService'
 import { OverlayService } from '../overlay/OverlayService'
 import { CharacterService } from './CharacterService'
 import { VoxtaClient } from '../../integration/voxta/voxtaClient'
+import { GenerationActivity } from '../imageGeneration/GenerationActivity'
 
 /**
  * Owns runtime NPC activation/deactivation: an NPC is "active" iff co-located
@@ -24,7 +25,8 @@ export class CharacterActivationService {
     private readonly avatarService: AvatarService,
     private readonly overlay: OverlayService,
     private readonly characterService: CharacterService,
-    private readonly voxtaClient: VoxtaClient
+    private readonly voxtaClient: VoxtaClient,
+    private readonly activity: GenerationActivity
   ) {
     this.sim.onNpcActivationChanged((change) => void this.handle(change))
   }
@@ -40,22 +42,29 @@ export class CharacterActivationService {
 
   /** Add the NPC to the chat and generate + show their avatar. */
   private async activate(characterId: string): Promise<void> {
-    await this.voxtaClient.addChatParticipant(characterId)
-
-    const sim = this.sim.getSim()
-    if (!sim) return
-
-    this.sim.pauseTime()
-    const name = this.characterService.getScenarioCharacterById(characterId)?.name
-    this.overlay.show(`Generating avatar for ${name ?? characterId}...`)
+    // Register the pending avatar work synchronously (before any await) so a scene
+    // transition waiting on `whenIdle()` can't fade out before this avatar is done.
+    this.activity.begin()
     try {
-      const prompt = await sim.getAvatarPromptForCharacter(characterId)
-      await this.avatarService.handle(prompt)
-    } catch (err) {
-      console.error('[activation] failed to generate avatar:', err)
+      await this.voxtaClient.addChatParticipant(characterId)
+
+      const sim = this.sim.getSim()
+      if (!sim) return
+
+      this.sim.pauseTime()
+      const name = this.characterService.getScenarioCharacterById(characterId)?.name
+      this.overlay.show(`Generating avatar for ${name ?? characterId}...`)
+      try {
+        const prompt = await sim.getAvatarPromptForCharacter(characterId)
+        await this.avatarService.handle(prompt)
+      } catch (err) {
+        console.error('[activation] failed to generate avatar:', err)
+      } finally {
+        this.overlay.hide()
+        this.sim.resumeTime()
+      }
     } finally {
-      this.overlay.hide()
-      this.sim.resumeTime()
+      this.activity.end()
     }
   }
 
