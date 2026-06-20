@@ -1,6 +1,8 @@
+import { container } from "tsyringe"
 import { ActionContent, arg, CharacterInferenceAction, InferredArgs, optional } from "../../../core/action-inference/CharacterInferenceAction"
 import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager"
 import { Entity } from "../../../core/ec/Entity"
+import { CharacterSpawner } from "../../entity/CharacterSpawner"
 import { EventSystem } from "../../EventSystem"
 import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentityKey } from "../identity/CharacterIdentity"
@@ -21,9 +23,10 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
     readonly args = clothingInferenceArgs
     private readonly characterName: string;
 
+    private characterSpawner?: CharacterSpawner;
 
     constructor(
-        private entity: Entity, 
+        private entity: Entity,
         private eventSystem: EventSystem,
         manager: InferenceActionManager
     ) {
@@ -52,8 +55,15 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
 
     handle(args: InferredArgs<ClothingInferenceArgs>): void {
         console.log("ACTION CALLED: " + JSON.stringify(args))
-        // todo subjectName
-        const targetEntity = this.entity
+        if (!this.characterSpawner) {
+            this.characterSpawner = container.resolve(CharacterSpawner)
+        }
+        const targetData = this.characterSpawner.getTargetCharacter(args.subjectName, this.entity)
+        if (!targetData) {
+            console.log("unable to find target character with name " + args.subjectName)
+            return;
+        }
+        const targetEntity = targetData.target
 
 
         const clothingItem = targetEntity.require(ClothingManagerKey).getClothingItemByTag(args.clothingName)
@@ -70,6 +80,6 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
 
         clothingItem.setStateById(state.id)
 
-        this.eventSystem.emit("image.request",buildAvatarPrompt(targetEntity) )
+        this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))
     }
 }

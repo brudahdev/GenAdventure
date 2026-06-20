@@ -8,7 +8,7 @@ import { EntityRegistry } from "./EntityRegistry";
 import { INIT_CHARACTERS } from "./initCharacters";
 import { RUN_CONTAINER } from "../../core/provision/runContainer";
 import { NpcActivityKey, npcActivityFactory } from "../character/npc/NpcActivity";
-import { playerIdentityFactory, npcIdentityFactory } from "../character/identity/CharacterIdentity";
+import { playerIdentityFactory, npcIdentityFactory, CharacterIdentityKey } from "../character/identity/CharacterIdentity";
 import { playerMarkerFactory } from "../character/player/PlayerControlled";
 import { characterLocationFactory } from "../character/location/CharacterLocation";
 import { characterPoseFactory } from "../character/pose/CharacterPose";
@@ -47,7 +47,9 @@ const NPC_BLUEPRINT: ComponentFactory[] = [
 @scoped(Lifecycle.ContainerScoped)
 export class CharacterSpawner implements GameSystem {
     // Insertion order matters: the player first, then NPCs in init order.
-    private readonly characters: Entity[] = [];
+    // private readonly characters: Entity[] = [];
+    private readonly characterMap = new Map<string, Entity>();
+    private readonly characterNameMap = new Map<string, Entity>();
 
     constructor(
         @inject(INIT_CHARACTERS) initCharacters: SimStartCharacterData[],
@@ -66,14 +68,14 @@ export class CharacterSpawner implements GameSystem {
     /** Emits every character's initial state events (in insertion order, player
      *  first), once the whole run graph is constructed. */
     init(): void {
-        for (const character of this.characters) {
+        for (const character of this.characterMap.values()) {
             character.init()
             this.eventSystem.emit("character.initialized", { characterId: character.id })
         }
     }
 
     dispose(): void {
-        for (const character of this.characters) {
+        for (const character of this.characterMap.values()) {
             character.dispose()
         }
     }
@@ -82,12 +84,38 @@ export class CharacterSpawner implements GameSystem {
         return this.registry.with(NpcActivityKey).filter(entity => entity.require(NpcActivityKey).isActive)
     }
 
+    getCharacterByName(name: string) {
+        return this.characterNameMap.get(name)
+    }
+
+    ///used to fetch a character by name provided by llm
+    getTargetCharacter(targetCharacterName: string, calledBy: Entity): { target: Entity, isActingOnSelf: boolean } | undefined {
+        const isActingOnSelf = targetCharacterName === calledBy.require(CharacterIdentityKey).name || targetCharacterName == 'self';
+        if (isActingOnSelf) {
+            return {
+                target: calledBy,
+                isActingOnSelf: true
+            }
+        }
+        const target = this.getCharacterByName(targetCharacterName)
+        if (!target) {
+            return undefined
+        }
+
+        return {
+            target: target,
+            isActingOnSelf: false
+        }
+    }
+
     private spawn(characterId: string, blueprint: ComponentFactory[]): void {
         const entity = new Entity(characterId)
         for (const factory of blueprint) {
             factory.attach(entity, this.container)
         }
         this.registry.register(entity)
-        this.characters.push(entity)
+
+        this.characterMap.set(entity.id, entity)
+        this.characterNameMap.set(entity.require(CharacterIdentityKey).name, entity)
     }
 }
