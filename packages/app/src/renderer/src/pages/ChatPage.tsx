@@ -135,24 +135,6 @@ function buildTouchMenu(characterId: string, options: TouchOptions): ContextMenu
   }))
 }
 
-//scrolls down on messages
-let messagesEl!: HTMLDivElement
-createEffect(() => {
-  messages.map((m) => [
-    m.revealed,
-    m.playing,
-    m.finalText,
-    m.settled
-  ])
-
-  queueMicrotask(() => {
-    messagesEl.scrollTo({
-      top: messagesEl.scrollHeight,
-      behavior: 'smooth'
-    })
-  })
-})
-
 /**
  * The live chat screen. Subscribes to assembled messages from Voxta (character
  * replies and recognized-speech user turns) via ChatService over IPC, stacks them
@@ -171,6 +153,11 @@ export default function ChatPage(): JSX.Element {
   const [showSaveModal, setShowSaveModal] = createSignal(false)
   const [showQuitConfirm, setShowQuitConfirm] = createSignal(false)
   const [partialText, setPartialText] = createSignal('')
+  // Scrollable message column + the avatars row (whose dynamic height pins the
+  // column's bottom edge); both refs are wired to their divs below.
+  let messagesEl!: HTMLDivElement
+  let avatarsRowEl!: HTMLDivElement
+  let chatPageEl!: HTMLDivElement
   const [menu, setMenu] = createSignal<{
     x: number
     y: number
@@ -182,6 +169,16 @@ export default function ChatPage(): JSX.Element {
 
   createEffect(() => {
     if (!headerOpen()) setShowImagePanel(false)
+  })
+
+  // Auto-scroll the message column to the newest message. Touch each message's
+  // reactive fields so the effect re-runs as text streams in / settles; defer the
+  // scroll a microtask so the DOM has grown before we measure scrollHeight.
+  createEffect(() => {
+    messages.map((m) => [m.revealed, m.playing, m.finalText, m.settled])
+    queueMicrotask(() => {
+      messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' })
+    })
   })
 
   // NPC avatar right-click: action menu at the cursor, cascading down/right.
@@ -307,6 +304,17 @@ export default function ChatPage(): JSX.Element {
   onMount(() => {
     reset() // fresh message list for this chat
     clearAvatars() // fresh avatars for this chat
+
+    // The avatars row sizes to its tallest image, so its top edge floats. Track
+    // its height and expose it as --avatars-height on the page root; the CSS pins
+    // .chat-messages' bottom to the avatars' top via that var. Border-box height
+    // ignores the speaking-emphasis scale transform, so it doesn't jitter.
+    const avatarsResize = new ResizeObserver((entries) => {
+      const h = entries[0]?.borderBoxSize?.[0]?.blockSize ?? avatarsRowEl.offsetHeight
+      chatPageEl.style.setProperty('--avatars-height', `${h}px`)
+    })
+    avatarsResize.observe(avatarsRowEl)
+    onCleanup(() => avatarsResize.disconnect())
     setSceneFading(false) // fresh transition state for this chat
     setSceneBlack(false)
     const unsubscribe = window.electronAPI.chat.onMessage((message) => {
@@ -399,7 +407,7 @@ export default function ChatPage(): JSX.Element {
   }
 
   return (
-    <div class="chat-page">
+    <div class="chat-page" ref={chatPageEl}>
       <Show when={backgroundImage()}>
         {(src) => <img class="chat-background" src={src()} alt="" />}
       </Show>
@@ -471,7 +479,7 @@ export default function ChatPage(): JSX.Element {
       </Show>
 
 
-      <div class="avatars">
+      <div class="avatars" ref={avatarsRowEl}>
         <For each={avatars}>
           {(avatar) => {
             onCleanup(() => avatarEls.delete(avatar.characterId))

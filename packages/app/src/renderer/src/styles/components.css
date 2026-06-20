@@ -545,22 +545,25 @@
 .chat-messages {
   position: absolute;
   top: 0;
-  bottom: 50px;
+  /* Pin the column's bottom to the top edge of the avatars row: avatars sit
+     --chat-footer-height above the viewport bottom and are --avatars-height tall
+     (measured at runtime by a ResizeObserver on .avatars). Falls back to the
+     footer offset when no avatars are present. */
+  bottom: calc(var(--chat-footer-height) + var(--avatars-height, 0px));
   left: 50%;
   transform: translateX(-50%);
   width: 50%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  /* Short lists sit just above the avatars (newest at the bottom, pairs with
+     auto-scroll-to-bottom). */
+  justify-content: flex-end;
   /* This full-height center column overlays the avatars (z 0). Let clicks in its
      empty space fall through so right-clicking an avatar reaches it; the bubbles
      below re-enable pointer-events for selection / wheel-scroll over text. */
   pointer-events: none;
-  /* justify-content: flex-end; */
   gap: 10px;
-  /* padding: 72px 0 16px; */
-
-
 }
 
 .chat-messages::-webkit-scrollbar {
