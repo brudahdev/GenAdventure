@@ -20,7 +20,7 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
 
     readonly args = clothingInferenceArgs
     private readonly characterName: string;
-    private readonly myClothingManager: ClothingManager;
+
 
     constructor(
         private entity: Entity, 
@@ -35,7 +35,6 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
         }, manager)
         this.characterName = characterName;
         this.init();
-        this.myClothingManager = entity.require(ClothingManagerKey)
     }
 
     protected computeContent(): ActionContent<ClothingInferenceArgs> {
@@ -53,24 +52,24 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
 
     handle(args: InferredArgs<ClothingInferenceArgs>): void {
         console.log("ACTION CALLED: " + JSON.stringify(args))
-        // //todo subjectName
-        // const targetEntity = this.entity
+        // todo subjectName
+        const targetEntity = this.entity
 
 
-        // const clothingItem = this.myClothingManager.getClothingItemByTag(args.clothingName)
-        // if (!clothingItem) {
-        //     console.log("unable to find clothing item with tag " + args.clothingName)
-        //     return;
-        // }
+        const clothingItem = targetEntity.require(ClothingManagerKey).getClothingItemByTag(args.clothingName)
+        if (!clothingItem) {
+            console.log("unable to find clothing item with tag " + args.clothingName)
+            return;
+        }
 
-        // const state = clothingItem.getStateByTag(args.clothingState)
-        // if (!state) {
-        //     console.log(`unable to find clothing item state with tag ${args.clothingState} on ${clothingItem.id}`)
-        //     return;
-        // }
+        const state = clothingItem.getStateByTag(args.clothingState)
+        if (!state) {
+            console.log(`unable to find clothing item state with tag ${args.clothingState} on ${clothingItem.id}`)
+            return;
+        }
 
-        // clothingItem.setStateById(state.id)
+        clothingItem.setStateById(state.id)
 
-        // this.eventSystem.emit("image.request",buildAvatarPrompt(targetEntity) )
+        this.eventSystem.emit("image.request",buildAvatarPrompt(targetEntity) )
     }
 }
