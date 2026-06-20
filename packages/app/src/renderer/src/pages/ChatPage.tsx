@@ -18,7 +18,8 @@ import ImageConfigForm from '../components/ImageConfigForm'
 import ChatAvatar, {
   AVATAR_FADE_MS,
   AVATAR_RELAYOUT_MS,
-  AVATAR_RELAYOUT_EASING
+  AVATAR_RELAYOUT_EASING,
+  AVATAR_SPEAKING_SIZE_PERCENT
 } from '../components/ChatAvatar'
 import GameClock from '../components/GameClock'
 import SaveSlotModal from '../components/SaveSlotModal'
@@ -308,10 +309,13 @@ export default function ChatPage(): JSX.Element {
     // The avatars row sizes to its tallest image, so its top edge floats. Track
     // its height and expose it as --avatars-height on the page root; the CSS pins
     // .chat-messages' bottom to the avatars' top via that var. Border-box height
-    // ignores the speaking-emphasis scale transform, so it doesn't jitter.
+    // ignores the speaking-emphasis scale transform, so it doesn't jitter — but
+    // the active speaker scales to AVATAR_SPEAKING_SIZE_PERCENT (bottom-anchored,
+    // grows upward), so reserve the grown height up front to clear it when talking.
     const avatarsResize = new ResizeObserver((entries) => {
       const h = entries[0]?.borderBoxSize?.[0]?.blockSize ?? avatarsRowEl.offsetHeight
-      chatPageEl.style.setProperty('--avatars-height', `${h}px`)
+      const reserved = h * (AVATAR_SPEAKING_SIZE_PERCENT / 100)
+      chatPageEl.style.setProperty('--avatars-height', `${reserved}px`)
     })
     avatarsResize.observe(avatarsRowEl)
     onCleanup(() => avatarsResize.disconnect())
