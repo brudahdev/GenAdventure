@@ -378,6 +378,32 @@ export interface VoxtaServerReplyEnd {
   senderId: string
 }
 
+
+
+// {
+//   $type: "action",
+//   contextKey: "Neena_alter_clothing_state",
+//   layer: "act",
+//   value: "Neena_alter_clothing_state",
+//   role: "Assistant",
+//   senderId: "cee5bcf2-b919-ab1c-a9f7-7e080e3d05da",
+//   scenarioRole: "role2",
+//   arguments: [
+//     {
+//       name: "subjectName",
+//       value: "Neena",
+//     },
+//     {
+//       name: "clothingName",
+//       value: "blouse",
+//     },
+//     {
+//       name: "clothingState",
+//       value: "unbuttoned",
+//     },
+//   ],
+//   sessionId: "2b335dc6-b100-9774-b769-f70d76889d4c",
+// }
 export interface VoxtaServerAction {
   $type: 'action'
   sessionId: string

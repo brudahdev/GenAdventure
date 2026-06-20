@@ -1,4 +1,4 @@
-import { OutfitSlotConfig, type ClothingStateChangeOptionsSummary } from "@gen-adventure/shared";
+import { OutfitSlotConfig, PLAYER_CHARACTER_ID, type ClothingStateChangeOptionsSummary } from "@gen-adventure/shared";
 import type { Component } from "../../../core/ec/Component";
 import type { Entity } from "../../../core/ec/Entity";
 import type { Saveable } from "../../../core/save/Saveable";
@@ -15,6 +15,8 @@ import { CharacterIdentity, CharacterIdentityKey } from "../identity/CharacterId
 import { LocationContextItem } from "../../location/LocationContextItem";
 import { LocationContextItemFactory } from "../../location/LocationContextItemFactory";
 import { CharacterLocationKey } from "../location/CharacterLocation";
+import { ClothingInferenceAction } from "./ClothingInferenceAction";
+import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager";
 
 
 export const ClothingManagerKey = defineKey<ClothingManager>("character.clothing")
@@ -25,12 +27,27 @@ interface ClothingItemSave { id: string; stateId: string }
 /** {@link ClothingManager}'s save blob and the shape its default closure builds. */
 interface ClothingSave { items: ClothingItemSave[] }
 
+
+export const clothingFactory = defineFactory(ClothingManagerKey, (entity, c) =>
+    new ClothingManager(
+        entity,
+        c.resolve(EventSystem),
+        c.resolve<RestoreSource>(RESTORE_SOURCE),
+        c.resolve<StartingClothingAdapter>(STARTING_CLOTHING_ADAPTER),
+        c.resolve<ClothingItemConfigAdapter>(CLOTHING_ITEM_CONFIG_ADAPTER),
+        c.resolve<OutfitConfigAdapter>(OUTFIT_CONFIG_ADAPTER),
+        c.resolve(LocationContextItemFactory),
+        c.resolve(InferenceActionManager)
+    ))
+
+
 export class ClothingManager implements Component, Saveable<ClothingSave> {
     private slotMap = new Map<string, ClothingItem[]>();
     private clothingItems: ClothingItem[] = [];
 
 
     private contextItem: LocationContextItem;
+    private inferenceAction?: ClothingInferenceAction;
 
     constructor(
         private readonly entity: Entity,
@@ -40,6 +57,7 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {
         clothingItemConfig: ClothingItemConfigAdapter,
         private readonly outfitConfig: OutfitConfigAdapter,
         contextItemFactory: LocationContextItemFactory,
+        inferenceManager: InferenceActionManager,
     ) {
         // Saved per-item id+state on resume; outfit ids in their default 'on'
         // state on a fresh start.
@@ -68,6 +86,10 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {
         );
 
         this.updateContext()
+
+        if (entity.id != PLAYER_CHARACTER_ID) {
+            this.inferenceAction = new ClothingInferenceAction(this.entity, inferenceManager);
+        }
     }
 
     /** Emits each item's initial `clothing.state.changed`. */
@@ -197,15 +219,3 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {
         rootItems.forEach(rootItem => rootItem.updateOcclusions(false, false));
     }
 }
-
-export const clothingFactory = defineFactory(ClothingManagerKey, (entity, c) =>
-    new ClothingManager(
-        entity,
-        c.resolve(EventSystem),
-        c.resolve<RestoreSource>(RESTORE_SOURCE),
-        c.resolve<StartingClothingAdapter>(STARTING_CLOTHING_ADAPTER),
-        c.resolve<ClothingItemConfigAdapter>(CLOTHING_ITEM_CONFIG_ADAPTER),
-        c.resolve<OutfitConfigAdapter>(OUTFIT_CONFIG_ADAPTER),
-        c.resolve(LocationContextItemFactory),
-    ))
-

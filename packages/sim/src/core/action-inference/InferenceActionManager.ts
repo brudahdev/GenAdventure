@@ -72,5 +72,5 @@ export class InferenceActionManager {
 }
 
 function getInvocationValue(action: CharacterInferenceAction) {
-    return `action:${action.getName()}`
+    return `${action.getName()}`
 }
