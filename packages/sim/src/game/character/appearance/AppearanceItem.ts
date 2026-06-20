@@ -27,6 +27,14 @@ export class AppearanceItem {
         return this.config.ctx_txt
     }
 
+    get include_in_ctx(){
+        return this.config.include_in_ctx
+    }
+
+    get ingnore_clothing_covering(){
+        return this.config.ingnore_clothing_covering
+    }
+
     getIsCoveredByPose() {
         return this.isCoveredByPose;
     }

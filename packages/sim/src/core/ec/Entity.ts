@@ -44,6 +44,12 @@ export class Entity {
         }
     }
 
+    lateinit(): void {
+        for (const component of this.components.values()) {
+            (component as Component).lateInit?.()
+        }
+    }
+
     /** Collects a snapshot of every component that implements the `Saveable`
      *  capability, keyed by its `ComponentKey.id`. Pure-config components
      *  contribute nothing and are recomputed from config on the next load. */

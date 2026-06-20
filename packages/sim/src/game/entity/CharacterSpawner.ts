@@ -68,6 +68,10 @@ export class CharacterSpawner implements GameSystem {
     init(): void {
         for (const character of this.characters) {
             character.init()
+            // this.eventSystem.emit("character.initialized", { characterId: character.id })
+        }
+        for (const character of this.characters) {
+            character.lateinit()
             this.eventSystem.emit("character.initialized", { characterId: character.id })
         }
     }

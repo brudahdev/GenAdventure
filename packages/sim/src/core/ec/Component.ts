@@ -6,5 +6,6 @@
  *  the run graph exists, `dispose()` tears down in reverse. */
 export interface Component {
     init?(): void
+    lateInit?(): void
     dispose?(): void
 }

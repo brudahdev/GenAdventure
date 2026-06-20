@@ -58,6 +58,10 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
         //     console.log("unable to find target character with name " + args.subjectName)
         //     return;
         // }
+
+        ///<invoke>Neena_change_Locomotion("<user name>")
+
+
         const targetEntity = this.entity
 
         const targetLocomotionManager = targetEntity.require(CharacterLocomotionKey)

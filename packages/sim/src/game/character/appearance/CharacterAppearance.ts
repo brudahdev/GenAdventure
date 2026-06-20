@@ -9,23 +9,54 @@ import { AppearanceClassManager } from "./AppearanceClassManager";
 import { ClothingItem } from "../../item/clothing/ClothingItem";
 import { defineKey } from "../../../core/ec/ComponentKey";
 import { defineFactory } from "../../../core/ec/ComponentFactory";
-import { CharacterIdentityKey } from "../identity/CharacterIdentity";
+import { CharacterIdentity, CharacterIdentityKey } from "../identity/CharacterIdentity";
+import { LocationContextItem } from "../../location/LocationContextItem";
+import { LocationContextItemFactory } from "../../location/LocationContextItemFactory";
+import { CharacterLocationKey } from "../location/CharacterLocation";
+import { Component } from "../../../core/ec/Component";
 
 export const AppearanceKey = defineKey<CharacterAppearance>("character.appearance")
+export const appearanceFactory = defineFactory(AppearanceKey, (entity, c) =>
+    new CharacterAppearance(
+        entity,
+        c.resolve<AppearanceConfigAdapter>(APPEARANCE_CONFIG_ADAPTER),
+        c.resolve(EventSystem),
+        c.resolve(LocationContextItemFactory),
+    ))
+export class CharacterAppearance implements Component {
+    private charId: CharacterIdentity;
+    private contextItem: LocationContextItem;
 
-export class CharacterAppearance {
 
     private readonly appearanceItems: AppearanceItem[];
-
     public readonly classManager: AppearanceClassManager;
     private noun: string;
 
-    constructor(entity: Entity, appearanceConfig: AppearanceConfigAdapter, eventSystem: EventSystem) {
-        const entryIds = entity.require(CharacterIdentityKey).config.appearanceEntryIds;//todo get this from adapter
+    constructor(
+        entity: Entity,
+        appearanceConfig: AppearanceConfigAdapter,
+        eventSystem: EventSystem,
+        contextItemFactory: LocationContextItemFactory,
+    ) {
+        this.charId = entity.require(CharacterIdentityKey)
+        const entryIds = this.charId.config.appearanceEntryIds;//todo get this from adapter
 
         this.appearanceItems = parseItemsByEntryIds(entryIds, appearanceConfig)
         this.classManager = new AppearanceClassManager(entity, appearanceConfig, eventSystem)
         this.noun = this.appearanceItems.find(item => item.id == 'noun')?.ctx_txt ?? '';
+
+        this.contextItem = contextItemFactory.create(
+            {
+                key: "appearance_" + entity.require(CharacterIdentityKey).name,
+                value: '',
+                characterIds: []
+            },
+            entity.require(CharacterLocationKey).getCharacterLocationObserver()
+        );
+    }
+
+    lateInit() {
+        this.updateContext()
     }
 
     getNoun() {
@@ -108,6 +139,24 @@ export class CharacterAppearance {
                 // NotificationService.addTryPush(notificationTxt);
             }
         }
+        this.updateContext();
+    }
+
+    public updateContext() {//todo private context
+        const prompt = new PromptBuilder(',');
+
+        for (const item of this.appearanceItems) {
+            if (item.getIsCoveredByClothing() && item.ingnore_clothing_covering != true) {
+                continue
+            }
+            if (item.include_in_ctx && !item.ctx_txt) {
+                prompt.addToPos(item.img_txt)
+            } else if (item.ctx_txt) {
+                prompt.addToPos(item.ctx_txt)
+            }
+        }
+
+        this.contextItem.setValue(`${this.charId.name}'s appearance:[${prompt.getPositive()}]`)
     }
 }
 
@@ -168,10 +217,5 @@ export function parseItemsByConfig(groupConfigs: AppearanceItemConfig[]): Appear
     return appearanceItems;
 }
 
-export const appearanceFactory = defineFactory(AppearanceKey, (entity, c) =>
-    new CharacterAppearance(
-        entity,
-        c.resolve<AppearanceConfigAdapter>(APPEARANCE_CONFIG_ADAPTER),
-        c.resolve(EventSystem),
-    ))
+
 
