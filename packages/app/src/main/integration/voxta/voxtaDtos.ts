@@ -128,43 +128,42 @@ export type VoxtaPromptCategoryDto =
 
 export type VoxtaPromptPositionDto = 'Context' | 'System';
 
-
+//client => server
 export interface VoxtaScenarioActionDto {
-    name: string;
-    description: string;
-    disabled: boolean;
-    layer: string;
-    arguments: VoxtaFunctionArgumentDefinitionDto[];
-    timing?: VoxtaFunctionTimingDto;
-    effect: VoxtaActionEffectDto;
-    shortDescription?: string;
-    cancelReply?: boolean;
-    finalLayer?: boolean;
-    once?: boolean;
-    flagsFilter?: string;
+  name: string;
+  description: string;
+  disabled: boolean;
+  layer: string;
+  arguments: VoxtaFunctionArgumentDefinitionDto[];
+  timing?: VoxtaFunctionTimingDto;
+  effect: VoxtaActionEffectDto;
+  shortDescription?: string;
+  cancelReply?: boolean;
+  finalLayer?: boolean;
+  once?: boolean;
+  flagsFilter?: string;
+  roleFilter?: string;
 }
 
 export interface VoxtaActionEffectDto {
-    setFlags?: string[];
-    clearFlags?: string[];
+  setFlags?: string[];
+  clearFlags?: string[];
 }
-
 
 export interface VoxtaFunctionArgumentDefinitionDto {
-    name: string;
-    type: VoxtaFunctionArgumentTypeDto;
-    description?: string;
-    required?: boolean;
+  name: string;
+  type: VoxtaFunctionArgumentTypeDto;
+  description?: string;
+  required?: boolean;
 }
-
 
 export type VoxtaFunctionArgumentTypeDto = 'Undefined' | 'String' | 'Integer' | 'Double' | 'Boolean';
 
-
 export type VoxtaFunctionTimingDto =
-    | 'AfterUserMessage'
-    | 'BeforeAssistantMessage'
-    | 'AfterAssistantMessage'
-    | 'Manual'
-    | 'Button'
-    | 'AfterAnyMessage';
+| 'AfterUserMessage'
+| 'BeforeAssistantMessage'
+| 'AfterAssistantMessage'
+| 'Manual'
+| 'Button'
+| 'AfterAnyMessage';
+

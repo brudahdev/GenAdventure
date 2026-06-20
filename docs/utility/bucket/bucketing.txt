@@ -1,0 +1,8 @@
+Once the bucketing is complete, the Sim
+will score the individual actions on each object, but only the ones that solve for those
+bucketed motives. Thus, a starving Sim will never even consider watching TV unless they
+fail to find anything that can solve their hunger. This concept is illustrated in Figure 9.7.
+In Figure 9.7, you can see that there are two buckets, one for Hunger and one for Fun.
+Hunger has scored 0.8 while Fun has scored 0.4. The Sim will walk through all possible
+actions in the Hunger bucket and, assuming any of those actions are valid, will choose one.
+The Sim will not consider anything in the Fun bucket, even though some of those actions

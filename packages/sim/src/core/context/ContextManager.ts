@@ -43,7 +43,7 @@ export class ContextManager {
     }
 
 
-    private toContextItem(item: SimContextItem) {
+    private toContextItem(item: SimContextItem): SimContextItem {
         return {
             key: item.key,
             value: item.value,

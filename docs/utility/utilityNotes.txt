@@ -1,0 +1,195 @@
+Yes, in the context of that book, those would be called factors.
+
+More academically, they would usually be called attributes, criteria, or features depending on the field.
+
+For example, an attack decision might look like this:
+
+Action candidates:
+
+Attack with sword
+Attack with bow
+Use spell
+
+Decision factors (attributes/criteria):
+
+Damage dealt
+Chance to hit
+Distance from target
+Resource cost
+
+Each factor describes some aspect of an action.
+
+The AI evaluates each action by looking at its factors:
+
+Action	Damage	Accuracy	Distance	Cost
+Sword	0.8	0.9	0.3	0.1
+Bow	0.6	0.7	1.0	0.4
+Spell	1.0	0.8	0.8	0.9
+
+Then it combines those factor values:
+
+U(sword)=w
+d
+	​
+
+(0.8)+w
+a
+	​
+
+(0.9)+w
+r
+	​
+
+(0.3)+w
+c
+	​
+
+(0.1)
+
+to produce the overall utility of the action.
+
+A subtle distinction:
+
+Damage dealt (raw game value) is an attribute.
+"How desirable is this amount of damage?" is a utility function applied to that attribute.
+The final score for the attack choice is the overall utility.
+
+So:
+
+Action
+ ├── Attribute: Damage dealt
+ │       └── Utility value: 0.8
+ │
+ ├── Attribute: Chance to hit
+ │       └── Utility value: 0.9
+ │
+ └── Combined
+         └── Action utility: 0.85
+
+The book compresses the middle step and often calls both the factor score and final score "utility," which is convenient for implementation but less precise academically.
+
+okay, now relate that sword example back to the summation you gave me
+
+The summation formula applies at the outcome level, while the sword example with damage/accuracy/range applies at the factor level. They are actually two layers of the same idea.
+
+Let's combine them.
+
+Suppose the AI has an action:
+
+Action: Use Sword
+
+The sword has possible outcomes:
+
+Outcome	Probability	Outcome Utility
+Hit	0.85	0.6
+Miss	0.15	0
+
+Expected utility:
+
+EU(Sword)=
+i
+∑
+	​
+
+P
+i
+	​
+
+D
+i
+	​
+
+
+which becomes:
+
+EU(Sword)=(0.85)(0.6)+(0.15)(0)
+EU(Sword)=0.51
+
+That gives us the utility of the action.
+
+Now imagine that "Hit" is not just a single utility number. Instead, the usefulness of hitting depends on factors:
+
+Factor	Utility
+Damage dealt	0.8
+Chance to hit	0.9
+Distance	0.3
+Resource cost	0.2
+
+You combine these:
+
+U(Hit)=w
+1
+	​
+
+(0.8)+w
+2
+	​
+
+(0.9)+w
+3
+	​
+
+(0.3)+w
+4
+	​
+
+(0.2)
+
+Assume equal weights for simplicity:
+
+U(Hit)=
+4
+0.8+0.9+0.3+0.2
+	​
+
+U(Hit)=0.55
+
+Now that value replaces the earlier "0.6" in the expected utility formula:
+
+EU(Sword)=(0.85)(0.55)+(0.15)(0)
+EU(Sword)=0.4675
+
+So the full hierarchy is:
+
+Action: Use Sword
+│
+├── Outcome: Hit (probability 0.85)
+│      │
+│      ├── Damage factor → utility 0.8
+│      ├── Accuracy factor → utility 0.9
+│      ├── Distance factor → utility 0.3
+│      └── Cost factor → utility 0.2
+│
+│      Combined outcome utility = 0.55
+│
+└── Outcome: Miss (probability 0.15)
+       Utility = 0
+
+Expected Utility:
+(0.85 × 0.55) + (0.15 × 0)
+
+So there are actually two different summations/combining steps:
+
+Combine factors → outcome/action utility
+
+U=∑w
+i
+	​
+
+u
+i
+	​
+
+
+Combine possible outcomes → expected utility
+
+EU=∑P
+i
+	​
+
+U
+i
+	​
+
+
+The book moves between these levels quickly, which is why "utility" appears to mean slightly different things depending on where you are in the calculation.

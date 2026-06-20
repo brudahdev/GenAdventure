@@ -1,0 +1,20 @@
+This can be accomplished by dividing each score with the sum of all scores
+to get the percentage chance that the action will be chosen.
+
+
+
+
+---randomly picking a stupid option:
+
+You can get the best of both worlds by taking a subset of the highest scoring actions and
+choosing one of those with a weighted random. This can either be a tuned value, such as
+choosing from among the top five scoring actions, or it can be percentile based where you
+take the highest score and also consider things that scored within, say, 10% of it.
+This will generally solve the problem at hand, but there could also be times when some
+set of actions are just completely inappropriate. You may not even want to score them.
+For example, say you’re making an FPS and have a guard AI. You might have some set of
+actions for him to consider, like getting some coffee, chatting with his fellow guard, check-
+ing for lint, etc. If the player shoots at him, he shouldn’t even consider any of those actions
+and only try to score actions that involve combat. In a similar example from The Sims, if a
+Sim is starving to death, she shouldn’t bother scoring actions that result in her satisfying
+her Fun motive
