@@ -1,11 +1,11 @@
-import { container } from "tsyringe"
 import { ActionContent, arg, CharacterInferenceAction, InferredArgs, optional } from "../../../core/action-inference/CharacterInferenceAction"
 import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager"
 import { Entity } from "../../../core/ec/Entity"
-import { CharacterSpawner } from "../../entity/CharacterSpawner"
+import { EntityRegistry } from "../../entity/EntityRegistry"
 import { EventSystem } from "../../EventSystem"
 import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentityKey } from "../identity/CharacterIdentity"
+import { resolveTargetCharacter } from "../identity/characterLookup"
 import { ClothingManager, ClothingManagerKey } from "./ClothingManager"
 
 
@@ -23,12 +23,11 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
     readonly args = clothingInferenceArgs
     private readonly characterName: string;
 
-    private characterSpawner?: CharacterSpawner;
-
     constructor(
         private entity: Entity,
         private eventSystem: EventSystem,
-        manager: InferenceActionManager
+        manager: InferenceActionManager,
+        private readonly registry: EntityRegistry,
     ) {
         const characterName = entity.require(CharacterIdentityKey).name
         super({
@@ -55,10 +54,7 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
 
     handle(args: InferredArgs<ClothingInferenceArgs>): void {
         console.log("ACTION CALLED: " + JSON.stringify(args))
-        if (!this.characterSpawner) {
-            this.characterSpawner = container.resolve(CharacterSpawner)
-        }
-        const targetData = this.characterSpawner.getTargetCharacter(args.subjectName, this.entity)
+        const targetData = resolveTargetCharacter(this.registry, args.subjectName, this.entity)
         if (!targetData) {
             console.log("unable to find target character with name " + args.subjectName)
             return;

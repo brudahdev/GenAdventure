@@ -17,6 +17,7 @@ import { LocationContextItemFactory } from "../../location/LocationContextItemFa
 import { CharacterLocationKey } from "../location/CharacterLocation";
 import { ClothingInferenceAction } from "./ClothingInferenceAction";
 import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager";
+import { EntityRegistry } from "../../entity/EntityRegistry";
 import { findFirstWithTag } from "../../../core/TagUtils";
 
 
@@ -38,7 +39,8 @@ export const clothingFactory = defineFactory(ClothingManagerKey, (entity, c) =>
         c.resolve<ClothingItemConfigAdapter>(CLOTHING_ITEM_CONFIG_ADAPTER),
         c.resolve<OutfitConfigAdapter>(OUTFIT_CONFIG_ADAPTER),
         c.resolve(LocationContextItemFactory),
-        c.resolve(InferenceActionManager)
+        c.resolve(InferenceActionManager),
+        c.resolve(EntityRegistry),
     ))
 
 
@@ -59,6 +61,7 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {
         private readonly outfitConfig: OutfitConfigAdapter,
         contextItemFactory: LocationContextItemFactory,
         inferenceManager: InferenceActionManager,
+        registry: EntityRegistry,
     ) {
         // Saved per-item id+state on resume; outfit ids in their default 'on'
         // state on a fresh start.
@@ -89,7 +92,7 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {
         this.updateContext()
 
         if (entity.id != PLAYER_CHARACTER_ID) {
-            this.inferenceAction = new ClothingInferenceAction(this.entity, eventSystem, inferenceManager);
+            this.inferenceAction = new ClothingInferenceAction(this.entity, eventSystem, inferenceManager, registry);
         }
     }
 
