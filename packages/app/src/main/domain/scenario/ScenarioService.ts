@@ -65,7 +65,7 @@ export class ScenarioService {
     }
 
     sim.setChatId(chatId)
-    sim.pushInitaialContext();
+    sim.onChatStarted();
 
     simManager.resumeTime()
     chatService.onChatStarted(chatId)
@@ -136,7 +136,7 @@ export class ScenarioService {
     }
 
     sim.setChatId(chatId)
-    sim.pushInitaialContext();
+    sim.onChatStarted();
 
 
     simManager.resumeTime()

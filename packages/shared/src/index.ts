@@ -111,6 +111,7 @@ export type {
   VoxtaServerMissingResourcesError,
   VoxtaServerVisionCaptureRequest,
   VoxtaServerRecordingRequest,
+  VoxtaServerSpeechRecognitionPartial,
   VoxtaServerSpeechRecognitionEnd,
   VoxtaServerMessage
 } from './voxta'

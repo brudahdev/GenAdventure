@@ -64,8 +64,12 @@ function actionTiming(action: InferenceAction): VoxtaFunctionTimingDto {
 }
 
 /** Outbound: domain inference action → Voxta scenario-action wire DTO. The
- *  argument shape is 1:1, so it passes through unchanged. */
-export function mapInferenceActionToScenarioActionDto(action: InferenceAction): VoxtaScenarioActionDto {
+ *  argument shape is 1:1, so it passes through unchanged. `roleFilter` (the
+ *  acting character's role name) is resolved by the caller. */
+export function mapInferenceActionToScenarioActionDto(
+  action: InferenceAction,
+  roleFilter?: string
+): VoxtaScenarioActionDto {
   return {
     name: action.name,
     description: action.description,
@@ -79,6 +83,7 @@ export function mapInferenceActionToScenarioActionDto(action: InferenceAction): 
     })),
     timing: actionTiming(action),
     effect: {},
-    shortDescription: action.shortDescription
+    shortDescription: action.shortDescription,
+    roleFilter
   }
 }

@@ -35,11 +35,11 @@ export class ContextManager {
     }
 
     pushInitaialContext() {
+        this.pushedInitialContext = true;
         this.contextItems.forEach(item => {
-            this.eventSystem.emit("context", this.toContextItem(item))
+            this.sync(item)
         })
 
-        this.pushedInitialContext = true;
     }
 
 

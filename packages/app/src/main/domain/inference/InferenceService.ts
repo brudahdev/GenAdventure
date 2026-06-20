@@ -7,9 +7,11 @@ import type {
 } from "@gen-adventure/shared";
 import { VoxtaClient } from "../../integration/voxta/voxtaClient";
 import { SimManager } from "../sim/SimManager";
+import { CharacterService } from "../character/CharacterService";
 
 const voxtaClient = container.resolve(VoxtaClient);
 const simManager = container.resolve(SimManager);
+const characterService = container.resolve(CharacterService);
 
 /**
  * Bridges inference actions between the sim and Voxta in both directions:
@@ -31,10 +33,12 @@ export class InferenceService {
         voxtaClient.onMessage((message) => this.handleServerMessage(message))
     }
 
-    /** Track and (re)register an action with Voxta. */
+    /** Track and (re)register an action with Voxta, tagging it with the acting
+     *  character's role name so Voxta scopes it to that role. */
     private register(action: InferenceAction): void {
         this.registered.set(action.name, action)
-        void voxtaClient.syncAction(action)
+        const roleName = characterService.getScenarioCharacterById(action.characterId)?.roleName
+        void voxtaClient.syncAction(action, roleName)
     }
 
     private handleServerMessage(message: VoxtaServerMessage): void {

@@ -190,8 +190,9 @@ class SimService implements SimApi {
     }
     return this.world
   }
-  pushInitaialContext() {
+  onChatStarted() {
     this.world?.contextManager.pushInitaialContext();
+    this.world?.inferenceActionManager.pushInitialActions();
   }
 
   onInvocation(invocation: InferenceInvocation): void {

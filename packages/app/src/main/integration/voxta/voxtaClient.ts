@@ -146,15 +146,16 @@ export class VoxtaClient {
 
   /** Register/update a single inference action with the active chat. The
    *  contextKey is the action name, so re-syncing the same action replaces its
-   *  prior definition rather than accumulating. No-op without a session. */
-  async syncAction(action: InferenceAction): Promise<void> {
+   *  prior definition rather than accumulating. `roleFilter` is the acting
+   *  character's role name, resolved by the caller. No-op without a session. */
+  async syncAction(action: InferenceAction, roleFilter?: string): Promise<void> {
     const sessionId = this.signal.sessionId
     if (!sessionId) return
     await this.signal.send({
       $type: 'updateContext',
       sessionId,
       contextKey: action.name,
-      actions: [mapInferenceActionToScenarioActionDto(action)]
+      actions: [mapInferenceActionToScenarioActionDto(action, roleFilter)]
     })
   }
 

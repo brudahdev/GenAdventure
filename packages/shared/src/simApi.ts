@@ -39,7 +39,7 @@ export interface SimApi {
   poseUiAction(characterId: string, poseId: string): void
   /** UI-requested touch interaction performed by a character. */
   touchUiAction(characterId: string, targetId: string, withId: string, verbId: string): void
-  pushInitaialContext(): void,
+  onChatStarted(): void,
   /** An inference action fired by Voxta, routed to the run's InferenceActionManager. */
   onInvocation(invocation: InferenceInvocation): void,
 }

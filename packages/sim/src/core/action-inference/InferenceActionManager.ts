@@ -5,9 +5,11 @@ import { EventSystem } from "../../game/EventSystem";
 
 @scoped(Lifecycle.ContainerScoped)
 export class InferenceActionManager {
+
     private handlerMap = new Map<string, CharacterInferenceAction>();
     private characterActionMap = new Map<string, CharacterInferenceAction>();
 
+    private pushedInitialActions = false;
     constructor(private readonly eventSystem: EventSystem) {
 
     }
@@ -40,6 +42,9 @@ export class InferenceActionManager {
      *  that MainSync forwards to main, where it is mapped to a Voxta DTO and
      *  registered over the hub. */
     syncAction(action: CharacterInferenceAction) {
+        if (!this.pushedInitialActions) {
+            return;
+        }
         this.eventSystem.emit("inference.action.sync", this.toInferenceAction(action))
     }
 
@@ -55,6 +60,13 @@ export class InferenceActionManager {
             before: action.getBefore(),
             arguments: action.resolveArguments(),
             shortDescription: action.getShortDescription(),
+        }
+    }
+
+    pushInitialActions() {
+        this.pushedInitialActions = true;
+        for (const action of this.handlerMap.values()) {
+            this.syncAction(action)
         }
     }
 }
