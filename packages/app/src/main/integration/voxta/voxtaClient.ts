@@ -4,7 +4,8 @@ import type {
   VoxtaScenarioSummary,
   CharacterDetail,
   VoxtaServerMessage,
-  SimContextItem
+  SimContextItem,
+  InferenceAction
 } from '@gen-adventure/shared'
 
 import type {
@@ -13,7 +14,7 @@ import type {
   ScenariosResponseDto
 } from './voxtaDtos'
 
-import { mapCharacter, mapCharacterDetail, mapScenario } from './voxtaMappers'
+import { mapCharacter, mapCharacterDetail, mapInferenceActionToScenarioActionDto, mapScenario } from './voxtaMappers'
 import { mapServerMessage } from './voxtaSignalMappers'
 import { VoxtaSignal } from './voxtaSignal'
 import { singleton } from 'tsyringe'
@@ -140,6 +141,20 @@ export class VoxtaClient {
       sessionId,
       contextKey: item.key,
       contexts: [{ name: item.key, text: item.value }]
+    })
+  }
+
+  /** Register/update a single inference action with the active chat. The
+   *  contextKey is the action name, so re-syncing the same action replaces its
+   *  prior definition rather than accumulating. No-op without a session. */
+  async syncAction(action: InferenceAction): Promise<void> {
+    const sessionId = this.signal.sessionId
+    if (!sessionId) return
+    await this.signal.send({
+      $type: 'updateContext',
+      sessionId,
+      contextKey: action.name,
+      actions: [mapInferenceActionToScenarioActionDto(action)]
     })
   }
 

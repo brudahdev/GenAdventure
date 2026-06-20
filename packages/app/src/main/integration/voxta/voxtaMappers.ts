@@ -1,14 +1,18 @@
-import type {
-  CharacterDetail,
-  VoxtaCharacterSummary,
-  VoxtaScenarioRole,
-  VoxtaScenarioSummary
+import {
+  PLAYER_CHARACTER_ID,
+  type CharacterDetail,
+  type InferenceAction,
+  type VoxtaCharacterSummary,
+  type VoxtaScenarioRole,
+  type VoxtaScenarioSummary
 } from '@gen-adventure/shared'
 import type {
   CharacterCardDto,
   CharacterDto,
   ScenarioDto,
-  ScenarioRoleDto
+  ScenarioRoleDto,
+  VoxtaScenarioActionDto,
+  VoxtaFunctionTimingDto
 } from './voxtaDtos'
 
 /**
@@ -48,5 +52,33 @@ export function mapScenario(dto: ScenarioDto): VoxtaScenarioSummary {
     name: dto.name,
     description: dto.description ?? '',
     roles: (dto.roles ?? []).map(mapRole)
+  }
+}
+
+/** Outbound: when an inference action fires relative to a message turn.
+ *  The player's actions are inferred after their own message; a character's
+ *  actions fire before or after the assistant message per the action's `before`. */
+function actionTiming(action: InferenceAction): VoxtaFunctionTimingDto {
+  if (action.characterId === PLAYER_CHARACTER_ID) return 'AfterUserMessage'
+  return action.before ? 'BeforeAssistantMessage' : 'AfterAssistantMessage'
+}
+
+/** Outbound: domain inference action → Voxta scenario-action wire DTO. The
+ *  argument shape is 1:1, so it passes through unchanged. */
+export function mapInferenceActionToScenarioActionDto(action: InferenceAction): VoxtaScenarioActionDto {
+  return {
+    name: action.name,
+    description: action.description,
+    disabled: false,
+    layer: action.layer,
+    arguments: (action.arguments ?? []).map((arg) => ({
+      name: arg.name,
+      type: arg.type,
+      description: arg.description,
+      required: arg.required
+    })),
+    timing: actionTiming(action),
+    effect: {},
+    shortDescription: action.shortDescription
   }
 }

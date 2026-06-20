@@ -22,6 +22,7 @@ import { buildAvatarPrompt, buildBackgroundPrompt } from "./character/characterV
 import { EventSystem } from "./EventSystem";
 import { ContextManager } from "../core/context/ContextManager";
 import { LocationManager } from "./location/LocationManager";
+import { InferenceActionManager } from "../core/action-inference/InferenceActionManager";
 
 
 /** The root of a single sim run. Resolving it from a run's child container drives
@@ -51,6 +52,7 @@ export class SimWorld {
         public readonly registry: EntityRegistry,
         public readonly locationManager: LocationManager,
         public readonly contextManager: ContextManager,
+        public readonly inferenceActionManager: InferenceActionManager,
         private readonly characterSpawner: CharacterSpawner,
         scheduler: Scheduler,
     ) {

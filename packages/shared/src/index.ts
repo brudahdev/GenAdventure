@@ -1,4 +1,11 @@
 export type { SimApi, MainApi } from './simApi'
+export type {
+  InferenceAction,
+  InferenceArgument,
+  InferenceArgumentType,
+  InferenceInvocation,
+  InferenceInvocationArgument
+} from './inference'
 export type { ClothingStateChangeOptionsSummary } from './clothing'
 export type { NearbyLocationSummary } from './location'
 export type { TouchOptions } from './touch'

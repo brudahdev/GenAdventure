@@ -65,6 +65,10 @@ export class MainSync implements GameSystem {
             this.remoteMain.syncContext(simContextItem)
         })
 
+        this.eventSystem.on("inference.action.sync", (action) => {
+            void this.remoteMain.syncAction(action)
+        })
+
 
         this.eventSystem.on("npc.activation.changed", (args) => {
             if (!this.initialized.has(args.characterId)) return

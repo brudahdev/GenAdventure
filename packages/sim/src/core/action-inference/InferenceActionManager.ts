@@ -1,12 +1,14 @@
 import { Lifecycle, scoped } from "tsyringe";
+import type { InferenceAction, InferenceInvocation } from "@gen-adventure/shared";
 import { CharacterInferenceAction, decodeArgs } from "./CharacterInferenceAction";
+import { EventSystem } from "../../game/EventSystem";
 
 @scoped(Lifecycle.ContainerScoped)
 export class InferenceActionManager {
     private handlerMap = new Map<string, CharacterInferenceAction>();
     private characterActionMap = new Map<string, CharacterInferenceAction>();
 
-    constructor() {
+    constructor(private readonly eventSystem: EventSystem) {
 
     }
 
@@ -34,8 +36,11 @@ export class InferenceActionManager {
         await handler.handle(args)
     }
 
+    /** Pushes the action's current definition toward Voxta: emits a game event
+     *  that MainSync forwards to main, where it is mapped to a Voxta DTO and
+     *  registered over the hub. */
     syncAction(action: CharacterInferenceAction) {
-        //todo convert to InferenceAction, send in game event, mainSync push to main, main translate into voxta dto and send signal message 
+        this.eventSystem.emit("inference.action.sync", this.toInferenceAction(action))
     }
 
     /** Maps a registered action into its outbound DTO (description, short
@@ -56,44 +61,4 @@ export class InferenceActionManager {
 
 function getInvocationValue(action: CharacterInferenceAction) {
     return `action:${action.getName()}`
-}
-
-
-//todo move all these types to shared 
-
-export interface InferenceAction {
-    characterId: string;
-    name: string;
-    description: string;
-    layer: string;
-    before: boolean;
-    arguments?: InferenceArgument[];
-    shortDescription?: string;
-}
-
-
-
-
-export interface InferenceArgument {
-    name: string;
-    type: InferenceArgumentType;
-    description?: string;
-    required?: boolean;
-}
-
-
-export type InferenceArgumentType = 'Undefined' | 'String' | 'Integer' | 'Double' | 'Boolean';
-
-
-
-
-
-export interface InferenceInvocation {
-    value: string
-    arguments?: InferenceInvocationArgument[]
-}
-
-export interface InferenceInvocationArgument {
-    name: string
-    value: string
 }

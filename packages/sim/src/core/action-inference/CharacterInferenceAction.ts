@@ -1,9 +1,9 @@
-import {
+import type {
     InferenceArgument,
     InferenceArgumentType,
-    InferenceActionManager,
     InferenceInvocationArgument,
-} from "./InferenceActionManager";
+} from "@gen-adventure/shared";
+import { InferenceActionManager } from "./InferenceActionManager";
 
 
 export type InferenceActionLayer = "act" | "emotion";

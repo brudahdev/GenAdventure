@@ -4,6 +4,7 @@ import type { ClothingStateChangeOptionsSummary } from './clothing'
 import type { NearbyLocationSummary } from './location'
 import type { TouchOptions } from './touch'
 import type { NpcActivationChange } from './npc'
+import type { InferenceAction, InferenceInvocation } from './inference'
 
 // The worker and main process talk over Comlink as if calling each other's
 // methods. Each side `expose()`s its own implementation and `wrap()`s a typed
@@ -39,6 +40,8 @@ export interface SimApi {
   /** UI-requested touch interaction performed by a character. */
   touchUiAction(characterId: string, targetId: string, withId: string, verbId: string): void
   pushInitaialContext(): void,
+  /** An inference action fired by Voxta, routed to the run's InferenceActionManager. */
+  onInvocation(invocation: InferenceInvocation): void,
 }
 
 /** The main process's surface, called from the sim worker. */
@@ -63,4 +66,8 @@ export interface MainApi {
   backgroundChanged(): void,
 
   syncContext(context: SimContextItem): void,
+
+  /** Push an inference action's current definition up so main can register it
+   *  with Voxta. */
+  syncAction(action: InferenceAction): void,
 }

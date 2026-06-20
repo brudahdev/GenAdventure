@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as Comlink from 'comlink'
 import type { Remote } from 'comlink'
 import type {
-  MainApi, PromptRequest, SimApi, SimResumeData, SimStartData, SimStartResult
+  MainApi, PromptRequest, SimApi, SimResumeData, SimStartData, SimStartResult, InferenceInvocation
 } from '@gen-adventure/shared'
 import { nodeEndpoint, PLAYER_CHARACTER_ID } from '@gen-adventure/shared'
 import { container, type DependencyContainer } from 'tsyringe'
@@ -192,6 +192,10 @@ class SimService implements SimApi {
   }
   pushInitaialContext() {
     this.world?.contextManager.pushInitaialContext();
+  }
+
+  onInvocation(invocation: InferenceInvocation): void {
+    void this.getWorld().inferenceActionManager.onInvocation(invocation)
   }
 }
 

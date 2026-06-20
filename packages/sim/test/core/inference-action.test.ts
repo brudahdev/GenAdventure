@@ -9,6 +9,13 @@ import {
   type InferredArgs,
 } from '../../src/core/action-inference/CharacterInferenceAction'
 import { InferenceActionManager } from '../../src/core/action-inference/InferenceActionManager'
+import { EventSystem } from '../../src/game/EventSystem'
+
+/** Builds a manager wired to a real (listener-less) event bus, so the
+ *  call-through `syncAction` path can emit without throwing. */
+function newManager(): InferenceActionManager {
+  return new InferenceActionManager(new EventSystem())
+}
 
 // A concrete schema reused across the suite: one required string, one optional
 // integer. `typeof` recovers the shape so the subtype needn't restate it.
@@ -121,7 +128,7 @@ describe('CharacterInferenceAction', () => {
   let syncSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
-    manager = new InferenceActionManager()
+    manager = newManager()
     syncSpy = vi.spyOn(manager, 'syncAction')
   })
 
@@ -174,7 +181,7 @@ describe('InferenceActionManager', () => {
   let action: FollowAction
 
   beforeEach(() => {
-    manager = new InferenceActionManager()
+    manager = newManager()
     vi.spyOn(manager, 'syncAction').mockImplementation(() => {})
     action = new FollowAction(manager)
     action.init()

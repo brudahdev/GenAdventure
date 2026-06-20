@@ -1,4 +1,4 @@
-import { SimContextItem, NpcActivationChange } from "@gen-adventure/shared"
+import { SimContextItem, NpcActivationChange, InferenceAction } from "@gen-adventure/shared"
 
 export interface GameEvents {
     "time.tick": {
@@ -35,4 +35,6 @@ export interface GameEvents {
     "npc.activation.changed": NpcActivationChange,
 
     "context": SimContextItem,
+
+    "inference.action.sync": InferenceAction,
 }

@@ -17,6 +17,7 @@ import { ClothingIpcHandlers } from './domain/clothing/ClothingIpcHandlers'
 import { LocationIpcHandlers } from './domain/location/LocationIpcHandlers'
 import { PoseIpcHandlers } from './domain/pose/PoseIpcHandlers'
 import { TouchIpcHandlers } from './domain/touch/TouchIpcHandlers'
+import { InferenceService } from './domain/inference/InferenceService'
 
 
 
@@ -42,4 +43,7 @@ export function registerIpcHandlers(): void {
   container.resolve(LocationIpcHandlers)
   container.resolve(PoseIpcHandlers)
   container.resolve(TouchIpcHandlers)
+  // No IPC handlers of its own, but must be resolved so it subscribes to sim
+  // action-sync events and Voxta action invocations at startup.
+  container.resolve(InferenceService)
 }

@@ -6,6 +6,8 @@ import {
     NpcActivationChange,
     SimApi,
     MainApi,
+    InferenceAction,
+    InferenceInvocation,
     withTimeout,
     nodeEndpoint
 } from "@gen-adventure/shared"
@@ -35,6 +37,7 @@ const START_TIMEOUT_MS = 30_000
 type ImageRequestHandler = (request: PromptRequest) => void
 type NpcActivationHandler = (change: NpcActivationChange) => void
 type BackgroundChangedHandler = () => void
+type SyncActionHandler = (action: InferenceAction) => void
 
 @singleton()
 export class SimManager {
@@ -46,6 +49,7 @@ export class SimManager {
     private readonly imageRequestHandlers: ImageRequestHandler[] = []
     private readonly npcActivationHandlers: NpcActivationHandler[] = []
     private readonly backgroundChangedHandlers: BackgroundChangedHandler[] = []
+    private readonly syncActionHandlers: SyncActionHandler[] = []
 
     constructor() { }
 
@@ -91,6 +95,12 @@ export class SimManager {
 
         syncContext: (context) => {
             void voxtaClient.updateContext(context)
+        },
+
+        syncAction: (action) => {
+            for (const handler of this.syncActionHandlers) {
+                handler(action)
+            }
         }
     }
 
@@ -147,6 +157,16 @@ export class SimManager {
 
     onBackgroundChanged(handler: BackgroundChangedHandler): void {
         this.backgroundChangedHandlers.push(handler)
+    }
+
+    /** Subscribe to inference actions the sim wants registered with Voxta. */
+    onSyncAction(handler: SyncActionHandler): void {
+        this.syncActionHandlers.push(handler)
+    }
+
+    /** Forward a Voxta action invocation down into the running sim. */
+    onInvocation(invocation: InferenceInvocation): void {
+        void this.sim?.onInvocation(invocation)
     }
 
     async startSim(
