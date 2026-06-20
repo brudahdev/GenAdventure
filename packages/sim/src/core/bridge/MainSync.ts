@@ -51,7 +51,7 @@ export class MainSync implements GameSystem {
             this.pushLocationOptions(args.characterId);
             this.pushPoseOptions(args.characterId);
 
-            if(args.characterId == PLAYER_CHARACTER_ID && args.locationId != args.previousLocationId){
+            if (args.characterId == PLAYER_CHARACTER_ID && args.locationId != args.previousLocationId) {
                 void this.remoteMain.backgroundChanged()
             }
         }, -100)
@@ -73,6 +73,11 @@ export class MainSync implements GameSystem {
         this.eventSystem.on("npc.activation.changed", (args) => {
             if (!this.initialized.has(args.characterId)) return
             void this.remoteMain.npcActivationChanged(args)
+        })
+
+        this.eventSystem.on("image.request", (args) => {
+            if (args.characterId && !this.initialized.has(args.characterId)) return
+            this.remoteMain.imageRequest(args)
         })
 
 

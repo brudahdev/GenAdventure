@@ -17,6 +17,7 @@ import { LocationContextItemFactory } from "../../location/LocationContextItemFa
 import { CharacterLocationKey } from "../location/CharacterLocation";
 import { ClothingInferenceAction } from "./ClothingInferenceAction";
 import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager";
+import { findFirstWithTag } from "../../../core/TagUtils";
 
 
 export const ClothingManagerKey = defineKey<ClothingManager>("character.clothing")
@@ -88,7 +89,7 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {
         this.updateContext()
 
         if (entity.id != PLAYER_CHARACTER_ID) {
-            this.inferenceAction = new ClothingInferenceAction(this.entity, inferenceManager);
+            this.inferenceAction = new ClothingInferenceAction(this.entity, eventSystem, inferenceManager);
         }
     }
 
@@ -103,6 +104,10 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {
 
     getClothingItemById(id: string) {
         return this.clothingItems.find(clothingItem => clothingItem.id == id)
+    }
+
+    getClothingItemByTag(tag: string): ClothingItem | undefined {
+        return findFirstWithTag(tag, this.clothingItems)
     }
 
     getClothingItemIds(): string[] {

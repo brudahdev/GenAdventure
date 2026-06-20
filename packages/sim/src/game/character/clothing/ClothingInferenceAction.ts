@@ -1,7 +1,10 @@
 import { ActionContent, arg, CharacterInferenceAction, InferredArgs, optional } from "../../../core/action-inference/CharacterInferenceAction"
 import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager"
 import { Entity } from "../../../core/ec/Entity"
+import { EventSystem } from "../../EventSystem"
+import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentityKey } from "../identity/CharacterIdentity"
+import { ClothingManager, ClothingManagerKey } from "./ClothingManager"
 
 
 
@@ -17,8 +20,13 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
 
     readonly args = clothingInferenceArgs
     private readonly characterName: string;
+    private readonly myClothingManager: ClothingManager;
 
-    constructor(entity: Entity, manager: InferenceActionManager) {
+    constructor(
+        private entity: Entity, 
+        private eventSystem: EventSystem,
+        manager: InferenceActionManager
+    ) {
         const characterName = entity.require(CharacterIdentityKey).name
         super({
             name: `${characterName}_alter_clothing_state`, characterId: entity.id,
@@ -27,6 +35,7 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
         }, manager)
         this.characterName = characterName;
         this.init();
+        this.myClothingManager = entity.require(ClothingManagerKey)
     }
 
     protected computeContent(): ActionContent<ClothingInferenceArgs> {
@@ -44,5 +53,24 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
 
     handle(args: InferredArgs<ClothingInferenceArgs>): void {
         console.log("ACTION CALLED: " + JSON.stringify(args))
+        // //todo subjectName
+        // const targetEntity = this.entity
+
+
+        // const clothingItem = this.myClothingManager.getClothingItemByTag(args.clothingName)
+        // if (!clothingItem) {
+        //     console.log("unable to find clothing item with tag " + args.clothingName)
+        //     return;
+        // }
+
+        // const state = clothingItem.getStateByTag(args.clothingState)
+        // if (!state) {
+        //     console.log(`unable to find clothing item state with tag ${args.clothingState} on ${clothingItem.id}`)
+        //     return;
+        // }
+
+        // clothingItem.setStateById(state.id)
+
+        // this.eventSystem.emit("image.request",buildAvatarPrompt(targetEntity) )
     }
 }

@@ -6,6 +6,7 @@ import { ClothingManagerKey } from "../../character/clothing/ClothingManager";
 import { EventSystem } from "../../EventSystem";
 import { PromptBuilder } from "../../../core/PromptBuilder";
 import { StringUtils } from "../../../utils/StringUtils";
+import { findFirstWithTag } from "../../../core/TagUtils";
 
 
 
@@ -113,12 +114,15 @@ export class ClothingItem implements Taggable {
     }
 
     setStateById(stateId: string) {
-        const success = this.stateManager.setStateById(stateId);
-        if (success) {
-            this.wearingEntity?.require(ClothingManagerKey).updateContext()
-        }
-        return success
+        return this.stateManager.setStateById(stateId);
     }
+
+
+
+    getStateByTag(tag: string): ClothingItemState | undefined {
+        return findFirstWithTag(tag, this.stateManager.getStateItems())
+    }
+
     appendImagePrompt(prompt: PromptBuilder) {
         if (this.isOccluded) {
             return;
@@ -216,6 +220,7 @@ export class ClothingItem implements Taggable {
             }
         }
         this.emitClothingChangedEvent();
+        this.wearingEntity?.require(ClothingManagerKey).updateContext()
     }
 
 

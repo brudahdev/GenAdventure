@@ -4,7 +4,7 @@ import { CharacterInferenceAction, decodeArgs } from "./CharacterInferenceAction
 import { EventSystem } from "../../game/EventSystem";
 
 @scoped(Lifecycle.ContainerScoped)
-export class InferenceActionManager {
+export class InferenceActionManager {//todo removing actions
 
     private handlerMap = new Map<string, CharacterInferenceAction>();
     private characterActionMap = new Map<string, CharacterInferenceAction>();
