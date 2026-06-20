@@ -1,4 +1,4 @@
-import type { NearbyLocationSummary } from "@gen-adventure/shared";
+import { PLAYER_CHARACTER_ID, type NearbyLocationSummary } from "@gen-adventure/shared";
 import { Component } from "../../../core/ec/Component";
 import { defineKey } from "../../../core/ec/ComponentKey";
 import { defineFactory } from "../../../core/ec/ComponentFactory";
@@ -8,17 +8,38 @@ import { SubLocation } from "../../location/SubLocation";
 import { Location } from "../../location/Location";
 import { CharacterLocation, CharacterLocationKey } from "../location/CharacterLocation";
 import { LocationLink } from "../../location/LocationLink";
+import { LocomotionInferenceAction } from "./LocomotionInferenceAction";
+import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager";
+import { EntityRegistry } from "../../entity/EntityRegistry";
 
 export const CharacterLocomotionKey = defineKey<CharacterLocomotion>("character.locomotion")
+export const characterLocomotionFactory = defineFactory(CharacterLocomotionKey, (entity, c) =>
+    new CharacterLocomotion(
+        entity,
+        c.resolve(EventSystem),
+        c.resolve(InferenceActionManager),
+        c.resolve(EntityRegistry),
+    )
+)
+
 export class CharacterLocomotion implements Component {
 
     private charLocation: CharacterLocation;
 
+    private inferenceAction?: LocomotionInferenceAction;
+
+
     constructor(
         private readonly entity: Entity,
         private readonly eventSystem: EventSystem,
+        inferenceManager: InferenceActionManager,
+        registry: EntityRegistry,
     ) {
         this.charLocation = entity.require(CharacterLocationKey);
+
+        if (entity.id != PLAYER_CHARACTER_ID) {
+            this.inferenceAction = new LocomotionInferenceAction(this.entity, eventSystem, inferenceManager, registry);
+        }
     }
 
     init(): void {
@@ -49,6 +70,22 @@ export class CharacterLocomotion implements Component {
 
 
 
+    findNearbyLocationByTag(tag: string): LocationLink | SubLocation | undefined {
+        const currentLocation = this.charLocation.getCurrentLocation();
+
+        const subLoc = currentLocation.getSubLocationByTag(tag);
+        if (subLoc) {
+            return subLoc;
+        }
+
+        const locationLink = currentLocation.getLocationLinkByToTag(tag)
+        if (locationLink) {
+            return locationLink
+        }
+
+        return undefined;
+    }
+
 
     private findNearbyLocationById(locationId: string): LocationLink | SubLocation | undefined {
         const currentLocation = this.charLocation.getCurrentLocation();
@@ -65,6 +102,8 @@ export class CharacterLocomotion implements Component {
 
         return undefined;
     }
+
+
 
 
 
@@ -94,6 +133,3 @@ export class CharacterLocomotion implements Component {
         return summary;
     }
 }
-
-export const characterLocomotionFactory = defineFactory(CharacterLocomotionKey, (entity, c) =>
-    new CharacterLocomotion(entity, c.resolve(EventSystem)))

@@ -1,9 +1,9 @@
-import { LocationLinkConfig } from "@gen-adventure/shared";
+import { LocationLinkConfig, Taggable } from "@gen-adventure/shared";
 import { LocationManager } from "./LocationManager";
 import { Location } from "./Location";
 import { SubLocation } from "./SubLocation";
 
-export class LocationLink {
+export class LocationLink implements Taggable {
     private from: Location;
     private to: Location;
     private toDefaultSubLocation: SubLocation;
@@ -23,6 +23,14 @@ export class LocationLink {
             throw new Error(`unable to find sublocation with id ${this.config.defaultSubLocationId} under location ${this.config.locationId}`)
         }
         this.toDefaultSubLocation = toSubLocation;
+    }
+
+    get tags() {
+        return this.to.tags
+    }
+
+    get excludeTags() {
+        return this.to.excludeTags
     }
 
     getTo() {

@@ -1,11 +1,11 @@
-import { SubLocationConfig } from "@gen-adventure/shared";
+import { SubLocationConfig, Taggable } from "@gen-adventure/shared";
 import type { Entity } from "../../core/ec/Entity";
 import { Location } from "./Location";
 import { LocationBase } from "./LocationBase";
 import { PromptBuilder } from "../../core/PromptBuilder";
 
 
-export class SubLocation extends LocationBase {
+export class SubLocation extends LocationBase implements Taggable {
 
     constructor(private parent: Location, private config: SubLocationConfig) {
         super()
@@ -13,6 +13,14 @@ export class SubLocation extends LocationBase {
 
     get id() {
         return this.config.id;
+    }
+
+    get tags() {
+        return this.config.tags
+    }
+
+    get excludeTags() {
+        return this.config.excludeTags
     }
 
     getParent() {

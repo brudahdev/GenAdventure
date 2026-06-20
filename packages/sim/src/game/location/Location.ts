@@ -1,4 +1,4 @@
-import { LocationConfig, PromptRequest } from "@gen-adventure/shared";
+import { LocationConfig, PromptRequest, Taggable } from "@gen-adventure/shared";
 import { SubLocation } from "./SubLocation";
 import { LocationBase } from "./LocationBase";
 import { LocationCharacterObserver } from "./LocationCharacterObserver";
@@ -8,9 +8,10 @@ import { LocationContextItemFactory } from "./LocationContextItemFactory";
 import { CharacterIdentityKey } from "../character/identity/CharacterIdentity";
 import { LocationManager } from "./LocationManager";
 import { LocationLink } from "./LocationLink";
+import { findFirstInMapWithTag } from "../../core/TagUtils";
 
 
-export class Location extends LocationBase {
+export class Location extends LocationBase implements Taggable {
     private subLocations = new Map<string, SubLocation>();
     private locationLinks = new Map<string, LocationLink>();
 
@@ -52,6 +53,14 @@ export class Location extends LocationBase {
         return this.config.id;
     }
 
+    get tags() {
+        return this.config.tags
+    }
+
+    get excludeTags() {
+        return this.config.excludeTags
+    }
+
     getLocationLinks() {
         return this.locationLinks
     }
@@ -60,12 +69,20 @@ export class Location extends LocationBase {
         return this.locationLinks.get(id)
     }
 
+    getLocationLinkByToTag(tag: string) {
+        return findFirstInMapWithTag(tag, this.locationLinks.values())
+    }
+
     getSubLocations() {
         return this.subLocations;
     }
 
     getSubLocationById(id: string) {
         return this.subLocations.get(id);
+    }
+
+    getSubLocationByTag(tag: string) {
+        return findFirstInMapWithTag(tag, this.subLocations.values())
     }
 
     getBackgroundPrompt(): PromptRequest {
