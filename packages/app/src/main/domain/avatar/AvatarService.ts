@@ -182,7 +182,7 @@ export class AvatarService {
       console.warn('[avatar] no prompt available to regenerate', characterId)
       return
     }
-    await this.handle(request, true, 'Regenerating avatar...')
+    await this.handle(request, true)
   }
 
   /** The prompt that produced the current avatar: the stored one, or a freshly
