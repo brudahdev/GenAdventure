@@ -8,6 +8,21 @@ export function findFirstWithTag<T extends Taggable>(
     return collection.find(item => matchesTaggable(tagKey, item));
 }
 
+export function findFirstInMapWithTag<T extends Taggable>(
+    tagKey: string,
+    collection: MapIterator<T>
+): T | undefined {
+
+    for (const item of collection) {
+        const match = matchesTaggable(tagKey, item)
+        if (match) {
+            return item;
+        }
+    }
+
+    return undefined
+}
+
 export function matchesTaggable(
     tagKey: string,
     item: Taggable

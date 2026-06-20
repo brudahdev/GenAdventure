@@ -10,7 +10,7 @@ import { findFirstWithTag } from "../../../core/TagUtils";
 
 
 
-export class ClothingItem implements Taggable {
+export class ClothingItem implements Taggable {//todo transitions
     private subItems: ClothingItem[] = []
     private stateManager: StateManager<ClothingItemState> = new StateManager<ClothingItemState>();
 

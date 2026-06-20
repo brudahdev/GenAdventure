@@ -1,7 +1,7 @@
 import { IDable, Taggable } from "@gen-adventure/shared";
 import { findById, findFirstWithTag } from "./TagUtils";
 
-export class StateManager<T extends IStateItem<T>> {
+export class StateManager<T extends IStateItem<T>> {//todo transitions
     private stateItems: T[] = [];
     private activeStateItem: T | null = null;
     private stateChangeCallback?: (newState: T, oldState: T | null) => void;

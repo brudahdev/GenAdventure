@@ -14,8 +14,24 @@ import { CharacterLocation, CharacterLocationKey } from "../location/CharacterLo
 import { LocationContextItem } from "../../location/LocationContextItem";
 import { LocationContextItemFactory } from "../../location/LocationContextItemFactory";
 import { CharacterIdentityKey } from "../identity/CharacterIdentity";
+import { PoseInferenceAction } from "./PoseInferenceAction";
+import { PLAYER_CHARACTER_ID } from "@gen-adventure/shared";
+import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager";
+import { EntityRegistry } from "../../entity/EntityRegistry";
+import { findFirstInMapWithTag, findFirstWithTag } from "../../../core/TagUtils";
 
 export const CharacterPoseKey = defineKey<CharacterPose>("character.pose")
+export const characterPoseFactory = defineFactory(CharacterPoseKey, (entity, c) =>
+    new CharacterPose(
+        entity,
+        c.resolve(EventSystem),
+        c.resolve<PoseConfigAdapter>(POSE_CONFIG_ADAPTER),
+        c.resolve<RestoreSource>(RESTORE_SOURCE),
+        c.resolve<StartingStateAdapter>(STARTING_STATE_ADAPTER),
+        c.resolve(LocationContextItemFactory),
+        c.resolve(InferenceActionManager),
+        c.resolve(EntityRegistry),
+    ))
 
 /** {@link CharacterPose}'s save blob: the current pose id. */
 interface PoseSave { poseId: string }
@@ -28,6 +44,9 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
     private characterName: string;
     private characterLocation: CharacterLocation
 
+    private inferenceAction?: PoseInferenceAction;
+
+
     constructor(
         private readonly entity: Entity,
         private readonly eventSystem: EventSystem,
@@ -35,6 +54,8 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         restore: RestoreSource,
         startingState: StartingStateAdapter,
         contextItemFactory: LocationContextItemFactory,
+        inferenceManager: InferenceActionManager,
+        registry: EntityRegistry,
     ) {
         this.characterName = entity.require(CharacterIdentityKey).name
         this.characterLocation = entity.require(CharacterLocationKey)
@@ -70,6 +91,10 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
 
         this.currentPose = initPose;
         this.updatePoseContextItem();
+
+        if (entity.id != PLAYER_CHARACTER_ID) {
+            this.inferenceAction = new PoseInferenceAction(this.entity, eventSystem, inferenceManager, registry);
+        }
     }
 
     /** Emits the initial `pose.changed`. */
@@ -91,6 +116,10 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
 
     getCurrentPoseId(): string { return this.currentPose.id }
 
+    getPoseByTag(tag: string) {
+        return findFirstInMapWithTag(tag, this.poseMap.values())
+    }
+
     setPoseById(poseId: string) {
         //todo validation here? command layer? task GOAP?
         const targetPose = this.poseMap.get(poseId)
@@ -99,6 +128,8 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         }
         this.setPose(targetPose)
     }
+
+
 
     setPose(pose: Pose) {
         //todo validation here? command layer? task GOAP?
@@ -147,14 +178,3 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
 
 
 }
-
-export const characterPoseFactory = defineFactory(CharacterPoseKey, (entity, c) =>
-    new CharacterPose(
-        entity,
-        c.resolve(EventSystem),
-        c.resolve<PoseConfigAdapter>(POSE_CONFIG_ADAPTER),
-        c.resolve<RestoreSource>(RESTORE_SOURCE),
-        c.resolve<StartingStateAdapter>(STARTING_STATE_ADAPTER),
-        c.resolve(LocationContextItemFactory),
-    ))
-

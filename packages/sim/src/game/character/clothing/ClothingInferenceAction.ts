@@ -6,7 +6,7 @@ import { EventSystem } from "../../EventSystem"
 import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentityKey } from "../identity/CharacterIdentity"
 import { resolveTargetCharacter } from "../identity/characterLookup"
-import { ClothingManager, ClothingManagerKey } from "./ClothingManager"
+import { ClothingManagerKey } from "./ClothingManager"
 
 
 
@@ -42,7 +42,6 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
     protected computeContent(): ActionContent<ClothingInferenceArgs> {
         return {
             description: `When ${this.characterName} alteres the state of a piece of clothing. Do NOT call this if its only a request, command, or hypothetical`,
-            //   shortDescription: 'follow',
             argDescriptions: {
                 subjectName: 'The name of the person whose clothing changed.',
                 clothingName: 'Clothing item that was altered. parse whatever it is into a single word.',
@@ -74,7 +73,11 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
             return;
         }
 
-        clothingItem.setStateById(state.id)
+        const success = clothingItem.setStateById(state.id)
+        if (!success) {
+            console.log(`[sim] unable to set clothing item to state ${state.id}`)
+            return;
+        }
 
         this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))
     }

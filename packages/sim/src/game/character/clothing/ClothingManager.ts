@@ -44,7 +44,7 @@ export const clothingFactory = defineFactory(ClothingManagerKey, (entity, c) =>
     ))
 
 
-export class ClothingManager implements Component, Saveable<ClothingSave> {
+export class ClothingManager implements Component, Saveable<ClothingSave> {//todo transitions
     private slotMap = new Map<string, ClothingItem[]>();
     private clothingItems: ClothingItem[] = [];
 

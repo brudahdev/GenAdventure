@@ -165,7 +165,9 @@ class SimService implements SimApi {
       return;
     }
 
-    targetEntity.require(CharacterPoseKey).setPoseById(poseId)
+    const targetposeManager = targetEntity.require(CharacterPoseKey)
+    const targetPoseId = poseId
+    targetposeManager.setPoseById(targetPoseId)
 
     if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
       main.imageRequest(buildAvatarPrompt(targetEntity))
