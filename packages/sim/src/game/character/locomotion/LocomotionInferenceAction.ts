@@ -69,7 +69,7 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
 
 
         const targetLocationId = (targetLocation instanceof LocationLink) ? targetLocation.getTo().id : targetLocation.id
-        targetLocomotionManager.gotoNearbyLocation(targetLocationId)
+        targetLocomotionManager.gotoNearbyLocation(targetLocationId)//todo wait until done talking
 
         if (targetEntity.require(NpcActivityKey).isActive) {
             this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))

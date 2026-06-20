@@ -552,6 +552,10 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  /* This full-height center column overlays the avatars (z 0). Let clicks in its
+     empty space fall through so right-clicking an avatar reaches it; the bubbles
+     below re-enable pointer-events for selection / wheel-scroll over text. */
+  pointer-events: none;
   /* justify-content: flex-end; */
   gap: 10px;
   /* padding: 72px 0 16px; */
@@ -591,7 +595,9 @@
   gap: 3px;
   align-self: flex-start;
   max-width: 85%;
-
+  /* Re-enable clicks on the bubbles themselves (.chat-messages is click-through)
+     so text selection and wheel-scroll over text still work. */
+  pointer-events: auto;
 }
 
 .chat-message-group.is-user {
