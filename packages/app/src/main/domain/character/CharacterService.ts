@@ -42,6 +42,7 @@ export class CharacterService {
                     roleName: role.roleName,
                     roleOrder: role.roleOrder,
                     characterId: role.defaultCharacterId,
+                    isActive: true
                 };
             })
         );

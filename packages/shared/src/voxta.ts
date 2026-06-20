@@ -36,6 +36,7 @@ export interface ScenarioCharacter {
   roleName: string
   roleOrder: number
   characterId: string
+  isActive: boolean
 }
 
 /** A scenario as the UI needs it. */

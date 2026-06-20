@@ -44,7 +44,11 @@ export class CharacterActivationService {
     // transition waiting on `whenIdle()` can't fade out before this avatar is done.
     // GenerationActivity also owns the sim pause + loading overlay for the whole
     // batch, so the sim stays paused / the spinner stays up until everything is done.
-    const name = this.characterService.getScenarioCharacterById(characterId)?.name
+
+    const scenarioCharacter = this.characterService.getScenarioCharacterById(characterId)
+    const name = scenarioCharacter?.name
+    if (scenarioCharacter)
+      scenarioCharacter.isActive = true
     this.activity.begin()
     try {
       await this.voxtaClient.addChatParticipant(characterId)
@@ -63,6 +67,9 @@ export class CharacterActivationService {
 
   /** Remove the NPC from the chat and drop their avatar from the chat page. */
   private async deactivate(characterId: string, useFade: boolean): Promise<void> {
+    const scenarioCharacter = this.characterService.getScenarioCharacterById(characterId)
+    if (scenarioCharacter)
+      scenarioCharacter.isActive = false
     await this.voxtaClient.removeChatParticipant(characterId)
     this.avatarService.remove(characterId, useFade)
   }
@@ -74,8 +81,10 @@ export class CharacterActivationService {
     const active = new Set(activeCharacterIds)
     for (const character of this.characterService.getScenarioCharacters()) {
       if (active.has(character.characterId)) {
+        character.isActive = true;
         await this.voxtaClient.addChatParticipant(character.characterId)
       } else {
+        character.isActive = false;
         await this.voxtaClient.removeChatParticipant(character.characterId)
       }
     }

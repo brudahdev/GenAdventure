@@ -4,6 +4,7 @@ import { SimManager } from '../sim/SimManager'
 import { SaveDataService } from '../save/SaveDataService'
 import { ComfyConfigStore } from '../../integration/comfyui/comfyConfig'
 import { ImageGenerationService } from '../imageGeneration/ImageGenerationService'
+import { CharacterService } from '../character/CharacterService'
 import { promptHash } from '../imageGeneration/promptHash'
 import { toImageUrl } from '../imageGeneration/imageProtocol'
 import { applyTransparency } from '../imageGeneration/imageTransparency'
@@ -52,7 +53,8 @@ export class AvatarService {
     private readonly sim: SimManager,
     private readonly imageGen: ImageGenerationService,
     private readonly saveData: SaveDataService,
-    private readonly config: ComfyConfigStore
+    private readonly config: ComfyConfigStore,
+    private readonly characterService: CharacterService
   ) {
     this.sim.onImageRequest((request) => {
       if (request.type === 'avatar') void this.handle(request)
@@ -141,6 +143,7 @@ export class AvatarService {
         console.warn('[avatar] got avatar request with no characterId')
         return
       }
+      if (!this.characterService.getScenarioCharacterById(characterId)?.isActive) return
       const hash = promptHash(request.positive, request.negative)
       const originalRel = this.originalRel(characterId, hash)
       const settings = await this.config.getImgGenSettings()
@@ -167,6 +170,7 @@ export class AvatarService {
 
       const avatar: ActiveAvatar = { characterId, hash, useFade }
       this.active.set(characterId, avatar)
+      if (!this.characterService.getScenarioCharacterById(characterId)?.isActive) return
       await this.emit(avatar, settings)
     } catch (err) {
       console.error('[avatar] failed to handle avatar request:', err)
