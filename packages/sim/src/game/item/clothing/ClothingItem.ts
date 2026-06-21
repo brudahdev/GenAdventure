@@ -180,7 +180,7 @@ export class ClothingItem implements Taggable {//todo transitions
         return changed;
     }
 
-    isTopOrSubItemIsTop(): boolean {
+    isTopOrSubItemIsTop(): boolean {//todo remove isAtop
         if (this.config.isATop && this.stateManager.getActiveState()?.id != 'off') {
             return true;
         }
@@ -191,6 +191,8 @@ export class ClothingItem implements Taggable {//todo transitions
         }
         return false;
     }
+
+    
 
     private initStateManager(startingStateId: string) {
         this.stateManager.onStateChange(this.onStateChange.bind(this));

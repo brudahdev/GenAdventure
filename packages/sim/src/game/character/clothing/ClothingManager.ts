@@ -52,6 +52,8 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {//tod
     private contextItem: LocationContextItem;
     private inferenceAction?: ClothingInferenceAction;
 
+    private isTopless = false;
+
     constructor(
         private readonly entity: Entity,
         eventSystem: EventSystem,
@@ -156,13 +158,18 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {//tod
     }
 
     public updateContext() {
+        this.updateIsTopless()
         const prompt = new PromptBuilder(',');
         this.clothingItems.forEach(clothingItem => clothingItem.appendContextPrompt(prompt))
         if (prompt.getPositive().length == 0) {
             this.contextItem.setValue(`${this.entity.require(CharacterIdentityKey).name} is completely naked.`)
             return;
         }
-
+        if (this.isTopless) {
+            prompt.flipReveresed()
+            prompt.addToPos("Topless")
+            prompt.flipReveresed()
+        }
         this.contextItem.setValue(`${this.entity.require(CharacterIdentityKey).name}'s clothing:[${prompt.getPositive()}]`)
     }
 
@@ -225,5 +232,24 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {//tod
         }
         const rootItems = this.clothingItems.filter(clothingItem => clothingItem.getParent() == null)
         rootItems.forEach(rootItem => rootItem.updateOcclusions(false, false));
+    }
+
+    private updateIsTopless() {
+        const top_outer = this.slotMap.get('top_outer')
+        const top_inner = this.slotMap.get('top_inner')
+        let hasInner = false;
+        let hasOuter = false;
+        if (top_outer && top_outer.find(item => item.getCurrentStateId() != "off")) {
+            hasInner = true;
+        }
+        if (top_inner && top_inner.find(item => item.getCurrentStateId() != "off")) {
+            hasOuter = true;
+        }
+
+        const newIsTopless = !hasInner && !hasOuter
+        if (this.isTopless == newIsTopless) {
+            return;
+        }
+        this.isTopless = newIsTopless
     }
 }

@@ -10,6 +10,10 @@ export class PromptBuilder {
         this.reversed = reversed;
     }
 
+    flipReveresed() {
+        this.reversed = !this.reversed
+    }
+
     private addText(current: string, txt: string, useSeperator: boolean = true): string {
         if (!current) {
             return txt;
@@ -37,10 +41,10 @@ export class PromptBuilder {
         this.negative = this.addText(this.negative, txt);
     }
 
-    public getPositive(){
+    public getPositive() {
         return this.positive;
     }
-    public getNegative(){
+    public getNegative() {
         return this.negative;
     }
 }
