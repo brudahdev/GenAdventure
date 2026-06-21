@@ -7,6 +7,8 @@ import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentityKey } from "../identity/CharacterIdentity"
 import { resolveTargetCharacter } from "../identity/characterLookup"
 import { ClothingManagerKey } from "./ClothingManager"
+import { PlanExecutor } from "../../plan/PlanExecutor"
+import { alterClothingStateIntent } from "../../plan/planDefs"
 
 
 
@@ -28,6 +30,7 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
         private eventSystem: EventSystem,
         manager: InferenceActionManager,
         private readonly registry: EntityRegistry,
+        private readonly planExecutor: PlanExecutor,
     ) {
         const characterName = entity.require(CharacterIdentityKey).name
         super({
@@ -61,6 +64,8 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
         const targetEntity = targetData.target
 
 
+        // Parse the LLM's free-text item/state into concrete ids here (the
+        // inference source's job); the command layer then operates on ids.
         const clothingItem = targetEntity.require(ClothingManagerKey).getClothingItemByTag(args.clothingName)
         if (!clothingItem) {
             console.log("unable to find clothing item with tag " + args.clothingName)
@@ -73,9 +78,11 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
             return;
         }
 
-        const success = clothingItem.setStateById(state.id)
-        if (!success) {
-            console.log(`[sim] unable to set clothing item to state ${state.id}`)
+        const status = this.planExecutor.submit(
+            alterClothingStateIntent(this.entity.id, targetEntity.id, clothingItem.id, state.id)
+        )
+        if (status.state !== 'completed') {
+            console.log(`[sim] clothing plan did not complete (${status.state})`)
             return;
         }
 

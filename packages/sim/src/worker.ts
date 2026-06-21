@@ -10,8 +10,8 @@ import { nodeEndpoint, PLAYER_CHARACTER_ID } from '@gen-adventure/shared'
 import { container, type DependencyContainer } from 'tsyringe'
 import { SimProvisioner } from './core/provision/SimProvisioner'
 import { SimWorld } from './game/SimWorld'
-import { ClothingManagerKey } from "./game/character/clothing/ClothingManager"
 import { buildAvatarPrompt } from './game/character/characterViews'
+import { alterClothingStateIntent } from './game/plan/planDefs'
 import { CharacterPoseKey } from './game/character/pose/CharacterPose'
 import { CharacterLocation, CharacterLocationKey } from './game/character/location/CharacterLocation'
 import { CharacterLocomotionKey } from './game/character/locomotion/CharacterLocomotion'
@@ -105,24 +105,23 @@ class SimService implements SimApi {
       //todo user acting
     }
 
-    //todo action layer, decomposition, etc. not now though
     const targetEntity = this.world?.registry.getById(characterId)
     if (!targetEntity) {
       console.log(`[sim] unable to get character with id ${characterId}`)
       return;
     }
-    const clothingITem = targetEntity.require(ClothingManagerKey).getClothingItemById(clothingItemId)
-    if (!clothingITem) {
-      console.log(`[sim] unable to get clothing item with id ${clothingItemId}`)
+
+    // The player directs the character to alter its own clothing, so the actor
+    // and target are the same. Decomposition/execution runs in the plan layer.
+    const status = this.getWorld().submitIntent(
+      alterClothingStateIntent(PLAYER_CHARACTER_ID, characterId, clothingItemId, stateId)
+    )
+    if (status.state !== 'completed') {
+      console.log(`[sim] clothing plan did not complete (${status.state})`)
       return;
     }
 
-    const success = clothingITem.setStateById(stateId);
-    if (!success) {
-      console.log(`[sim] unable to set clothing item to state ${stateId}`)
-      return;
-    }
-
+    // Avatar regeneration stays in the handler (gated on success + NPC active).
     if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
       main.imageRequest(buildAvatarPrompt(targetEntity))
     }

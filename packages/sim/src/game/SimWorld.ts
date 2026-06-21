@@ -23,6 +23,9 @@ import { EventSystem } from "./EventSystem";
 import { ContextManager } from "../core/context/ContextManager";
 import { LocationManager } from "./location/LocationManager";
 import { InferenceActionManager } from "../core/action-inference/InferenceActionManager";
+import { PlanExecutor } from "./plan/PlanExecutor";
+import type { ActorIntent } from "./plan/planDefs";
+import type { PlanStatus } from "../core/plan/planTypes";
 
 
 /** The root of a single sim run. Resolving it from a run's child container drives
@@ -55,9 +58,19 @@ export class SimWorld {
         public readonly inferenceActionManager: InferenceActionManager,
         private readonly characterSpawner: CharacterSpawner,
         scheduler: Scheduler,
+        // Resolved here so the plan layer (command-systems + decomposers) is wired
+        // at boot, ready before any intent is submitted at run time.
+        public readonly planExecutor: PlanExecutor,
     ) {
         this.systems = [eventSystem, time, mainSync, characterSpawner]
         this.worldSaveables = [time, worldState, scheduler]
+    }
+
+    /** Submit a top-level intent for decomposition + execution. Returns the
+     *  resulting plan status. The entry point both intent sources (UI handler,
+     *  inference handler) funnel through. */
+    submitIntent(intent: ActorIntent): PlanStatus {
+        return this.planExecutor.submit(intent)
     }
 
     /** Second boot phase: the whole graph is constructed, so systems can emit

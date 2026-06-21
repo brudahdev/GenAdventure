@@ -87,7 +87,7 @@ export class CharacterLocomotion implements Component {
     }
 
 
-    private findNearbyLocationById(locationId: string): LocationLink | SubLocation | undefined {
+    findNearbyLocationById(locationId: string): LocationLink | SubLocation | undefined {
         const currentLocation = this.charLocation.getCurrentLocation();
 
         const subLoc = currentLocation.getSubLocationById(locationId);
