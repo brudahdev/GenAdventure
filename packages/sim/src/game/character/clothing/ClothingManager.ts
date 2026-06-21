@@ -20,6 +20,7 @@ import { InferenceActionManager } from "../../../core/action-inference/Inference
 import { EntityRegistry } from "../../entity/EntityRegistry";
 import { findFirstWithTag } from "../../../core/TagUtils";
 import { PlanExecutor } from "../../plan/PlanExecutor";
+import { AvatarKey } from "../Avatar";
 
 
 export const ClothingManagerKey = defineKey<ClothingManager>("character.clothing")
@@ -52,7 +53,7 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {//tod
 
 
     private contextItem: LocationContextItem;
-    private inferenceAction?: ClothingInferenceAction;
+    readonly inferenceAction?: ClothingInferenceAction;
 
     private isTopless = false;
 
@@ -158,6 +159,11 @@ export class ClothingManager implements Component, Saveable<ClothingSave> {//tod
         if (!foundTop) {
             prompt.addToPos('topless');
         }
+    }
+
+    public onClothingItemStateChange() {//when one of my clothing items state changes
+        this.entity.get(AvatarKey)?.dirtied();
+        this.updateContext()
     }
 
     public updateContext() {

@@ -10,6 +10,7 @@ import { defineKey } from "../../../core/ec/ComponentKey";
 import { defineFactory } from "../../../core/ec/ComponentFactory";
 import { CharacterLocationObserver } from "./CharacterLocationObserver";
 import { Location } from "../../location/Location";
+import { AvatarKey } from "../Avatar";
 
 export const CharacterLocationKey = defineKey<CharacterLocation>("character.location")
 
@@ -90,7 +91,7 @@ export class CharacterLocation implements Component, Saveable<LocationSave> {
 
         this.currentSubLocation = loc;
         this.currentSubLocation.onCharacterEnter(this.entity);
-
+        this.entity.get(AvatarKey)?.dirtied();
         this.emitLocationChanged(previousLocation)
     }
 

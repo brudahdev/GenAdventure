@@ -222,7 +222,7 @@ export class ClothingItem implements Taggable {//todo transitions
             }
         }
         this.emitClothingChangedEvent();
-        this.wearingEntity?.require(ClothingManagerKey).updateContext()
+        this.wearingEntity?.require(ClothingManagerKey).onClothingItemStateChange()
     }
 
 

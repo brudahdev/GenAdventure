@@ -9,6 +9,7 @@ import { resolveTargetCharacter } from "../identity/characterLookup"
 import { ClothingManagerKey } from "./ClothingManager"
 import { PlanExecutor } from "../../plan/PlanExecutor"
 import { alterClothingStateIntent } from "../../plan/planDefs"
+import { AvatarKey } from "../Avatar"
 
 
 
@@ -55,7 +56,6 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
     }
 
     handle(args: InferredArgs<ClothingInferenceArgs>): void {
-        console.log("ACTION CALLED: " + JSON.stringify(args))
         const targetData = resolveTargetCharacter(this.registry, args.subjectName, this.entity)
         if (!targetData) {
             console.log("unable to find target character with name " + args.subjectName)
@@ -86,6 +86,7 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
             return;
         }
 
-        this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))
+        this.entity.get(AvatarKey)?.updateAvatar();
+        targetEntity.get(AvatarKey)?.updateAvatar();
     }
 }

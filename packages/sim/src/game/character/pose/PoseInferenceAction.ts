@@ -52,7 +52,6 @@ export class PoseInferenceAction extends CharacterInferenceAction<PoseInferenceA
     }
 
     handle(args: InferredArgs<PoseInferenceArgs>): void {
-        console.log("ACTION CALLED: " + JSON.stringify(args))
         const targetData = resolveTargetCharacter(this.registry, args.subjectName, this.entity)
         if (!targetData) {
             console.log("unable to find target character with name " + args.subjectName)

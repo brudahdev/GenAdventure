@@ -5,7 +5,14 @@ export function findFirstWithTag<T extends Taggable>(
     collection: T[]
 ): T | undefined {
 
-    return collection.find(item => matchesTaggable(tagKey, item));
+    for (const item of collection) {
+        const match = matchesTaggable(tagKey, item)
+        if (match) {
+            return item;
+        }
+    }
+
+    return undefined
 }
 
 export function findFirstInMapWithTag<T extends Taggable>(

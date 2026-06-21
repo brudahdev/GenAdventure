@@ -52,7 +52,6 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
     }
 
     handle(args: InferredArgs<LocomotionInferenceArgs>): void {//todo move other character
-        console.log("ACTION CALLED: " + JSON.stringify(args))
         // const targetData = resolveTargetCharacter(this.registry, args.subjectName, this.entity)
         // if (!targetData) {
         //     console.log("unable to find target character with name " + args.subjectName)

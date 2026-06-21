@@ -51,5 +51,36 @@ describe('sim world (system test)', () => {
     expect(context.characterIds).includes(sim.npcs[1].id)
   })
 
+  it('undress anime outfit self', () => {
+
+    const npc1 = sim.npcs[0]
+
+    // npc1.require(ClothingManagerKey).inferenceAction?.handle({
+    //   subjectName: getName(npc1),
+    //   clothingName: 'bowtie',
+    //   clothingState: 'remove'
+    // })
+    // const bowTie = npc1.require(ClothingManagerKey).getClothingItemByTag("bowtie")
+    // expect(bowTie?.getCurrentStateId()).toBe("off")
+
+    // npc1.require(ClothingManagerKey).inferenceAction?.handle({
+    //   subjectName: getName(npc1),
+    //   clothingName: 'skirt',
+    //   clothingState: 'remove'
+    // })
+    // const skirt = npc1.require(ClothingManagerKey).getClothingItemByTag("skirt")
+    // expect(skirt?.getCurrentStateId()).toBe("off")
+
+
+    npc1.require(ClothingManagerKey).inferenceAction?.handle({
+      subjectName: getName(npc1),
+      clothingName: 'panties',
+      clothingState: 'remove'
+    })
+    const panties = npc1.require(ClothingManagerKey).getClothingItemById("panties_pink")
+    expect(panties?.getCurrentStateId()).toBe("off")
+
+  })
+
 
 })

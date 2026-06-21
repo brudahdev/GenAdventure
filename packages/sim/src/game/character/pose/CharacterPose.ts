@@ -19,6 +19,7 @@ import { PLAYER_CHARACTER_ID } from "@gen-adventure/shared";
 import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager";
 import { EntityRegistry } from "../../entity/EntityRegistry";
 import { findFirstInMapWithTag, findFirstWithTag } from "../../../core/TagUtils";
+import { AvatarKey } from "../Avatar";
 
 export const CharacterPoseKey = defineKey<CharacterPose>("character.pose")
 export const characterPoseFactory = defineFactory(CharacterPoseKey, (entity, c) =>
@@ -153,6 +154,7 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         }
 
         this.currentPose = pose;
+        this.entity.get(AvatarKey)?.dirtied();
 
         this.updatePoseContextItem();
         this.emitPoseChangedEvent();

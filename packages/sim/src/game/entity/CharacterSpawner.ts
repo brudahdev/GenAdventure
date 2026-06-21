@@ -16,6 +16,7 @@ import { appearanceFactory } from "../character/appearance/CharacterAppearance";
 import { clothingFactory } from "../character/clothing/ClothingManager";
 import { characterLocomotionFactory } from "../character/locomotion/CharacterLocomotion";
 import { actorPlanFactory } from "../../core/plan/ActorPlan";
+import { avatarFactory } from "../character/Avatar";
 
 /** A blueprint is just an ordered list of component factories. Component order
  *  matters: factories that `require()` a sibling at attach time (identity) or
@@ -40,6 +41,7 @@ const NPC_BLUEPRINT: ComponentFactory[] = [
     appearanceFactory,
     clothingFactory,
     actorPlanFactory,
+    avatarFactory,
 ]
 
 /** Assembles the run's characters and registers them into the shared

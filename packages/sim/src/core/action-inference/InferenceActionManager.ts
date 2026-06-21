@@ -21,6 +21,7 @@ export class InferenceActionManager {//todo removing actions, removing on charac
 
 
     async onInvocation(invocation: InferenceInvocation) {
+        console.log("InferenceActionManager - ACTION CALLED: " + JSON.stringify(invocation))
         const handler = this.handlerMap.get(invocation.value)
         if (!handler) {
             console.log("InferenceActionManager unable to find handler for " + invocation.value)
