@@ -1,0 +1,324 @@
+Intent/Command layers
+They should be persistable; prefer data and systems over closures or classes.
+
+
+
+Intent List[]
+          ▼
+   decompposer         ── expands an intent(s) into a command sequence, using registered decomposer(s).
+          │            
+          ▼
+   plan executor  ── walks the sequence, advances a cursor,
+          │            stops on failure                             [SEQUENCE]
+          ▼
+   command exec   ── runs ONE primitive vs the engine, reports
+          │            its outcome                                  [RUN]
+          ▼
+   command layer  ── dispatches primitives to the engine
+          │            
+          ▼
+    domainSystems(ClothignManager,LocationManager,PoseManager)
+
+
+
+About a decomposer:
+A decomposer will return a this: Command|Intent[]
+
+Returned intents will be further decomposed until there is just a Command[], which may then be passed to the plan executor
+
+decomposer themselves are hand written logic
+
+Example (note im only trying to give you the jist, I use new GoToCharacterIntent(), but it may not be best to be an object, mabe just an interface with a type and a system that implements):
+
+AlterClothingStateIntent{actorId,targetId,clothingId,stateId}
+
+AlterClothingStateDecomposer.decompose(intent: AlterClothingStateIntent):
+
+        let sequence: Command|Intent[]
+
+        if(not standing)
+            sequence.push(new PoseCommand(actorId, "stand"))
+
+        if(not at same sublocation as targetId)
+            sequence.push(new GoToCharacterIntent(actorId, characterId))
+
+
+        sequence.push(new AlterStateClothingCommand(actorId,targetId,clothingId,stateId))
+
+
+GoToCharacterIntent{actorId, characterId}
+
+GoToCharacterDecomposer.decompose(intent: GoToCharacterIntent):
+        let sequence: Command|Intent[]
+        if(at same sublocation as targetId) return sequence
+
+        let path: string[] = calcPath(actorId, targetId) (bfs serch over location graph, returns a list like this: [location1Id, location2Id,..., subLocationId])
+        forEach step in path
+            sequence.push (gotToNearbyLocationCommand(setp))
+
+
+
+
+About commands:
+
+Note commands may not execute immediately. For example the goto command may execute instantly (if only moving sublocations) or may take time (moving locations)
+These commands will be continued by ScheduledEvents (See ScheduledEvents)
+
+Commands should be persistable and set their in progress state if any
+
+
+Addendum: Lazy (cursor-time) decomposition
+
+Rule
+
+Do not flatten the whole intent tree up front. Decompose at the cursor: the plan
+executor walks the Command|Intent[] list; when it reaches a Command it runs it, when
+it reaches an Intent it decomposes that intent at that moment against current world
+state and splices the result into the list at that position.
+
+So a plan is never fully expanded ahead of time — it expands just-in-time as the cursor
+arrives at each intent.
+
+Why
+
+Decomposer guards read live world state (not standing, not at same sublocation) and
+commands take game-time (a GoTo continued by ScheduledEvents may span multiple ticks).
+
+If the tree is flattened up front, every guard is evaluated against the world at plan
+time. By the time an earlier time-extended command finishes, those assumptions may be
+stale — the actor was knocked down, the target moved sublocation, the path changed — and
+later commands fire against a world that no longer matches.
+
+Decomposing at the cursor keeps every guard honest: it runs at the moment it actually
+matters. GoToCharacterIntent doesn't run its BFS path search until the cursor reaches
+it, so it plans against fresh state and a fresh path.
+
+The only thing given up is a full preview of the flattened plan up front — which isn't
+needed.
+
+How it interacts with Command|Intent[]
+
+The mixed list is already the right representation; lazy decomp just defines when the
+Intent entries get expanded.
+
+plan executor tick:
+    entry = list[cursor]
+    if entry is Command:
+        run / continue it; on Completed advance cursor; on Failed stop
+    if entry is Intent:
+        result = registry[entry.type].decompose(entry)   // evaluated against CURRENT state
+        splice result into list at cursor (in place, preserving order)
+        // do not advance cursor — re-read; result may itself contain Intents
+
+Recursive expansion (Intent → list that contains more Intents) falls out naturally: after
+splicing, re-read the same cursor position and keep expanding until that position is a
+Command.
+
+Two safeguards for recursive expansion
+
+
+Splice in place at the cursor so ordering is preserved.
+Guard against non-reducing recursion: a decomposer that can transitively re-emit its
+own type without reducing state can loop forever. Add a depth cap, or require each
+decomposition to make measurable progress on its guard condition.
+
+
+Consequence for persistence
+
+Because the live plan is just the partially-expanded Command|Intent[] plus a cursor
+index plus the in-flight command's progress, that same structure is the save format.
+One representation serves as the plan, the expansion frontier, and the persisted state at
+once. (This is also why the plan executor must be a data cursor ticked by a system, not a
+coroutine — a coroutine hides the cursor and remaining work in call-stack state that
+won't serialize mid-walk.)
+
+
+
+
+
+
+
+
+
+Addendum: Command status
+
+The status values
+
+A command is ticked and reports a status. Because commands may be time-extended
+(continued by ScheduledEvents), there is a running state in addition to the terminal
+ones.
+
+Running              // not done yet; keep ticking / waiting on its ScheduledEvent
+Completed            // finished successfully; advance the cursor
+Failed(reason)       // the command itself could not achieve its effect; stop
+Interrupted(cause)   // something external stopped it mid-flight; stop
+
+Running is the one the instant-execution model didn't need. A GoTo that only changes
+sublocation may return Completed on its first tick; one that crosses locations returns
+Running and is continued by ScheduledEvents until arrival.
+
+Status is data (a tagged value), not control flow — it serializes with the command and
+is read by the plan executor system. reason / cause are data too (enums/ids, not
+closures).
+
+Failed vs Interrupted — the distinction matters
+
+
+Failed = the command's own attempt didn't work. Precondition turned false, no path,
+target gone. The command is the cause.
+Interrupted = something external cut it short. A higher-priority intent preempted
+it; a reactive response (knockdown, stagger) took over.
+
+
+They are kept separate because they route differently later:
+
+
+Failed invalidates the plan's assumptions → the plan stops and (eventually) the layer
+above replans.
+Interrupted may be absorbed and the original intent re-attempted, or dropped in favour
+of whatever preempted it — that decision belongs to the layer above, not the command.
+
+
+For the current plain-code build there is no planner above, so both terminal-error states
+stop the plan and report to the UI. Keep them as distinct values now anyway, so the
+routing split is available later without changing the command contract.
+
+How status drives the plan executor
+
+tick:
+    status = current command.tick()
+    switch status:
+        Running:      do nothing; tick again next frame / on its ScheduledEvent
+        Completed:    advance cursor (next entry may be a Command or an Intent to expand)
+        Failed(r):    stop the plan; surface r upward
+        Interrupted(c): stop the plan; surface c upward
+
+Only Completed advances the cursor. Running holds position. Either terminal-error
+status ends the plan walk.
+
+Status carries resume / state-at-stop data
+
+Tie this back to persistence and lazy decomp:
+
+
+A Running command's status (or the command's own progress fields) must hold enough to
+resume after a save/load — current step, target tick. The command is the source of
+truth for its own progress; it re-derives its ScheduledEvent from that, never the
+reverse.
+A terminal status should carry where it stopped (the relevant world facts at the
+point of stopping), so that if the surviving plan re-decomposes a later intent, the new
+decomposition runs against real post-stop state rather than the world as it was at
+original plan time. This is the same freshness guarantee lazy decomposition provides.
+
+
+Plan status vs command status
+
+Don't conflate the two:
+
+
+Command status = the outcome of one primitive.
+Plan status = derived by the plan executor from command statuses + cursor position:
+Running while any command is Running or the cursor has entries left; Completed
+when the cursor reaches the end; Failed/Interrupted when a command ends the walk with
+that status.
+
+
+The plan executor maps per-command status onto plan status; the layer above reads plan
+status, not individual command statuses.
+
+
+
+Addendum: Validation
+
+You already have validation in two forms — keep them distinct
+
+Validation shows up at two different layers, checking sometimes-identical predicates for
+different reasons. Conflating them is the trap.
+
+
+Decomposer guards (if not standing → push Stand): these decide what steps a plan
+needs. They run at decompose time and shape the command list. They are about plan
+construction.
+Command preconditions (is the actor actually standing / in range right now?):
+these decide whether this primitive is currently legal to execute. They run at
+execution time and gate the command. They are about plan execution.
+
+
+Same predicate, different job. You need both.
+
+Why command-level validation is not redundant — time drift
+
+A decomposer's guards evaluate state at decompose time. But the plan it produces contains
+time-extended commands (a GoTo continued by ScheduledEvents). State drifts during that
+walk.
+
+Example: AlterClothingStateDecomposer runs, sees the actor is standing and not in range,
+and emits [GoToCharacterIntent, AlterStateClothingCommand]. The walk takes several ticks.
+During it the actor is knocked down. The AlterStateClothing command's "is standing / in
+range" condition was checked before the walk — it is now stale.
+
+Command preconditions are the safety net: validated at the command's own start, they catch
+drift that no decompose-time guard could have seen.
+
+Where it slots in
+
+Validation gates the transition from "cursor reaches command" to "command runs". It is a
+pure read (no mutation), so a failed validation produces Failed with no side
+effects.
+
+plan executor reaches a Command:
+    result = commandSystem[cmd.type].validate(cmd, world)   // pure, read-only
+    if result is Failed(reason):
+        status = Failed(reason)        // stop; nothing happened
+    else:
+        run / start the command        // may return Running, Completed, ...
+
+Keep validate and execute as separate steps in the command's system, so "fails
+before any side effect" is structural, not a matter of discipline.
+
+Time-extended commands: validate again while Running
+
+Precondition validation gates the start. For a command that stays Running across ticks,
+the condition that made it valid can become false mid-flight (knocked down mid-walk). So a
+time-extended command may re-validate its invariant on each continuation tick:
+
+Running tick:
+    if not commandSystem[cmd.type].stillValid(cmd, world):
+        status = Failed(reason)   // or Interrupted, if cause is external
+    else if arrived:
+        status = Completed
+    else:
+        status = Running
+
+Precondition = "can I start?", checked once. Invariant = "am I still valid?", checked while
+Running. A command type opts into the invariant check only if it can be invalidated
+mid-flight.
+
+A failed validation is NOT a re-decompose
+
+The command reports Failed(reason) and stops. It does not re-decompose itself or
+patch the plan. Whether to re-decompose the originating intent, abandon it, or surface to
+the UI is a layer-above policy decision (today: stop + tell UI; later: the arbiter /
+planner decides). Keep the command dumb: validate, report, stop.
+
+Fits the existing rules
+
+
+Pure / no persisted state. Validation only reads domain systems
+(PoseManager, LocationManager, …); it stores nothing, so it adds nothing to the save
+format.
+Data over classes. Validation logic lives in the command's registered system
+(hand-written per command type), exactly like decomposers live in registered systems
+per intent type. The command stays a plain data record.
+Same freshness guarantee as lazy decomp. Lazy decomposition keeps plan
+construction honest against current state; command validation keeps plan execution
+honest against current state. They are the same principle applied at the two layers.
+
+
+
+
+Your goal is to implement the above systems and use them for:
+implement the AlterClothingState intent, And the goToCharacterIntent has some similar pre-exising implementation in gotoNearbyLocation (note no async continuation yet, just plan the commands and executor with that in mind)
+
+
+Decompose to commands and execute. Intent source will come from ClothingInferenceAction and clothingStateChangeUiAction
