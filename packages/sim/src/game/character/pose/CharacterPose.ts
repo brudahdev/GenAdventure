@@ -122,7 +122,16 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
     getCurrentPoseId(): string { return this.currentPose.id }
 
     getPoseByTag(tag: string) {
-        return findFirstInMapWithTag(tag, this.poseMap.values())
+        const pose = findFirstInMapWithTag(tag, this.poseMap.values())
+        if (!pose) {
+            return undefined;
+        }
+
+        const isPoseAllowedAtCurrentSubLocation = this.getAvailablePoseOptions().has(pose.id);
+        if (isPoseAllowedAtCurrentSubLocation) {
+            return pose
+        }
+        return pose
     }
 
     setPoseById(poseId: string) {
@@ -149,14 +158,14 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         this.emitPoseChangedEvent();
     }
 
-    getAvailablePoseOptions(): string[] {
-        const options: string[] = []
+    getAvailablePoseOptions(): Set<string> {
+        const options: Set<string> = new Set<string>()
         const locPoseOptions = this.characterLocation.getCurrentSubLocation().getPoseOptions();
         for (const option of locPoseOptions) {
             if (option == this.currentPose.id) {
                 continue;
             }
-            options.push(option)
+            options.add(option)
         }
         return options;
     }

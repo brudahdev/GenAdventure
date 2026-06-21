@@ -105,7 +105,7 @@ export class MainSync implements GameSystem {
     private pushPoseOptions(characterId: string): void {
         const pose = this.componentFor(characterId, CharacterPoseKey)
         if (!pose) return
-        void this.remoteMain.poseOptions(characterId, pose.getAvailablePoseOptions())
+        void this.remoteMain.poseOptions(characterId, [...pose.getAvailablePoseOptions()])
     }
 
 
