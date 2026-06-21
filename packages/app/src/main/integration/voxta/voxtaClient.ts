@@ -118,6 +118,18 @@ export class VoxtaClient {
     await this.signal.send({ $type: 'interrupt', sessionId })
   }
 
+  /** Set enabled scenarioRoles. */
+  async setEnabledRoles(enableRoles: Record<string, boolean>): Promise<void> {
+    const sessionId = this.signal.sessionId
+    if (!sessionId) return
+    await this.signal.send(
+      {
+        $type: 'updateContext',
+        sessionId,
+        enableRoles
+      })
+  }
+
   /** Add a character to the active chat as a participant. No-op without a session. */
   async addChatParticipant(characterId: string): Promise<void> {
     const sessionId = this.signal.sessionId

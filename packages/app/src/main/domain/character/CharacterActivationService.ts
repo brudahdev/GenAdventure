@@ -1,5 +1,5 @@
 import { singleton } from 'tsyringe'
-import type { NpcActivationChange } from '@gen-adventure/shared'
+import type { NpcActivationChange, ScenarioCharacter } from '@gen-adventure/shared'
 import { SimManager } from '../sim/SimManager'
 import { AvatarService } from '../avatar/AvatarService'
 import { CharacterService } from './CharacterService'
@@ -51,7 +51,8 @@ export class CharacterActivationService {
       scenarioCharacter.isActive = true
     this.activity.begin()
     try {
-      await this.voxtaClient.addChatParticipant(characterId)
+      await this.updateVoxtaEnabledRoles();
+
 
       const sim = this.sim.getSim()
       if (!sim) return
@@ -70,7 +71,8 @@ export class CharacterActivationService {
     const scenarioCharacter = this.characterService.getScenarioCharacterById(characterId)
     if (scenarioCharacter)
       scenarioCharacter.isActive = false
-    await this.voxtaClient.removeChatParticipant(characterId)
+    await this.updateVoxtaEnabledRoles();
+
     this.avatarService.remove(characterId, useFade)
   }
 
@@ -82,11 +84,24 @@ export class CharacterActivationService {
     for (const character of this.characterService.getScenarioCharacters()) {
       if (active.has(character.characterId)) {
         character.isActive = true;
-        await this.voxtaClient.addChatParticipant(character.characterId)
       } else {
         character.isActive = false;
-        await this.voxtaClient.removeChatParticipant(character.characterId)
       }
     }
+    await this.updateVoxtaEnabledRoles();
+  }
+
+  async updateVoxtaEnabledRoles() {
+    await this.voxtaClient.setEnabledRoles(this.getEnabledRoles())
+  }
+
+  private getEnabledRoles(): Record<string, boolean> {
+    const rv: Record<string, boolean> = {}
+    const scenarioCharacters = this.characterService.getScenarioCharacters()
+    for (const char of scenarioCharacters) {
+      rv[char.roleName] = char.isActive
+    }
+
+    return rv;
   }
 }
