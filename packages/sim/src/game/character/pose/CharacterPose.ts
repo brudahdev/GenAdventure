@@ -91,6 +91,11 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
 
         this.currentPose = initPose;
         this.updatePoseContextItem();
+        eventSystem.on("location.changed", (args) => {
+            if (args.characterId != this.entity.id)
+                return;
+            this.updatePoseContextItem();
+        })
 
         if (entity.id != PLAYER_CHARACTER_ID) {
             this.inferenceAction = new PoseInferenceAction(this.entity, eventSystem, inferenceManager, registry);

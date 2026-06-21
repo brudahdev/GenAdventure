@@ -60,7 +60,7 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
         // }
 
         ///<invoke>Neena_change_Locomotion("<user name>")
-
+// <invoke>Cortney_change_Locomotion("standing near <user name>")
 
         const targetEntity = this.entity
 
