@@ -7,8 +7,9 @@ import type { ChatMessage } from '@gen-adventure/shared'
  * finish), `playing` is the light-grey chunk currently being voiced, and text
  * after it stays hidden until its audio starts. `finalText` is the authoritative
  * full text (from CHAT_MESSAGE or a typed echo) shown once playback settles or
- * when the reply has no audio at all. Visibility ordering across characters is
- * driven by the global `audioActive` signal (see audio-store) — not stored here.
+ * when the reply has no audio at all. A character bubble stays hidden until it
+ * starts voicing or settles (see `viewOf` in ChatPage), so ordering across
+ * speakers falls out of per-message state — not a global signal.
  */
 export interface DisplayMessage {
     messageId: string

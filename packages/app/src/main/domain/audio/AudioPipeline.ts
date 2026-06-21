@@ -1,5 +1,6 @@
 import type {
     AudioChunk,
+    AudioReplyEnd,
     AudioStartedAck,
     AudioCompleteAck,
     VoxtaServerReplyChunk
@@ -25,12 +26,24 @@ export class AudioPipeline {
     constructor(
         private readonly voxta: VoxtaClient,
         private readonly emitChunk: (chunk: AudioChunk) => void,
+        private readonly emitReplyEnd: (event: AudioReplyEnd) => void,
         private readonly emitStop: () => void
     ) {}
 
     /** Reset the emission chain (used by interrupt). */
     resetChain(): void {
         this.downloadChain = Promise.resolve()
+    }
+
+    /** A reply finished streaming (replyEnd) — emit the completion to the renderer
+     *  AFTER the message's already-queued chunks, by appending to the same ordered
+     *  download chain. The epoch guard drops it if an interrupt has since fired. */
+    signalReplyEnd(messageId: string): void {
+        const epoch = this.epoch
+        this.downloadChain = this.downloadChain.then(() => {
+            if (this.epoch !== epoch) return
+            this.emitReplyEnd({ messageId })
+        })
     }
 
     /** Download + queue a reply chunk's audio for ordered playback. */

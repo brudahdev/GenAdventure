@@ -5,6 +5,7 @@ import type {
   VoxtaScenarioSummary,
   ChatMessage,
   AudioChunk,
+  AudioReplyEnd,
   AudioStartedAck,
   AudioCompleteAck,
   RecordingStartEvent,
@@ -93,6 +94,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
       const listener = (_event: unknown, chunk: AudioChunk): void => callback(chunk)
       ipcRenderer.on(ICP.AUDIO_PLAY, listener)
       return () => ipcRenderer.removeListener(ICP.AUDIO_PLAY, listener)
+    },
+
+    // A reply's audio is complete (after its last chunk). Returns an unsubscribe fn.
+    onReplyEnd: (callback: (event: AudioReplyEnd) => void): (() => void) => {
+      const listener = (_event: unknown, event: AudioReplyEnd): void => callback(event)
+      ipcRenderer.on(ICP.AUDIO_REPLY_END, listener)
+      return () => ipcRenderer.removeListener(ICP.AUDIO_REPLY_END, listener)
     },
 
     // Stop all playback (interrupt). Returns an unsubscribe fn.

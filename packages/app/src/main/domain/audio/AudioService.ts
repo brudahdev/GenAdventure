@@ -1,11 +1,13 @@
 import { container, singleton } from 'tsyringe'
 import type {
     AudioChunk,
+    AudioReplyEnd,
     AudioStartedAck,
     AudioCompleteAck,
     RecordingStartEvent,
     VoxtaServerMessage,
     VoxtaServerReplyChunk,
+    VoxtaServerReplyEnd,
     VoxtaServerRecordingRequest
 } from '@gen-adventure/shared'
 import { VoxtaClient } from '../../integration/voxta/voxtaClient'
@@ -14,6 +16,7 @@ import { AudioPipeline } from './AudioPipeline'
 const voxtaClient = container.resolve(VoxtaClient)
 
 type PlayHandler = (chunk: AudioChunk) => void
+type ReplyEndHandler = (event: AudioReplyEnd) => void
 type StopHandler = () => void
 type RecordingStartHandler = (event: RecordingStartEvent) => void
 type RecordingStopHandler = () => void
@@ -29,6 +32,7 @@ type RecordingStopHandler = () => void
 export class AudioService {
     private readonly pipeline: AudioPipeline
     private readonly playHandlers: PlayHandler[] = []
+    private readonly replyEndHandlers: ReplyEndHandler[] = []
     private readonly stopHandlers: StopHandler[] = []
     private readonly recordingStartHandlers: RecordingStartHandler[] = []
     private readonly recordingStopHandlers: RecordingStopHandler[] = []
@@ -37,6 +41,7 @@ export class AudioService {
         this.pipeline = new AudioPipeline(
             voxtaClient,
             (chunk) => this.emit(this.playHandlers, chunk),
+            (event) => this.emit(this.replyEndHandlers, event),
             () => this.emit(this.stopHandlers, undefined)
         )
         voxtaClient.onMessage((message) => this.handleServerMessage(message))
@@ -45,6 +50,11 @@ export class AudioService {
     /** Subscribe to ordered, ready-to-play TTS chunks. */
     onPlayAudio(handler: PlayHandler): void {
         this.playHandlers.push(handler)
+    }
+
+    /** Subscribe to "a reply's audio is complete" signals (after its last chunk). */
+    onReplyEnd(handler: ReplyEndHandler): void {
+        this.replyEndHandlers.push(handler)
     }
 
     /** Subscribe to "stop all playback" (interrupt) signals. */
@@ -81,6 +91,9 @@ export class AudioService {
         switch (message.$type) {
             case 'replyChunk':
                 this.pipeline.processReplyChunk(message as VoxtaServerReplyChunk)
+                break
+            case 'replyEnd':
+                this.pipeline.signalReplyEnd((message as VoxtaServerReplyEnd).messageId)
                 break
             case 'recordingRequest': {
                 const m = message as VoxtaServerRecordingRequest

@@ -7,7 +7,6 @@ import {
     speakerMuted,
     setPlaybackStatus,
     setRecordingStatus,
-    setAudioActive,
     setSpeakingCharacterId
 } from '../stores/audio-store'
 import { beginChunk, completeChunk, settleToFinal, markInterrupted } from '../stores/chat-store'
@@ -30,13 +29,9 @@ export default function AudioController() {
         let currentMessageId: string | null = null
         // The last message that began voicing — settled when a new speaker starts.
         let lastVoicedId: string | null = null
-        // Debounced settle-to-final, so brief inter-sentence gaps don't reveal the tail early.
-        let settleTimer: ReturnType<typeof setTimeout> | null = null
-
-        // Mirror "is any audio playing or queued" to the store — gates ordered reveal.
-        function updateActive(): void {
-            setAudioActive(isPlaying || queue.length > 0)
-        }
+        // Replies whose audio stream has ended (replyEnd reached, after the last chunk)
+        // but whose final chunk may still be queued/playing — settled by trySettle.
+        const endedMessages = new Set<string>()
 
         // Begin voicing a chunk: settle the previous speaker first so it ends as full
         // white text before the next character's reply starts revealing. `durationMs`
@@ -48,20 +43,16 @@ export default function AudioController() {
             beginChunk(chunk.messageId, chunk.senderId, chunk.text, durationMs)
         }
 
-        function cancelSettle(): void {
-            if (settleTimer) {
-                clearTimeout(settleTimer)
-                settleTimer = null
-            }
-        }
-
-        function scheduleSettle(messageId: string): void {
-            cancelSettle()
-            settleTimer = setTimeout(() => {
-                settleTimer = null
-                settleToFinal(messageId)
-                setSpeakingCharacterId(null)
-            }, 250)
+        // Settle a reply to its full text once its stream has ended AND its last chunk
+        // has finished — deterministic, replacing the old debounced timer. No-ops while
+        // the message is still playing or has queued chunks (deferred until it drains).
+        function trySettle(messageId: string): void {
+            if (!endedMessages.has(messageId)) return
+            if (currentMessageId === messageId) return
+            if (queue.some((c) => c.messageId === messageId)) return
+            endedMessages.delete(messageId)
+            settleToFinal(messageId)
+            if (!isPlaying && queue.length === 0) setSpeakingCharacterId(null)
         }
 
         function ack(messageId: string, index: number): void {
@@ -73,12 +64,11 @@ export default function AudioController() {
             currentMessageId = null
             completeChunk(chunk.messageId)
             ack(chunk.messageId, chunk.index)
-            if (queue.length === 0) {
-                setPlaybackStatus('off')
-                scheduleSettle(chunk.messageId)
-            }
+            if (queue.length === 0) setPlaybackStatus('off')
+            // Settle now if this was the reply's last chunk and its stream already ended;
+            // otherwise the reply-end signal (or the next chunk) drives it.
+            trySettle(chunk.messageId)
             playNext()
-            updateActive()
         }
 
         function playNext(): void {
@@ -92,7 +82,6 @@ export default function AudioController() {
             // Speaker muted — skip real playback but still ack (start+complete) so the
             // server flow advances, and reveal the text instantly (no karaoke timing).
             if (speakerMuted()) {
-                cancelSettle()
                 startVoicing(chunk, 0)
                 completeChunk(chunk.messageId)
                 void window.electronAPI.audio.started({
@@ -104,8 +93,7 @@ export default function AudioController() {
                     isNarration: chunk.isNarration
                 })
                 ack(chunk.messageId, chunk.index)
-                if (queue.length === 0) scheduleSettle(chunk.messageId)
-                updateActive()
+                trySettle(chunk.messageId)
                 playNext()
                 return
             }
@@ -113,13 +101,11 @@ export default function AudioController() {
             isPlaying = true
             currentMessageId = chunk.messageId
             setPlaybackStatus('playing')
-            updateActive()
 
             engine
                 .playChunk(chunk.dataUrl)
                 .then(({ duration, onEnded }) => {
                     // Audio has started — reveal this chunk, paced over its clip length.
-                    cancelSettle()
                     startVoicing(chunk, duration)
                     void window.electronAPI.audio.started({
                         messageId: chunk.messageId,
@@ -142,8 +128,14 @@ export default function AudioController() {
 
         const unsubPlay = window.electronAPI.audio.onPlay((chunk) => {
             queue.push(chunk)
-            updateActive()
             playNext()
+        })
+
+        // A reply's audio stream is complete — settle once its last chunk has played
+        // (deferred via endedMessages while chunks are still queued/playing).
+        const unsubReplyEnd = window.electronAPI.audio.onReplyEnd((event) => {
+            endedMessages.add(event.messageId)
+            trySettle(event.messageId)
         })
 
         const unsubStop = window.electronAPI.audio.onStop(() => {
@@ -154,14 +146,13 @@ export default function AudioController() {
             queue.length = 0
             engine.stop()
             isPlaying = false
-            cancelSettle()
+            endedMessages.clear()
             const target = currentMessageId ?? lastVoicedId
             if (target) markInterrupted(target)
             currentMessageId = null
             lastVoicedId = null
             setPlaybackStatus('off')
             setSpeakingCharacterId(null)
-            updateActive()
         })
 
         // --- Mic input ---
@@ -217,27 +208,25 @@ export default function AudioController() {
                 queue.length = 0
                 engine.stop()
                 isPlaying = false
-                cancelSettle()
+                endedMessages.clear()
                 if (currentMessageId) settleToFinal(currentMessageId)
                 currentMessageId = null
                 lastVoicedId = null
                 setPlaybackStatus('off')
                 setSpeakingCharacterId(null)
-                updateActive()
             }
         })
 
         onCleanup(() => {
             unsubPlay()
+            unsubReplyEnd()
             unsubStop()
             unsubRecStart()
             unsubRecStop()
-            cancelSettle()
             audioInput.dispose()
             engine.dispose()
             setPlaybackStatus('off')
             setRecordingStatus('off')
-            setAudioActive(false)
             setSpeakingCharacterId(null)
         })
     })

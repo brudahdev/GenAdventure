@@ -83,6 +83,14 @@ export interface AudioChunk {
   text: string
 }
 
+/** Main → renderer: a character reply's audio stream is complete — emitted after
+ *  the message's last {@link AudioChunk} (ordered through the same download chain),
+ *  so the renderer can settle the bubble to its full text deterministically rather
+ *  than guessing with a timer. */
+export interface AudioReplyEnd {
+  messageId: string
+}
+
 /** Renderer → main: a chunk has started playing (carries the real duration so
  *  main can relay `speechPlaybackStart` to Voxta). */
 export interface AudioStartedAck {

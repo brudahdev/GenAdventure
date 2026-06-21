@@ -30,8 +30,9 @@ export class AudioIpcHandlers {
             audioService.audioComplete(ack)
         })
 
-        // Main → renderer: ordered TTS chunks, interrupt, and mic start/stop.
+        // Main → renderer: ordered TTS chunks, reply-complete, interrupt, mic start/stop.
         audioService.onPlayAudio((chunk) => broadcast(ICP.AUDIO_PLAY, chunk))
+        audioService.onReplyEnd((event) => broadcast(ICP.AUDIO_REPLY_END, event))
         audioService.onStopAudio(() => broadcast(ICP.AUDIO_STOP))
         audioService.onRecordingStart((event) => broadcast(ICP.AUDIO_RECORDING_START, event))
         audioService.onRecordingStop(() => broadcast(ICP.AUDIO_RECORDING_STOP))

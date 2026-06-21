@@ -68,6 +68,7 @@ export type {
   ChatMessage,
   // Audio pipeline (main ↔ renderer)
   AudioChunk,
+  AudioReplyEnd,
   AudioStartedAck,
   AudioCompleteAck,
   RecordingStartEvent,

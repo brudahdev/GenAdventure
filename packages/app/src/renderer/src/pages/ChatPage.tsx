@@ -30,8 +30,7 @@ import {
   speakerMuted,
   setSpeakerMuted,
   recordingStatus,
-  playbackStatus,
-  audioActive
+  playbackStatus
 } from '../stores/audio-store'
 import { messages, upsertFinalText, reset } from '../stores/chat-store'
 import type { DisplayMessage } from '../stores/chat-store'
@@ -58,18 +57,19 @@ interface MessageView {
 
 /**
  * Resolve what (if anything) a message should show right now. Returns null to
- * hide the bubble entirely — used to keep a later character's reply hidden until
- * the earlier character finishes its reveal (gated by the global `audioActive`).
+ * hide the bubble entirely — a character reply stays hidden until it starts
+ * voicing (its first chunk) or settles, so the authoritative full text is never
+ * shown out of sync with the karaoke (no full-text flash, no restart). Every
+ * reply ends with a reply-end signal, so an un-voiced bubble always settles —
+ * no-audio/silence replies settle as soon as that signal arrives.
  */
-function viewOf(m: DisplayMessage, active: boolean): MessageView | null {
+function viewOf(m: DisplayMessage): MessageView | null {
   if (m.role === 'user') return { revealed: m.finalText ?? '', playing: '', duration: 0 }
   if (m.interrupted) return { revealed: m.revealed, playing: '', duration: 0, interrupted: true }
   if (m.playing != null) return { revealed: m.revealed, playing: m.playing, duration: m.playingDuration }
   if (m.settled) return { revealed: m.finalText ?? m.revealed, playing: '', duration: 0 }
   if (m.revealed !== '') return { revealed: m.revealed, playing: '', duration: 0 } // between its own chunks
-  // Nothing revealed yet: wait its turn while any audio is active, else show full text.
-  if (active) return null
-  return m.finalText != null ? { revealed: m.finalText, playing: '', duration: 0 } : null
+  return null // nothing voiced yet — hide until it starts voicing or settles
 }
 
 
@@ -503,7 +503,7 @@ export default function ChatPage(): JSX.Element {
       <div class="chat-messages" style={`--char-fade-ms:${CHAR_FADE_MS}ms`} ref={messagesEl}>
         <For each={messages}>
           {(message) => {
-            const view = (): MessageView | null => viewOf(message, audioActive())
+            const view = (): MessageView | null => viewOf(message)
             return (
               <Show when={view()}>
                 {(v) => (

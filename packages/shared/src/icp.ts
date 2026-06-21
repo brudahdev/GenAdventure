@@ -10,6 +10,7 @@ export const ICP = {
     CHAT_PARTIAL: 'chat:partial',             // main → renderer (send)
     // Audio: streamed TTS playback + mic voice input
     AUDIO_PLAY: 'audio:play',                     // main → renderer (send)
+    AUDIO_REPLY_END: 'audio:reply-end',           // main → renderer (send): { messageId }
     AUDIO_STOP: 'audio:stop',                     // main → renderer (send)
     AUDIO_STARTED: 'audio:started',               // renderer → main (invoke)
     AUDIO_COMPLETE: 'audio:complete',             // renderer → main (invoke)

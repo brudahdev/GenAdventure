@@ -7,6 +7,7 @@ import type {
   VoxtaScenarioSummary,
   ChatMessage,
   AudioChunk,
+  AudioReplyEnd,
   AudioStartedAck,
   AudioCompleteAck,
   RecordingStartEvent,
@@ -62,6 +63,7 @@ declare global {
       }
       audio: {
         onPlay(callback: (chunk: AudioChunk) => void): () => void
+        onReplyEnd(callback: (event: AudioReplyEnd) => void): () => void
         onStop(callback: () => void): () => void
         onRecordingStart(callback: (event: RecordingStartEvent) => void): () => void
         onRecordingStop(callback: () => void): () => void
