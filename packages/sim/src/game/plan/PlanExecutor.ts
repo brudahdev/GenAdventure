@@ -12,6 +12,9 @@ import { AlterClothingStateCommandSystem } from "../character/clothing/behavior/
 import { GoToCharacterDecomposer } from "./GoToCharacterDecomposer"
 import { AlterClothingStateDecomposer } from "../character/clothing/behavior/AlterClothingStateDecomposer"
 import { PoseDecomposer } from "../character/pose/behavior/PoseDecomposer"
+import { GoToCommand } from "../character/locomotion/behavior/GoToCommand"
+import { GoToCommandSystem } from "../character/locomotion/behavior/GoToCommandSystem"
+import { GoToDecomposer } from "../character/locomotion/behavior/GoToDecomposer"
 
 
 /** The intent/command layer's entry point. Constructor-injects every concrete
@@ -27,16 +30,21 @@ export class PlanExecutor {
     constructor(
         private readonly registry: EntityRegistry,
         poseCommand: PoseCommandSystem,
-        goToNearbyLocationCommand: GoToNearbyLocationCommandSystem,
-        alterClothingStateCommand: AlterClothingStateCommandSystem,
-        goToCharacterDecomposer: GoToCharacterDecomposer,
-        alterClothingStateDecomposer: AlterClothingStateDecomposer,
         poseDecomoser: PoseDecomposer,
+
+        alterClothingStateCommand: AlterClothingStateCommandSystem,
+        alterClothingStateDecomposer: AlterClothingStateDecomposer,
+
+        goToCommand: GoToCommandSystem,
+        goToDecompose: GoToDecomposer,
+
+        goToNearbyLocationCommand: GoToNearbyLocationCommandSystem,
+        goToCharacterDecomposer: GoToCharacterDecomposer,
     ) {
-        for (const system of [poseCommand, goToNearbyLocationCommand, alterClothingStateCommand]) {
+        for (const system of [poseCommand, goToNearbyLocationCommand, alterClothingStateCommand, goToCommand]) {
             this.register(this.commands, system.type, system)
         }
-        for (const decomposer of [goToCharacterDecomposer, alterClothingStateDecomposer, poseDecomoser]) {
+        for (const decomposer of [goToCharacterDecomposer, alterClothingStateDecomposer, poseDecomoser, goToDecompose]) {
             this.register(this.decomposers, decomposer.type, decomposer)
         }
     }
