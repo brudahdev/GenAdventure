@@ -16,6 +16,7 @@ import { CharacterPoseKey } from './game/character/pose/CharacterPose'
 import { CharacterLocation, CharacterLocationKey } from './game/character/location/CharacterLocation'
 import { CharacterLocomotionKey } from './game/character/locomotion/CharacterLocomotion'
 import { NpcActivityKey } from './game/character/npc/NpcActivity'
+import { poseIntent } from './game/character/pose/behavior/PoseIntent'
 
 /** The worker's implementation of the surface the main process calls. Each run
  *  gets its own child container (provisioned with a mode-specific adapter set)
@@ -101,9 +102,6 @@ class SimService implements SimApi {
 
   clothingStateChangeUiAction(characterId: string, clothingItemId: string, stateId: string): void {
     console.log('[sim] clothingStateChangeUiAction', characterId, clothingItemId, stateId)
-    if (characterId == PLAYER_CHARACTER_ID) {
-      //todo user acting
-    }
 
     const targetEntity = this.world?.registry.getById(characterId)
     if (!targetEntity) {
@@ -111,8 +109,7 @@ class SimService implements SimApi {
       return;
     }
 
-    // The player directs the character to alter its own clothing, so the actor
-    // and target are the same. Decomposition/execution runs in the plan layer.
+
     const status = this.getWorld().submitIntent(
       alterClothingStateIntent(PLAYER_CHARACTER_ID, characterId, clothingItemId, stateId)
     )
@@ -153,11 +150,6 @@ class SimService implements SimApi {
     characterId: string,//playerId if the user is posing themselves, otherwise id of an npc
     poseId: string,
   ) {
-    //todo action layer, decomposition, etc. not now though
-    if (characterId == PLAYER_CHARACTER_ID) {
-      //todo user acting
-    }
-
     const targetEntity = this.world?.registry.getById(characterId);
     if (!targetEntity) {
       console.log(`[sim] unable to get character with id ${characterId}`)
@@ -166,7 +158,15 @@ class SimService implements SimApi {
 
     const targetposeManager = targetEntity.require(CharacterPoseKey)
     const targetPoseId = poseId
-    targetposeManager.setPoseById(targetPoseId)
+
+
+    const status = this.getWorld().submitIntent(
+      poseIntent(PLAYER_CHARACTER_ID, characterId, targetPoseId)
+    )
+    if (status.state !== 'completed') {
+      console.log(`[sim] targetPoseId plan did not complete (${status.state})`)
+      return;
+    }
 
     if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
       main.imageRequest(buildAvatarPrompt(targetEntity))
