@@ -1,5 +1,8 @@
 import { Lifecycle, scoped } from "tsyringe";
+import type { Notif } from "@gen-adventure/shared";
 import { EventSystem } from "../game/EventSystem";
+
+export type { Notif } from "@gen-adventure/shared";
 
 @scoped(Lifecycle.ContainerScoped)
 export class NotificationService {
@@ -15,16 +18,4 @@ export class NotificationService {
         this.eventSystem.emit("notification", notification)
     }
 
-}
-
-
-
-
-export interface Notif {
-    text: string,
-    characterIds: string[],
-    actorInfo?: {
-        text: string,
-        actorId: string,
-    }
 }

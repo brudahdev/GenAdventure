@@ -81,10 +81,8 @@ export class MainSync implements GameSystem {
             this.remoteMain.imageRequest(args)
         })
 
-        this.eventSystem.on("notification", (args: Notif[]) => {//todo move Notif to shared
-            console.log(JSON.stringify(args))
-
-            //todo send args
+        this.eventSystem.on("notification", (notif: Notif) => {
+            void this.remoteMain.notification(notif)
         })
 
     }

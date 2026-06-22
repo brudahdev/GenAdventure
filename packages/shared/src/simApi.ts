@@ -5,6 +5,7 @@ import type { NearbyLocationSummary } from './location'
 import type { TouchOptions } from './touch'
 import type { NpcActivationChange } from './npc'
 import type { InferenceAction, InferenceInvocation } from './inference'
+import type { Notif } from './notification'
 
 // The worker and main process talk over Comlink as if calling each other's
 // methods. Each side `expose()`s its own implementation and `wrap()`s a typed
@@ -70,4 +71,8 @@ export interface MainApi {
   /** Push an inference action's current definition up so main can register it
    *  with Voxta. */
   syncAction(action: InferenceAction): void,
+
+  /** A sim notification (witnessed action). Routed to the main NotificationService,
+   *  which turns it into Voxta /secret and/or /instructions messages. */
+  notification(notif: Notif): void,
 }

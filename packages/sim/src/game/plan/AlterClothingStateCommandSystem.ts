@@ -54,9 +54,7 @@ export class AlterClothingStateCommandSystem implements CommandSystem<AlterCloth
 
 
     private sendNotificaiton(cmd: AlterClothingStateCommand, state: ClothingItemState) {
-        if (!state.verb) {
-            return;
-        }
+        //todo verb should come from transition?
         const actor = this.registry.requireById(cmd.actorId)
         const actorIden = actor.require(CharacterIdentityKey);
 

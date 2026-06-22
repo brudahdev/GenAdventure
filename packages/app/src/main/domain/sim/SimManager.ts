@@ -23,6 +23,7 @@ import { LocationService } from "../location/LocationService";
 import { PoseService } from "../pose/PoseService";
 import { TouchService } from "../touch/TouchService";
 import { VoxtaClient } from "../../integration/voxta/voxtaClient";
+import { NotificationService } from "../notification/NotificationService";
 
 const timeService = container.resolve(TimeService);
 const clothingService = container.resolve(ClothingService);
@@ -30,6 +31,7 @@ const locationService = container.resolve(LocationService);
 const poseService = container.resolve(PoseService);
 const touchService = container.resolve(TouchService);
 const voxtaClient = container.resolve(VoxtaClient);
+const notificationService = container.resolve(NotificationService);
 
 /** How long to wait for the worker's `start()` to resolve before giving up. */
 const START_TIMEOUT_MS = 30_000
@@ -101,6 +103,10 @@ export class SimManager {
             for (const handler of this.syncActionHandlers) {
                 handler(action)
             }
+        },
+
+        notification: (notif) => {
+            notificationService.onNotification(notif)
         }
     }
 

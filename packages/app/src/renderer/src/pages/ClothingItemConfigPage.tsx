@@ -87,7 +87,7 @@ function ItemEditor(props: {
   const addState = (): void => {
     const existing = new Set(stateIds())
     patch({
-      states: [...props.item.states, { id: uniqueId('new-state', existing), tags: [] }]
+      states: [...props.item.states, { id: uniqueId('new-state', existing), verb: '', tags: [] }]
     })
   }
 
@@ -257,6 +257,20 @@ function ItemEditor(props: {
                 />
                 <Show when={!state().id}>
                   <span class="field-error">State ID is required</span>
+                </Show>
+              </div>
+
+              <div class="field">
+                <label class="field-label">VERB</label>
+                <input
+                  class="field-input"
+                  classList={{ 'field-invalid': !state().verb }}
+                  type="text"
+                  value={state().verb ?? ''}
+                  onInput={(e) => updateState(sIdx, { verb: e.currentTarget.value })}
+                />
+                <Show when={!state().verb}>
+                  <span class="field-error">Verb is required</span>
                 </Show>
               </div>
 
