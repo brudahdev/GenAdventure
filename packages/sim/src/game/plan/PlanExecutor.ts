@@ -7,7 +7,7 @@ import { ActorPlanKey } from "../../core/plan/ActorPlan"
 import { EntityRegistry } from "../entity/EntityRegistry"
 import type { ActorIntent } from "./planDefs"
 import { PoseCommandSystem } from "../character/pose/behavior/PoseCommandSystem"
-import { GoToNearbyLocationCommandSystem } from "./GoToNearbyLocationCommandSystem"
+
 import { AlterClothingStateCommandSystem } from "../character/clothing/behavior/AlterClothingStateCommandSystem"
 import { GoToCharacterDecomposer } from "../character/locomotion/behavior/GoToCharacter/GoToCharacterDecomposer"
 import { AlterClothingStateDecomposer } from "../character/clothing/behavior/AlterClothingStateDecomposer"
@@ -38,10 +38,10 @@ export class PlanExecutor {
         goToCommand: GoToCommandSystem,
         goToDecompose: GoToDecomposer,
 
-        goToNearbyLocationCommand: GoToNearbyLocationCommandSystem,
+
         goToCharacterDecomposer: GoToCharacterDecomposer,
     ) {
-        for (const system of [poseCommand, goToNearbyLocationCommand, alterClothingStateCommand, goToCommand]) {
+        for (const system of [poseCommand, alterClothingStateCommand, goToCommand]) {
             this.register(this.commands, system.type, system)
         }
         for (const decomposer of [goToCharacterDecomposer, alterClothingStateDecomposer, poseDecomoser, goToDecompose]) {
