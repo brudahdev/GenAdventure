@@ -22,10 +22,14 @@ export class PoseCommandSystem implements CommandSystem<PoseCommand> {
     ) { }
 
     validate(cmd: PoseCommand): Validation {///todo target pose available, not on actor/ validate actor in same subloc as target
-        const actor = this.registry.getById(cmd.actorId)
-        if (!actor) return invalid(`actor ${cmd.actorId} not found`)
-        if (!actor.require(CharacterPoseKey).getPoseById(cmd.poseId)) {
-            return invalid(`pose '${cmd.poseId}' unknown for ${cmd.actorId}`)
+        const target = this.registry.getById(cmd.targetId)
+        
+        if (!target) return invalid(`actor ${cmd.targetId} not found`)
+        if (!target.require(CharacterPoseKey).getPoseById(cmd.poseId)) {
+            return invalid(`pose '${cmd.poseId}' unknown for ${cmd.targetId}`)
+        }
+        if (!target.require(CharacterPoseKey).getAvailablePoseOptions().has(cmd.poseId)) {
+            return invalid(`pose '${cmd.poseId}' not allowed in location`)
         }
         return ok()
     }

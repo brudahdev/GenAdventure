@@ -17,6 +17,7 @@ import { CharacterLocation, CharacterLocationKey } from './game/character/locati
 import { CharacterLocomotionKey } from './game/character/locomotion/CharacterLocomotion'
 import { NpcActivityKey } from './game/character/npc/NpcActivity'
 import { poseIntent } from './game/character/pose/behavior/PoseIntent'
+import { goToIntent } from './game/character/locomotion/behavior/GoToIntent'
 
 /** The worker's implementation of the surface the main process calls. Each run
  *  gets its own child container (provisioned with a mode-specific adapter set)
@@ -129,9 +130,7 @@ class SimService implements SimApi {
     locationId: string,
   ) {
     //todo action layer, decomposition, etc. not now though
-    if (characterId == PLAYER_CHARACTER_ID) {
-      //todo user acting
-    }
+  
 
     const targetEntity = this.world?.registry.getById(characterId);
     if (!targetEntity) {
@@ -139,7 +138,22 @@ class SimService implements SimApi {
       return;
     }
 
-    targetEntity.require(CharacterLocomotionKey).gotoNearbyLocation(locationId)
+    let targetLocation = this.world?.locationManager.getLocationById(locationId);
+    let targetSubLocation = undefined;
+    if (!targetLocation) {
+      targetLocation = this.world?.registry.requireById(PLAYER_CHARACTER_ID).require(CharacterLocationKey).getCurrentLocation();
+      targetSubLocation = locationId;
+    }
+
+
+
+    const status = this.getWorld().submitIntent(//todo async
+      goToIntent(characterId, targetLocation!.id, targetSubLocation)
+    )
+    if (status.state !== 'completed') {
+      console.log(`[sim] targetPoseId plan did not complete (${status.state})`)
+      return;
+    }
 
     if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
       main.imageRequest(buildAvatarPrompt(targetEntity))
@@ -160,7 +174,7 @@ class SimService implements SimApi {
     const targetPoseId = poseId
 
 
-    const status = this.getWorld().submitIntent(
+    const status = this.getWorld().submitIntent(//todo async
       poseIntent(PLAYER_CHARACTER_ID, characterId, targetPoseId)
     )
     if (status.state !== 'completed') {

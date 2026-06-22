@@ -1,5 +1,5 @@
 import { Lifecycle, scoped } from "tsyringe"
-import { goToCharacterIntent } from "../../../plan/planDefs"
+import { goToCharacterIntent } from "../../locomotion/behavior/GoToCharacter/GoToCharacter"
 import { AlterClothingStateIntent } from "./AlterClothingStateIntent"
 import { ALTER_CLOTHING_STATE_INTENT } from "./AlterClothingStateIntent"
 import { alterClothingStateCommand } from "./AlterClothingStateCommand"

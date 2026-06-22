@@ -23,6 +23,10 @@ export class SubLocation extends LocationBase implements Taggable {
         return this.config.excludeTags
     }
 
+    get onEnterText(){
+        return this.config.onEnterText
+    }
+
     getParent() {
         return this.parent;
     }

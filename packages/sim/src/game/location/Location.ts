@@ -61,6 +61,10 @@ export class Location extends LocationBase implements Taggable {
         return this.config.excludeTags
     }
 
+    get onEnterText() {
+        return this.config.onEnterText
+    }
+
     getLocationLinks() {
         return this.locationLinks
     }

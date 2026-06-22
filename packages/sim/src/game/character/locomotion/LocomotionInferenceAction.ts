@@ -4,10 +4,12 @@ import { Entity } from "../../../core/ec/Entity"
 import { EntityRegistry } from "../../entity/EntityRegistry"
 import { EventSystem } from "../../EventSystem"
 import { LocationLink } from "../../location/LocationLink"
+import { PlanExecutor } from "../../plan/PlanExecutor"
 import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentity, CharacterIdentityKey } from "../identity/CharacterIdentity"
 import { resolveTargetCharacter } from "../identity/characterLookup"
 import { NpcActivityKey } from "../npc/NpcActivity"
+import { goToIntent } from "./behavior/GoToIntent"
 import { CharacterLocomotionKey } from "./CharacterLocomotion"
 
 
@@ -29,6 +31,7 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
         private eventSystem: EventSystem,
         manager: InferenceActionManager,
         private readonly registry: EntityRegistry,
+        private readonly planExecutor: PlanExecutor,
     ) {
         const charId = entity.require(CharacterIdentityKey);
 
@@ -59,7 +62,7 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
         // }
 
         ///<invoke>Neena_change_Locomotion("<user name>")
-// <invoke>Cortney_change_Locomotion("standing near <user name>")
+        // <invoke>Cortney_change_Locomotion("standing near <user name>")
 
         const targetEntity = this.entity
 
@@ -71,8 +74,23 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
         }
 
 
-        const targetLocationId = (targetLocation instanceof LocationLink) ? targetLocation.getTo().id : targetLocation.id
-        targetLocomotionManager.gotoNearbyLocation(targetLocationId)//todo wait until done talking
+        let targetLocationId: string;
+        let targetSubLocationId: string | undefined;
+        if (targetLocation instanceof LocationLink) {
+            targetLocationId = targetLocation.getTo().id;
+        } else {//instance of sublocation
+            targetLocationId = targetLocation.getParent().id
+            targetSubLocationId = targetLocation.id
+        }
+
+
+        const status = this.planExecutor.submit(//todo async //todo wait until done talking? as command?
+            goToIntent(this.entity.id, targetLocationId, targetSubLocationId)
+        )
+        if (status.state !== 'completed') {
+            console.log(`[sim] goTo plan did not complete (${status.state})`)
+            return;
+        }
 
         if (targetEntity.require(NpcActivityKey).isActive) {
             this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))

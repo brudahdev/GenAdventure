@@ -4,7 +4,7 @@ import { AlterClothingStateIntent } from "../../clothing/behavior/AlterClothingS
 import { POSE_INTENT, PoseIntent } from "./PoseIntent";
 import { EntityRegistry } from "../../../entity/EntityRegistry";
 import { PlanEntry } from "../../../../core/plan/planTypes";
-import { goToCharacterIntent } from "../../../plan/planDefs";
+import { goToCharacterIntent } from "../../locomotion/behavior/GoToCharacter/GoToCharacter";
 import { CharacterLocationKey } from "../../location/CharacterLocation";
 import { poseCommand } from "./PoseCommand";
 

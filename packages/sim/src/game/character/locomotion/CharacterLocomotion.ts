@@ -11,6 +11,7 @@ import { LocationLink } from "../../location/LocationLink";
 import { LocomotionInferenceAction } from "./LocomotionInferenceAction";
 import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager";
 import { EntityRegistry } from "../../entity/EntityRegistry";
+import { PlanExecutor } from "../../plan/PlanExecutor";
 
 export const CharacterLocomotionKey = defineKey<CharacterLocomotion>("character.locomotion")
 export const characterLocomotionFactory = defineFactory(CharacterLocomotionKey, (entity, c) =>
@@ -19,6 +20,7 @@ export const characterLocomotionFactory = defineFactory(CharacterLocomotionKey, 
         c.resolve(EventSystem),
         c.resolve(InferenceActionManager),
         c.resolve(EntityRegistry),
+        c.resolve(PlanExecutor)
     )
 )
 
@@ -34,11 +36,12 @@ export class CharacterLocomotion implements Component {
         private readonly eventSystem: EventSystem,
         inferenceManager: InferenceActionManager,
         registry: EntityRegistry,
+        planExecutor: PlanExecutor,
     ) {
         this.charLocation = entity.require(CharacterLocationKey);
 
         if (entity.id != PLAYER_CHARACTER_ID) {
-            this.inferenceAction = new LocomotionInferenceAction(this.entity, eventSystem, inferenceManager, registry);
+            this.inferenceAction = new LocomotionInferenceAction(this.entity, eventSystem, inferenceManager, registry, planExecutor);
         }
     }
 

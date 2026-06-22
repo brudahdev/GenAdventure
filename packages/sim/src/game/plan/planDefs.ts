@@ -11,15 +11,6 @@ export interface ActorIntent extends Intent {
     actorId: string
 }
 
-export const GOTO_CHARACTER_INTENT = 'goToCharacter'
-export interface GoToCharacterIntent extends ActorIntent {
-    type: typeof GOTO_CHARACTER_INTENT
-    characterId: string
-}
-export const goToCharacterIntent = (actorId: string, characterId: string): GoToCharacterIntent => ({
-    kind: 'intent', type: GOTO_CHARACTER_INTENT, actorId, characterId,
-})
-
 export const GOTO_NEARBY_LOCATION_COMMAND = 'goToNearbyLocation'
 export interface GoToNearbyLocationCommand extends Command {
     type: typeof GOTO_NEARBY_LOCATION_COMMAND
