@@ -12,8 +12,10 @@ import { defineFactory } from "../../../core/ec/ComponentFactory";
 import { CharacterIdentity, CharacterIdentityKey } from "../identity/CharacterIdentity";
 import { LocationContextItem } from "../../location/LocationContextItem";
 import { LocationContextItemFactory } from "../../location/LocationContextItemFactory";
-import { CharacterLocationKey } from "../location/CharacterLocation";
+import { CharacterLocation, CharacterLocationKey } from "../location/CharacterLocation";
 import { Component } from "../../../core/ec/Component";
+import { NotificationService } from "../../../core/NotificationService";
+import { StringUtils } from "../../../utils/StringUtils";
 
 export const AppearanceKey = defineKey<CharacterAppearance>("character.appearance")
 export const appearanceFactory = defineFactory(AppearanceKey, (entity, c) =>
@@ -22,9 +24,11 @@ export const appearanceFactory = defineFactory(AppearanceKey, (entity, c) =>
         c.resolve<AppearanceConfigAdapter>(APPEARANCE_CONFIG_ADAPTER),
         c.resolve(EventSystem),
         c.resolve(LocationContextItemFactory),
+        c.resolve(NotificationService)
     ))
 export class CharacterAppearance implements Component {
     private charId: CharacterIdentity;
+    private charLocation: CharacterLocation;
     private contextItem: LocationContextItem;
 
 
@@ -37,8 +41,10 @@ export class CharacterAppearance implements Component {
         appearanceConfig: AppearanceConfigAdapter,
         eventSystem: EventSystem,
         contextItemFactory: LocationContextItemFactory,
+        private readonly notificationService: NotificationService,
     ) {
         this.charId = entity.require(CharacterIdentityKey)
+        this.charLocation = entity.require(CharacterLocationKey)
         const entryIds = this.charId.config.appearanceEntryIds;//todo get this from adapter
 
         this.appearanceItems = parseItemsByEntryIds(entryIds, appearanceConfig)
@@ -112,10 +118,14 @@ export class CharacterAppearance implements Component {
 
             if (prompt.getPositive().length > 0) {
                 const txt = prompt.getPositive().trim();
-                // const notificationTxt =
-                //     `${this.character.name}'s ${txt} ${StringUtils.isAreAdverb(txt)} now visible, no longer covered by ${this.character.hisHer} ${clothingItem.name}.`;
+                const notificationTxt =
+                    `${this.charId.name}'s ${txt} ${StringUtils.isAreAdverb(txt)} now visible, no longer covered by ${this.charId.config.pronouns.hisHer} ${clothingItem.name}.`;
 
-                // NotificationService.addTryPush(notificationTxt);
+                const witnesses = this.charLocation.getCurrentLocation().getCharactersInLocation().map(ent => ent.id)
+                this.notificationService.send({
+                    text: notificationTxt,
+                    characterIds: witnesses
+                })
             }
         }
 
@@ -133,10 +143,14 @@ export class CharacterAppearance implements Component {
 
             if (prompt.getPositive().length > 0) {
                 const txt = prompt.getPositive().trim();
-                // const notificationTxt =
-                //     `${this.character.name}'s ${txt} ${StringUtils.isAreAdverb(txt)} now hidden, covered by ${this.character.hisHer} ${clothingItem.name}.`;
+                const notificationTxt =
+                    `${this.charId.name}'s ${txt} ${StringUtils.isAreAdverb(txt)} now hidden, covered by ${this.charId.config.pronouns.hisHer} ${clothingItem.name}.`;
 
-                // NotificationService.addTryPush(notificationTxt);
+                const witnesses = this.charLocation.getCurrentLocation().getCharactersInLocation().map(ent => ent.id)
+                this.notificationService.send({
+                    text: notificationTxt,
+                    characterIds: witnesses
+                })
             }
         }
         this.updateContext();

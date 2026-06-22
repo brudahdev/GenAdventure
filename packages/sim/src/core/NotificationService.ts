@@ -6,9 +6,24 @@ export type { Notif } from "@gen-adventure/shared";
 
 @scoped(Lifecycle.ContainerScoped)
 export class NotificationService {
-    private enabled = true;
+    private enabled = false;
 
-    constructor(private readonly eventSystem: EventSystem) { }
+    constructor(
+        private readonly eventSystem: EventSystem
+    ) {
+        this.eventSystem.on("notification.add", (notif) => {
+            this.send(notif)
+        })
+
+    }
+
+    activate() {
+        this.enabled = true;
+    }
+
+    deactivate() {
+        this.enabled = false;
+    }
 
 
     send(notification: Notif | undefined) {

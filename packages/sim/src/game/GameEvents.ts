@@ -41,5 +41,6 @@ export interface GameEvents {
 
     "image.request": PromptRequest,
 
-    "notification": Notif,
+    "notification": Notif,//pushed by notification system
+    "notification.add": Notif,//pushed by things to send to notification.... probably bad but im lazy todo remove this
 }

@@ -79,6 +79,7 @@ export class SimWorld {
         for (const system of this.systems) {
             system.init?.()
         }
+        this.notificationService.activate();
     }
 
     /** Tears down the run in reverse lifecycle order: stops the time interval

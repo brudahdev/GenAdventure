@@ -47,8 +47,9 @@ export class AlterClothingStateCommandSystem implements CommandSystem<AlterCloth
         const item = this.registry.requireById(cmd.targetId).require(ClothingManagerKey).getClothingItemById(cmd.clothingId)
         if (!item) return failed(`clothing item '${cmd.clothingId}' not found on ${cmd.targetId}`)
 
+        const futureState = item.getStateById(cmd.stateId)!;
+        this.sendNotificaiton(cmd, futureState)
         const success = item.setStateById(cmd.stateId)
-        this.sendNotificaiton(cmd, item.getCurrentState()!)//todo sstate manager improvements
 
         return success ? completed() : failed(`could not set '${cmd.clothingId}' to state '${cmd.stateId}'`)
     }

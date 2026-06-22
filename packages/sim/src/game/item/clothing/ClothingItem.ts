@@ -7,6 +7,8 @@ import { EventSystem } from "../../EventSystem";
 import { PromptBuilder } from "../../../core/PromptBuilder";
 import { StringUtils } from "../../../utils/StringUtils";
 import { findFirstWithTag } from "../../../core/TagUtils";
+import { CharacterLocationKey } from "../../character/location/CharacterLocation";
+import { getName } from "../../character/characterViews";
 
 
 
@@ -121,7 +123,9 @@ export class ClothingItem implements Taggable {//todo transitions
         return this.stateManager.setStateById(stateId);
     }
 
-
+    getStateById(stateId: string) {
+        return this.stateManager.getStateById(stateId)
+    }
 
     getStateByTag(tag: string): ClothingItemState | undefined {
         return findFirstWithTag(tag, this.stateManager.getStateItems())
@@ -152,7 +156,14 @@ export class ClothingItem implements Taggable {//todo transitions
             const cleanedUpText = clothingItemText.replace(/,|[\s]+$/g, '');
             const adverb = StringUtils.isAreAdverb(cleanedUpText);
 
-            // NotificationService.addTryPush(`${this.wearingCharacter?.name}'s ${clothingItemText} ${adverb} now visible.`);
+            if (this.wearingEntity) {
+                const witnesses = this.wearingEntity.require(CharacterLocationKey).getCurrentLocation().getCharactersInLocation().map(ent => ent.id)
+                this.eventSystem.emit("notification.add", {
+                    text: `${getName(this.wearingEntity)}'s ${clothingItemText} ${adverb} now visible.`,
+                    characterIds: witnesses
+
+                })
+            }
         }
         const isCovered = !this.isOccluded && occludedByParent;
         if (isCovered) {
@@ -160,7 +171,14 @@ export class ClothingItem implements Taggable {//todo transitions
             const cleanedUpText = clothingItemText.replace(/,|[\s]+$/g, '');
             const adverb = StringUtils.isAreAdverb(cleanedUpText);
 
-            // NotificationService.addTryPush(`${this.wearingCharacter?.name}'s ${clothingItemText} ${adverb} now covered.`);
+            if (this.wearingEntity) {
+                const witnesses = this.wearingEntity.require(CharacterLocationKey).getCurrentLocation().getCharactersInLocation().map(ent => ent.id)
+                this.eventSystem.emit("notification.add", {
+                    text: `${getName(this.wearingEntity)}'s ${clothingItemText} ${adverb} now covered.`,
+                    characterIds: witnesses
+
+                })
+            }
         }
 
         this.isOccluded = occludedByParent;
