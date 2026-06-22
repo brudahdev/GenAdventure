@@ -1,7 +1,6 @@
 [
   {
     "id": "stand",
-    "verb":"stands",
     "tags": [
       "stand",
       "stood"
@@ -9,7 +8,8 @@
     "occludedAppearanceClasses": [
       "back",
       "ass"
-    ]
+    ],
+    "verb": "stands up"
   },
   {
     "id": "squat",
@@ -20,11 +20,11 @@
     "occludedAppearanceClasses": [
       "back",
       "ass"
-    ]
+    ],
+    "verb": "squats"
   },
   {
     "id": "sit",
-    "verb":"sits",
     "tags": [
       "sit",
       "sat"
@@ -32,7 +32,8 @@
     "occludedAppearanceClasses": [
       "back",
       "ass"
-    ]
+    ],
+    "verb": "sits"
   },
   {
     "id": "kneel",
@@ -43,7 +44,8 @@
     "occludedAppearanceClasses": [
       "back",
       "ass"
-    ]
+    ],
+    "verb": "kneels down"
   },
   {
     "id": "lay_on_stomach",
@@ -53,13 +55,15 @@
     "occludedAppearanceClasses": [
       "back",
       "ass"
-    ]
+    ],
+    "verb": "lays"
   },
   {
     "id": "lay_on_side",
     "tags": [
       "side"
-    ]
+    ],
+    "verb": "lays"
   },
   {
     "id": "lay_on_back",
@@ -72,7 +76,8 @@
     "occludedAppearanceClasses": [
       "back",
       "ass"
-    ]
+    ],
+    "verb": "lays"
   },
   {
     "id": "bent_over",
@@ -83,6 +88,7 @@
     "occludedAppearanceClasses": [
       "chest",
       "face"
-    ]
+    ],
+    "verb": "bends over"
   }
 ]

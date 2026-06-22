@@ -43,7 +43,7 @@ export class CharacterAppearance implements Component {
 
         this.appearanceItems = parseItemsByEntryIds(entryIds, appearanceConfig)
         this.classManager = new AppearanceClassManager(entity, appearanceConfig, eventSystem)
-        this.noun = this.appearanceItems.find(item => item.id == 'noun')?.ctx_txt ?? '';
+        this.noun = this.appearanceItems.find(item => item.id == 'noun')?.img_txt ?? '';
 
         this.contextItem = contextItemFactory.create(
             {

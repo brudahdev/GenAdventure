@@ -60,8 +60,16 @@ export class PoseCommandSystem implements CommandSystem<PoseCommand> {
 
             const actorIden = actor.require(CharacterIdentityKey);
 
+            ///This will turn "sits down" to "sits targetName down"
+            const verbParts = pose.verb.trim().split(/\s+/);
+            const firstPart = verbParts[0];
+            let lastPart: string | undefined = verbParts[verbParts.length - 1]
+            if (firstPart == lastPart)
+                lastPart = undefined;
 
-            txt = `${actorIden.name} ${pose.verb} ${targetIden.name}. ${targetIden.name} is now ${charPose.getLocationPoseContextPrompt()}.`
+            const modifiedVerb = `${firstPart} ${targetIden.name}${lastPart ? (" " + lastPart) : ""}`;
+
+            txt = `${actorIden.name} ${modifiedVerb}. ${targetIden.name} is now ${charPose.getLocationPoseContextPrompt()}.`
             actorTxt = `*${pose.verb} ${targetIden.name}*`
         }
 
