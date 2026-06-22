@@ -15,4 +15,8 @@ export class Pose implements Taggable {
     get excludeTags() {
         return this.config.excludeTags
     }
+
+    get verb() {
+        return this.config.verb
+    }
 }

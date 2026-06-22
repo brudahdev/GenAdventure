@@ -3,9 +3,12 @@ import { InferenceActionManager } from "../../../core/action-inference/Inference
 import { Entity } from "../../../core/ec/Entity"
 import { EntityRegistry } from "../../entity/EntityRegistry"
 import { EventSystem } from "../../EventSystem"
+import { PlanExecutor } from "../../plan/PlanExecutor"
+import { AvatarKey } from "../Avatar"
 import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentity, CharacterIdentityKey } from "../identity/CharacterIdentity"
 import { resolveTargetCharacter } from "../identity/characterLookup"
+import { poseIntent } from "./behavior/PoseIntent"
 import { CharacterPoseKey } from "./CharacterPose"
 
 
@@ -28,6 +31,7 @@ export class PoseInferenceAction extends CharacterInferenceAction<PoseInferenceA
         private eventSystem: EventSystem,
         manager: InferenceActionManager,
         private readonly registry: EntityRegistry,
+        private readonly planExecutor: PlanExecutor,
     ) {
         const charId = entity.require(CharacterIdentityKey);
 
@@ -67,9 +71,15 @@ export class PoseInferenceAction extends CharacterInferenceAction<PoseInferenceA
         }
 
         const targetPoseId = targetPose.id
-        targetposeManager.setPoseById(targetPoseId)
+        const status = this.planExecutor.submit(
+            poseIntent(this.entity.id, targetEntity.id, targetPoseId)//todo could be async
+        )
+        if (status.state !== 'completed') {
+            console.log(`[sim] pose plan did not complete (${status.state})`)
+            return;
+        }
 
-
-        this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))
+        this.entity.get(AvatarKey)?.updateAvatar();
+        targetEntity.get(AvatarKey)?.updateAvatar();
     }
 }

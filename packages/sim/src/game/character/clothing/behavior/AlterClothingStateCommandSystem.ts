@@ -1,15 +1,16 @@
 import { Lifecycle, scoped } from "tsyringe"
-import type { CommandSystem } from "../../core/plan/CommandSystem"
-import { completed, failed, invalid, ok, type CommandStatus, type Validation } from "../../core/plan/planTypes"
-import { EntityRegistry } from "../entity/EntityRegistry"
-import { CharacterLocationKey } from "../character/location/CharacterLocation"
-import { ClothingManagerKey } from "../character/clothing/ClothingManager"
-import { ALTER_CLOTHING_STATE_COMMAND, type AlterClothingStateCommand } from "./planDefs"
-import { Notif, NotificationService } from "../../core/NotificationService"
-import { ClothingItemState } from "../item/clothing/ClothingItemState"
-import { getName } from "../character/characterViews"
-import { CharacterIdentity, CharacterIdentityKey } from "../character/identity/CharacterIdentity"
-import { StringUtils } from "../../utils/StringUtils"
+import type { CommandSystem } from "../../../../core/plan/CommandSystem"
+import { completed, failed, invalid, ok, type CommandStatus, type Validation } from "../../../../core/plan/planTypes"
+import { EntityRegistry } from "../../../entity/EntityRegistry"
+import { CharacterLocationKey } from "../../location/CharacterLocation"
+import { ClothingManagerKey } from "../ClothingManager"
+import { type AlterClothingStateCommand } from "./AlterClothingStateCommand"
+import { ALTER_CLOTHING_STATE_COMMAND } from "./AlterClothingStateCommand"
+import { Notif, NotificationService } from "../../../../core/NotificationService"
+import { ClothingItemState } from "../../../item/clothing/ClothingItemState"
+import { getName } from "../../characterViews"
+import { CharacterIdentity, CharacterIdentityKey } from "../../identity/CharacterIdentity"
+import { StringUtils } from "../../../../utils/StringUtils"
 
 /** Sets one of the target's clothing items to a new state. Instant.
  *
@@ -60,6 +61,7 @@ export class AlterClothingStateCommandSystem implements CommandSystem<AlterCloth
 
         let txt: string
         let actorTxt: string
+
         if (cmd.actorId == cmd.targetId) {
             txt = `${actorIden.name} ${state.verb} ${actorIden.config.pronouns.hisHer} ${state.getClothingItem().name}`
             actorTxt = `*${StringUtils.capitalizeFirstLetter(state.verb)} my ${state.getClothingItem().name}*`
@@ -82,7 +84,5 @@ export class AlterClothingStateCommandSystem implements CommandSystem<AlterCloth
         }
 
         this.notificationService.send(notif)
-
-
     }
 }

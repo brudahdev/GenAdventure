@@ -8,7 +8,7 @@ import { CharacterIdentityKey } from "../identity/CharacterIdentity"
 import { resolveTargetCharacter } from "../identity/characterLookup"
 import { ClothingManagerKey } from "./ClothingManager"
 import { PlanExecutor } from "../../plan/PlanExecutor"
-import { alterClothingStateIntent } from "../../plan/planDefs"
+import { alterClothingStateIntent } from "./behavior/AlterClothingStateIntent"
 import { AvatarKey } from "../Avatar"
 
 

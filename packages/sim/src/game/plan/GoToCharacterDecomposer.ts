@@ -4,7 +4,8 @@ import type { PlanEntry } from "../../core/plan/planTypes"
 import { EntityRegistry } from "../entity/EntityRegistry"
 import { LocationManager } from "../location/LocationManager"
 import { CharacterLocationKey } from "../character/location/CharacterLocation"
-import { GOTO_CHARACTER_INTENT, goToNearbyLocationCommand, poseCommand, type GoToCharacterIntent } from "./planDefs"
+import { GOTO_CHARACTER_INTENT, goToNearbyLocationCommand, type GoToCharacterIntent } from "./planDefs"
+import { poseCommand } from "../character/pose/behavior/PoseCommand"
 import { calcPath } from "./locationPath"
 import { isStanding, standPoseId } from "./poseGuards"
 
@@ -33,7 +34,7 @@ export class GoToCharacterDecomposer implements Decomposer<GoToCharacterIntent> 
         // Must be standing to move.
         if (!isStanding(actor)) {
             const standId = standPoseId(actor)
-            if (standId) seq.push(poseCommand(intent.actorId, standId))
+            if (standId) seq.push(poseCommand(intent.actorId, intent.actorId, standId))
         }
 
         const path = calcPath(

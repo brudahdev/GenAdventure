@@ -11,7 +11,7 @@ import { container, type DependencyContainer } from 'tsyringe'
 import { SimProvisioner } from './core/provision/SimProvisioner'
 import { SimWorld } from './game/SimWorld'
 import { buildAvatarPrompt } from './game/character/characterViews'
-import { alterClothingStateIntent } from './game/plan/planDefs'
+import { alterClothingStateIntent } from "./game/character/clothing/behavior/AlterClothingStateIntent"
 import { CharacterPoseKey } from './game/character/pose/CharacterPose'
 import { CharacterLocation, CharacterLocationKey } from './game/character/location/CharacterLocation'
 import { CharacterLocomotionKey } from './game/character/locomotion/CharacterLocomotion'

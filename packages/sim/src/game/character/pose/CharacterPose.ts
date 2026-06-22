@@ -20,6 +20,7 @@ import { InferenceActionManager } from "../../../core/action-inference/Inference
 import { EntityRegistry } from "../../entity/EntityRegistry";
 import { findFirstInMapWithTag, findFirstWithTag } from "../../../core/TagUtils";
 import { AvatarKey } from "../Avatar";
+import { PlanExecutor } from "../../plan/PlanExecutor";
 
 export const CharacterPoseKey = defineKey<CharacterPose>("character.pose")
 export const characterPoseFactory = defineFactory(CharacterPoseKey, (entity, c) =>
@@ -32,6 +33,7 @@ export const characterPoseFactory = defineFactory(CharacterPoseKey, (entity, c) 
         c.resolve(LocationContextItemFactory),
         c.resolve(InferenceActionManager),
         c.resolve(EntityRegistry),
+        c.resolve(PlanExecutor)
     ))
 
 /** {@link CharacterPose}'s save blob: the current pose id. */
@@ -45,7 +47,7 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
     private characterName: string;
     private characterLocation: CharacterLocation
 
-    private inferenceAction?: PoseInferenceAction;
+    readonly inferenceAction?: PoseInferenceAction;
 
 
     constructor(
@@ -57,6 +59,7 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         contextItemFactory: LocationContextItemFactory,
         inferenceManager: InferenceActionManager,
         registry: EntityRegistry,
+        planExecutor: PlanExecutor
     ) {
         this.characterName = entity.require(CharacterIdentityKey).name
         this.characterLocation = entity.require(CharacterLocationKey)
@@ -99,7 +102,7 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         })
 
         if (entity.id != PLAYER_CHARACTER_ID) {
-            this.inferenceAction = new PoseInferenceAction(this.entity, eventSystem, inferenceManager, registry);
+            this.inferenceAction = new PoseInferenceAction(this.entity, eventSystem, inferenceManager, registry, planExecutor);
         }
     }
 
@@ -122,6 +125,10 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
 
     getCurrentPoseId(): string { return this.currentPose.id }
 
+    getCurrentPose() {
+        return this.currentPose;
+    }
+
     getPoseByTag(tag: string) {
         const pose = findFirstInMapWithTag(tag, this.poseMap.values())
         if (!pose) {
@@ -135,7 +142,7 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         return pose
     }
 
-    setPoseById(poseId: string) {
+    setPoseById(poseId: string) {///todo return true if you end up in desired pose
         //todo validation here? command layer? task GOAP?
         const targetPose = this.poseMap.get(poseId)
         if (!targetPose) {

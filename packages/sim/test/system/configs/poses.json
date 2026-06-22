@@ -1,6 +1,7 @@
 [
   {
     "id": "stand",
+    "verb":"stands",
     "tags": [
       "stand",
       "stood"
@@ -23,6 +24,7 @@
   },
   {
     "id": "sit",
+    "verb":"sits",
     "tags": [
       "sit",
       "sat"

@@ -6,11 +6,13 @@ import { advancePlan } from "../../core/plan/planWalk"
 import { ActorPlanKey } from "../../core/plan/ActorPlan"
 import { EntityRegistry } from "../entity/EntityRegistry"
 import type { ActorIntent } from "./planDefs"
-import { PoseCommandSystem } from "./PoseCommandSystem"
+import { PoseCommandSystem } from "../character/pose/behavior/PoseCommandSystem"
 import { GoToNearbyLocationCommandSystem } from "./GoToNearbyLocationCommandSystem"
-import { AlterClothingStateCommandSystem } from "./AlterClothingStateCommandSystem"
+import { AlterClothingStateCommandSystem } from "../character/clothing/behavior/AlterClothingStateCommandSystem"
 import { GoToCharacterDecomposer } from "./GoToCharacterDecomposer"
-import { AlterClothingStateDecomposer } from "./AlterClothingStateDecomposer"
+import { AlterClothingStateDecomposer } from "../character/clothing/behavior/AlterClothingStateDecomposer"
+import { PoseDecomposer } from "../character/pose/behavior/PoseDecomposer"
+
 
 /** The intent/command layer's entry point. Constructor-injects every concrete
  *  command-system and decomposer (so resolving the executor wires them up) and
@@ -29,11 +31,12 @@ export class PlanExecutor {
         alterClothingStateCommand: AlterClothingStateCommandSystem,
         goToCharacterDecomposer: GoToCharacterDecomposer,
         alterClothingStateDecomposer: AlterClothingStateDecomposer,
+        poseDecomoser: PoseDecomposer,
     ) {
         for (const system of [poseCommand, goToNearbyLocationCommand, alterClothingStateCommand]) {
             this.register(this.commands, system.type, system)
         }
-        for (const decomposer of [goToCharacterDecomposer, alterClothingStateDecomposer]) {
+        for (const decomposer of [goToCharacterDecomposer, alterClothingStateDecomposer, poseDecomoser]) {
             this.register(this.decomposers, decomposer.type, decomposer)
         }
     }

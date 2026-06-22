@@ -1,14 +1,12 @@
 import { Lifecycle, scoped } from "tsyringe"
-import type { Decomposer } from "../../core/plan/Decomposer"
-import type { PlanEntry } from "../../core/plan/planTypes"
-import { EntityRegistry } from "../entity/EntityRegistry"
-import { CharacterLocationKey } from "../character/location/CharacterLocation"
-import {
-    ALTER_CLOTHING_STATE_INTENT,
-    alterClothingStateCommand,
-    goToCharacterIntent,
-    type AlterClothingStateIntent,
-} from "./planDefs"
+import { goToCharacterIntent } from "../../../plan/planDefs"
+import { AlterClothingStateIntent } from "./AlterClothingStateIntent"
+import { ALTER_CLOTHING_STATE_INTENT } from "./AlterClothingStateIntent"
+import { alterClothingStateCommand } from "./AlterClothingStateCommand"
+import { Decomposer } from "../../../../core/plan/Decomposer"
+import { EntityRegistry } from "../../../entity/EntityRegistry"
+import { PlanEntry } from "../../../../core/plan/planTypes"
+import { CharacterLocationKey } from "../../location/CharacterLocation"
 
 /** Expands "alter the target's clothing" into: walk to the target (if not already
  *  co-located), then the clothing command. The "stand up to move" guard lives in

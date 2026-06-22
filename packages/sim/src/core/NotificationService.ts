@@ -15,6 +15,7 @@ export class NotificationService {
         if (!notification || !this.enabled) {
             return;
         }
+        console.log(JSON.stringify(notification))
         this.eventSystem.emit("notification", notification)
     }
 
