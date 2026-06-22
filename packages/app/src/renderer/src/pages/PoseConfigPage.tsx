@@ -57,6 +57,7 @@ export default function PoseConfigPage(): JSX.Element {
       if (!pose.id) errs.push({ message: `Pose #${idx + 1}: ID is required`, poseIdx: idx })
       else if (duplicatePoseIds().has(pose.id))
         errs.push({ message: `Pose "${pose.id}": ID already exists`, poseIdx: idx })
+      if (!pose.verb) errs.push({ message: `Pose "${label}": verb is required`, poseIdx: idx })
       pose.occludedAppearanceClasses?.forEach((c) => {
         if (c && !appearanceClassSet().has(c))
           errs.push({ message: `Pose "${label}": class "${c}" not found`, poseIdx: idx })
@@ -122,7 +123,7 @@ export default function PoseConfigPage(): JSX.Element {
   const addPose = (): void => {
     setPoses((arr) => [
       ...arr,
-      { id: uniqueId('new-pose', poseIdSet()), tags: [] }
+      { id: uniqueId('new-pose', poseIdSet()), verb: '', tags: [] }
     ])
     setSelectedPoseIdx(poses().length - 1)
   }
@@ -175,7 +176,7 @@ export default function PoseConfigPage(): JSX.Element {
                   <div class="list-row-info">
                     <span class="list-row-name">{pose.id || '(no id)'}</span>
                     <span class="list-row-desc">
-                      {pose.tags?.length ?? 0} tag(s) ·{' '}
+                      {pose.verb || '(no verb)'} · {pose.tags?.length ?? 0} tag(s) ·{' '}
                       {pose.occludedAppearanceClasses?.length ?? 0} occluded class(es)
                     </span>
                   </div>
@@ -220,6 +221,20 @@ export default function PoseConfigPage(): JSX.Element {
                     />
                     <Show when={idError()}>
                       <span class="field-error">{idError()}</span>
+                    </Show>
+                  </div>
+
+                  <div class="field">
+                    <label class="field-label">VERB</label>
+                    <input
+                      class="field-input"
+                      classList={{ 'field-invalid': !pose().verb }}
+                      type="text"
+                      value={pose().verb ?? ''}
+                      onInput={(e) => patch({ verb: e.currentTarget.value })}
+                    />
+                    <Show when={!pose().verb}>
+                      <span class="field-error">Verb is required</span>
                     </Show>
                   </div>
 
