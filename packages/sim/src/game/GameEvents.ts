@@ -1,4 +1,5 @@
 import { SimContextItem, NpcActivationChange, InferenceAction, PromptRequest } from "@gen-adventure/shared"
+import { Notif } from "../core/NotificationService"
 
 export interface GameEvents {
     "time.tick": {
@@ -39,4 +40,6 @@ export interface GameEvents {
     "inference.action.sync": InferenceAction,
 
     "image.request": PromptRequest,
+
+    "notification": Notif,
 }

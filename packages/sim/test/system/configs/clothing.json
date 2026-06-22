@@ -55,6 +55,7 @@
       {
         "id": "open",
         "state_context": "opened",
+        "verb": "opens",
         "tags": [
           "opened",
           "unbutton",

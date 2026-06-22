@@ -99,6 +99,10 @@ export class ClothingItem implements Taggable {//todo transitions
         return this.stateManager.getCurrentStateId();
     }
 
+    getCurrentState() {
+        return this.stateManager.getActiveState();
+    }
+
     getInactiveStateIds() {
         return this.getStateIds().filter(stateId => this.stateManager.getCurrentStateId() != stateId)
     }
@@ -192,7 +196,7 @@ export class ClothingItem implements Taggable {//todo transitions
         return false;
     }
 
-    
+
 
     private initStateManager(startingStateId: string) {
         this.stateManager.onStateChange(this.onStateChange.bind(this));

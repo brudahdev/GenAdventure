@@ -26,6 +26,7 @@ import { InferenceActionManager } from "../core/action-inference/InferenceAction
 import { PlanExecutor } from "./plan/PlanExecutor";
 import type { ActorIntent } from "./plan/planDefs";
 import type { PlanStatus } from "../core/plan/planTypes";
+import { NotificationService } from "../core/NotificationService";
 
 
 /** The root of a single sim run. Resolving it from a run's child container drives
@@ -48,19 +49,18 @@ export class SimWorld {
     private readonly worldSaveables: WorldSaveable[]
 
     constructor(
-        private readonly eventSystem: EventSystem,
-        private readonly time: Time,
-        worldState: WorldState,
+        readonly eventSystem: EventSystem,
+        readonly time: Time,
+        readonly worldState: WorldState,
+        readonly registry: EntityRegistry,
+        readonly locationManager: LocationManager,
+        readonly contextManager: ContextManager,
+        readonly inferenceActionManager: InferenceActionManager,
+        readonly characterSpawner: CharacterSpawner,
+        readonly scheduler: Scheduler,
+        readonly planExecutor: PlanExecutor,
+        readonly notificationService: NotificationService,
         private readonly mainSync: MainSync,
-        public readonly registry: EntityRegistry,
-        public readonly locationManager: LocationManager,
-        public readonly contextManager: ContextManager,
-        public readonly inferenceActionManager: InferenceActionManager,
-        private readonly characterSpawner: CharacterSpawner,
-        scheduler: Scheduler,
-        // Resolved here so the plan layer (command-systems + decomposers) is wired
-        // at boot, ready before any intent is submitted at run time.
-        public readonly planExecutor: PlanExecutor,
     ) {
         this.systems = [eventSystem, time, mainSync, characterSpawner]
         this.worldSaveables = [time, worldState, scheduler]

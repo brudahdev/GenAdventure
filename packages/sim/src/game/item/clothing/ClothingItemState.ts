@@ -35,6 +35,14 @@ export class ClothingItemState implements Taggable {
         return this.config.transitions;
     }
 
+    get verb() {
+        return this.config.verb
+    }
+
+    getClothingItem() {
+        return this.clothingItem;
+    }
+
     getImagePrompt() {
         var prompt = new PromptBuilder(",");
         this.entries.forEach(entry => {

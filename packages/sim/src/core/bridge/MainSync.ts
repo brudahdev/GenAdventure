@@ -9,6 +9,7 @@ import type { GameSystem } from "../GameSystem";
 import type { ComponentKey } from "../ec/ComponentKey";
 import { CharacterLocomotionKey } from "../../game/character/locomotion/CharacterLocomotion";
 import { CharacterPoseKey } from "../../game/character/pose/CharacterPose";
+import { Notif } from "../NotificationService";
 
 /** Pushes sim state up to the main process: subscribes to game events on
  *  `init()` and forwards them over the Comlink remote, so the rest of the sim
@@ -80,6 +81,11 @@ export class MainSync implements GameSystem {
             this.remoteMain.imageRequest(args)
         })
 
+        this.eventSystem.on("notification", (args: Notif[]) => {//todo move Notif to shared
+            console.log(JSON.stringify(args))
+
+            //todo send args
+        })
 
     }
 

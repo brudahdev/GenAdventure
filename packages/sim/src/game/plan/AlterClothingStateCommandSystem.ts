@@ -5,6 +5,11 @@ import { EntityRegistry } from "../entity/EntityRegistry"
 import { CharacterLocationKey } from "../character/location/CharacterLocation"
 import { ClothingManagerKey } from "../character/clothing/ClothingManager"
 import { ALTER_CLOTHING_STATE_COMMAND, type AlterClothingStateCommand } from "./planDefs"
+import { Notif, NotificationService } from "../../core/NotificationService"
+import { ClothingItemState } from "../item/clothing/ClothingItemState"
+import { getName } from "../character/characterViews"
+import { CharacterIdentity, CharacterIdentityKey } from "../character/identity/CharacterIdentity"
+import { StringUtils } from "../../utils/StringUtils"
 
 /** Sets one of the target's clothing items to a new state. Instant.
  *
@@ -16,7 +21,10 @@ import { ALTER_CLOTHING_STATE_COMMAND, type AlterClothingStateCommand } from "./
 export class AlterClothingStateCommandSystem implements CommandSystem<AlterClothingStateCommand> {
     readonly type = ALTER_CLOTHING_STATE_COMMAND
 
-    constructor(private readonly registry: EntityRegistry) { }
+    constructor(
+        private readonly registry: EntityRegistry,
+        private readonly notificationService: NotificationService
+    ) { }
 
     validate(cmd: AlterClothingStateCommand): Validation {
         const actor = this.registry.getById(cmd.actorId)
@@ -37,7 +45,46 @@ export class AlterClothingStateCommandSystem implements CommandSystem<AlterCloth
     execute(cmd: AlterClothingStateCommand): CommandStatus {
         const item = this.registry.requireById(cmd.targetId).require(ClothingManagerKey).getClothingItemById(cmd.clothingId)
         if (!item) return failed(`clothing item '${cmd.clothingId}' not found on ${cmd.targetId}`)
+
         const success = item.setStateById(cmd.stateId)
+        this.sendNotificaiton(cmd, item.getCurrentState()!)//todo sstate manager improvements
+
         return success ? completed() : failed(`could not set '${cmd.clothingId}' to state '${cmd.stateId}'`)
+    }
+
+
+    private sendNotificaiton(cmd: AlterClothingStateCommand, state: ClothingItemState) {
+        if (!state.verb) {
+            return;
+        }
+        const actor = this.registry.requireById(cmd.actorId)
+        const actorIden = actor.require(CharacterIdentityKey);
+
+        let txt: string
+        let actorTxt: string
+        if (cmd.actorId == cmd.targetId) {
+            txt = `${actorIden.name} ${state.verb} ${actorIden.config.pronouns.hisHer} ${state.getClothingItem().name}`
+            actorTxt = `*${StringUtils.capitalizeFirstLetter(state.verb)} my ${state.getClothingItem().name}*`
+        } else {
+            const target = this.registry.requireById(cmd.targetId)
+            const targetIden = target.require(CharacterIdentityKey);
+            txt = `${actorIden.name} ${state.verb} ${targetIden.name}'s ${state.getClothingItem().name}`
+            actorTxt = `*${StringUtils.capitalizeFirstLetter(state.verb)} ${targetIden.name}'s ${state.getClothingItem().name}*`
+        }
+
+        const witnesses = actor.require(CharacterLocationKey).getCurrentLocation().getCharactersInLocation().map(ent => ent.id)
+
+        const notif: Notif = {
+            text: txt,
+            characterIds: witnesses,
+            actorInfo: {
+                text: actorTxt,
+                actorId: actor.id
+            }
+        }
+
+        this.notificationService.send(notif)
+
+
     }
 }

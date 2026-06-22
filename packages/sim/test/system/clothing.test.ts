@@ -51,34 +51,32 @@ describe('sim world (system test)', () => {
     expect(context.characterIds).includes(sim.npcs[1].id)
   })
 
-  it('undress anime outfit self', () => {
+  it('open shirt self', () => {
 
     const npc1 = sim.npcs[0]
 
-    // npc1.require(ClothingManagerKey).inferenceAction?.handle({
-    //   subjectName: getName(npc1),
-    //   clothingName: 'bowtie',
-    //   clothingState: 'remove'
-    // })
-    // const bowTie = npc1.require(ClothingManagerKey).getClothingItemByTag("bowtie")
-    // expect(bowTie?.getCurrentStateId()).toBe("off")
-
-    // npc1.require(ClothingManagerKey).inferenceAction?.handle({
-    //   subjectName: getName(npc1),
-    //   clothingName: 'skirt',
-    //   clothingState: 'remove'
-    // })
-    // const skirt = npc1.require(ClothingManagerKey).getClothingItemByTag("skirt")
-    // expect(skirt?.getCurrentStateId()).toBe("off")
-
-
     npc1.require(ClothingManagerKey).inferenceAction?.handle({
       subjectName: getName(npc1),
-      clothingName: 'panties',
-      clothingState: 'remove'
+      clothingName: 'shirt',
+      clothingState: 'open'
     })
-    const panties = npc1.require(ClothingManagerKey).getClothingItemById("panties_pink")
-    expect(panties?.getCurrentStateId()).toBe("off")
+    const shirt = npc1.require(ClothingManagerKey).getClothingItemByTag("shirt")
+    expect(shirt?.getCurrentStateId()).toBe("open")
+
+  })
+
+  it('open shirt other', () => {
+
+    const npc1 = sim.npcs[0]
+    const npc2 = sim.npcs[1]
+
+    npc1.require(ClothingManagerKey).inferenceAction?.handle({
+      subjectName: getName(npc2),
+      clothingName: 'shirt',
+      clothingState: 'open'
+    })
+    const shirt = npc2.require(ClothingManagerKey).getClothingItemByTag("shirt")
+    expect(shirt?.getCurrentStateId()).toBe("open")
 
   })
 

@@ -14,6 +14,7 @@ export interface ClothingItemConfig extends Taggable {
 export interface ClothingItemStateConfig extends Taggable {
     id: string;
     state_context?: string;
+    verb: string
 
     enteries?: ClothingItemStateEntryConfig[];
     transitions?: ClothingStateTransition[];
