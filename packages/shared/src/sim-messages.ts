@@ -12,6 +12,7 @@ export interface SimStartData {
   poseConfigLocation: string,
   clothingItemConfigLocation: string,
   outfitConfigLocation: string,
+  playerPersonaConfigLocation: string,
   savesLocation: string,
 }
 

@@ -2,6 +2,8 @@ import { CharacterConfig, SimStartCharacterData } from "@gen-adventure/shared"
 import { defineKey } from "../../../core/ec/ComponentKey"
 import { defineFactory } from "../../../core/ec/ComponentFactory"
 import { CHARACTER_CONFIG_ADAPTER, type CharacterConfigAdapter } from "../CharacterConfigAdapter"
+import { PLAYER_PERSONA_CONFIG_ADAPTER, type PlayerPersonaConfigAdapter } from "../PlayerPersonaConfigAdapter"
+import { STARTING_STATE_ADAPTER, type StartingStateAdapter } from "../StartingStateAdapter"
 import { INIT_CHARACTERS } from "../../entity/initCharacters"
 
 
@@ -16,35 +18,20 @@ export class CharacterIdentity {
 }
 
 //todo load from persona
-const DEFAULT_PLAYER_CONFIG: CharacterConfig = {
-    "pronouns": {
-        "heShe": "he",
-        "himHer": "him",
-        "hisHer": "his"
-    },
-    "appearanceEntryIds": [
-        "race_caucasian",
-        "male",
-        "hair_style_braid"
-    ],
-    "arousalData": {
-        "vaginal_sex_tto": 2,
-        "anal_sex_tto": 2,
-        "fingering_anus_tto": 4,
-        "orgasm_time": 30,
-        "squirt_time": 10,
-        "fingering_tto": 4
-    },
-    "hasTits": false,
-    "hasPenis": true
-}
-
-//todo load from persona
 const DEFAULT_PLAYER_NAME = "{{user}}"
 
-/** Attaches the player's identity from a built-in default config. */
-export const playerIdentityFactory = defineFactory(CharacterIdentityKey, () =>
-    new CharacterIdentity(DEFAULT_PLAYER_CONFIG, DEFAULT_PLAYER_NAME))
+/** Attaches the player's identity: the persona config selected by the player
+ *  role's `personaId` (from `roles.json`, role order -1), loaded from
+ *  `player_personas.json`. The name still uses {@link DEFAULT_PLAYER_NAME}. */
+export const playerIdentityFactory = defineFactory(CharacterIdentityKey, (entity, c) => {
+    const startingState = c.resolve<StartingStateAdapter>(STARTING_STATE_ADAPTER)
+    const personaId = startingState.getRoleConfig(entity.id).personaId
+    if (personaId === undefined) {
+        throw new Error("player role config has no personaId")
+    }
+    const personas = c.resolve<PlayerPersonaConfigAdapter>(PLAYER_PERSONA_CONFIG_ADAPTER)
+    return new CharacterIdentity(personas.getConfig(personaId), DEFAULT_PLAYER_NAME)
+})
 
 /** Attaches an npc's identity: static config from the per-character config
  *  adapter, plus the persona name carried in the run's `INIT_CHARACTERS`. */

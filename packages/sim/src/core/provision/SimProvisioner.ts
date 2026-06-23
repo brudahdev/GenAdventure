@@ -8,6 +8,7 @@ import { TIME_CONFIG_ADAPTER, FileTimeConfigAdapter } from "../time/TimeConfigAd
 import { LOCATION_CONFIG_ADAPTER, FileLocationConfigAdapter } from "../../game/location/LocationConfigAdapter";
 import { ROLE_CONFIG_ADAPTER, FileRoleConfigAdapter } from "../../game/character/RoleConfigAdapter";
 import { CHARACTER_CONFIG_ADAPTER, FileCharacterConfigAdapter } from "../../game/character/CharacterConfigAdapter";
+import { PLAYER_PERSONA_CONFIG_ADAPTER, FilePlayerPersonaConfigAdapter } from "../../game/character/PlayerPersonaConfigAdapter";
 import { APPEARANCE_CONFIG_ADAPTER, FileAppearanceConfigAdapter } from "../../game/character/appearance/AppearanceConfigAdapter";
 import { POSE_CONFIG_ADAPTER, FilePoseConfigAdapter } from "../../game/character/pose/PoseConfigAdapter";
 import { STARTING_STATE_ADAPTER, RoleStartingStateAdapter } from "../../game/character/StartingStateAdapter";
@@ -56,6 +57,9 @@ export class SimProvisioner {
         })
         scope.register(CHARACTER_CONFIG_ADAPTER, {
             useValue: new FileCharacterConfigAdapter(this.initData.charactersConfigDirectory)
+        })
+        scope.register(PLAYER_PERSONA_CONFIG_ADAPTER, {
+            useValue: new FilePlayerPersonaConfigAdapter(this.initData.playerPersonaConfigLocation)
         })
         scope.register(APPEARANCE_CONFIG_ADAPTER, {
             useValue: new FileAppearanceConfigAdapter(this.initData.appearanceConfigLocation)

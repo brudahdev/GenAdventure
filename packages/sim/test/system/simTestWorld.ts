@@ -51,6 +51,7 @@ function buildStartData(savesLocation: string, overrides?: Partial<SimStartData>
     poseConfigLocation: path.join(CONFIGS, 'poses.json'),
     clothingItemConfigLocation: path.join(CONFIGS, 'clothing.json'),
     outfitConfigLocation: path.join(CONFIGS, 'outfit.json'),
+    playerPersonaConfigLocation: path.join(CONFIGS, 'player_personas.json'),
     savesLocation,
     ...overrides,
   }

@@ -159,6 +159,7 @@ export class ScenarioService {
       poseConfigLocation: absolutePath('configs/poses.json'),
       clothingItemConfigLocation: absolutePath('configs/clothing.json'),
       outfitConfigLocation: absolutePath('configs/outfit.json'),
+      playerPersonaConfigLocation: absolutePath('configs/player_personas.json'),
       savesLocation: absolutePath(`saves/${scenario.id}`),
     }
   }
