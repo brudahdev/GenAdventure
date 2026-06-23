@@ -8,6 +8,7 @@ import {
     MainApi,
     InferenceAction,
     InferenceInvocation,
+    TouchOptions,
     withTimeout,
     nodeEndpoint
 } from "@gen-adventure/shared"
@@ -77,10 +78,6 @@ export class SimManager {
 
         poseOptions: (characterId, options) => {
             poseService.onPoseOptions(characterId, options)
-        },
-
-        touchOptions: (characterId, options) => {
-            touchService.onTouchOptions(characterId, options)
         },
 
         npcActivationChanged: (change) => {
@@ -183,6 +180,7 @@ export class SimManager {
         }
 
         this.getWorker()
+        touchService.clear()
         // A hung/dead worker never replies, so the timeout is the safety net.
         const result = await withTimeout(this.sim!.start(initData), START_TIMEOUT_MS, 'sim.start')
         this.simRunning = true
@@ -197,6 +195,7 @@ export class SimManager {
         }
 
         this.getWorker()
+        touchService.clear()
         const result = await withTimeout(this.sim!.resume(resumeData), START_TIMEOUT_MS, 'sim.resume')
         this.simRunning = true
         return result
@@ -220,6 +219,10 @@ export class SimManager {
 
     touchUiAction(characterId: string, targetId: string, withId: string, verbId: string): void {
         void this.sim?.touchUiAction(characterId, targetId, withId, verbId)
+    }
+
+    async getTouchOptions(characterId: string): Promise<TouchOptions> {
+        return (await this.sim?.getTouchOptions(characterId)) ?? { targets: [] }
     }
 
     async persist(saveName: string, slot: number): Promise<void> {

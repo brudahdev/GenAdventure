@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as Comlink from 'comlink'
 import type { Remote } from 'comlink'
 import type {
-  MainApi, PromptRequest, SimApi, SimResumeData, SimStartData, SimStartResult, InferenceInvocation
+  MainApi, PromptRequest, SimApi, SimResumeData, SimStartData, SimStartResult, InferenceInvocation, TouchOptions
 } from '@gen-adventure/shared'
 import { nodeEndpoint, PLAYER_CHARACTER_ID } from '@gen-adventure/shared'
 import { container, type DependencyContainer } from 'tsyringe'
@@ -18,6 +18,7 @@ import { CharacterLocomotionKey } from './game/character/locomotion/CharacterLoc
 import { NpcActivityKey } from './game/character/npc/NpcActivity'
 import { poseIntent } from './game/character/pose/behavior/PoseIntent'
 import { goToIntent } from './game/character/locomotion/behavior/GoToIntent'
+import { touchIntent } from './game/character/body/touch/behavior/TouchIntent'
 
 /** The worker's implementation of the surface the main process calls. Each run
  *  gets its own child container (provisioned with a mode-specific adapter set)
@@ -93,6 +94,10 @@ class SimService implements SimApi {
     return this.getWorld().getAvatarPromptForCharacter(characterId)
   }
 
+  async getTouchOptions(characterId: string): Promise<TouchOptions> {
+    return this.getWorld().getTouchOptions(characterId)
+  }
+
   timeResume(): void {
     this.world?.timeResume()
   }
@@ -128,7 +133,7 @@ class SimService implements SimApi {
     locationId: string,
   ) {
     //todo action layer, decomposition, etc. not now though
-  
+
 
     const targetEntity = this.world?.registry.getById(characterId);
     if (!targetEntity) {
@@ -185,10 +190,26 @@ class SimService implements SimApi {
     withId: string,
     verbId: string,
   ) {
-    //todo action layer, decomposition, etc. not now though
-    if (characterId == PLAYER_CHARACTER_ID) {
-      //todo user acting
+    const targetEntity = this.world?.registry.getById(characterId);
+    if (!targetEntity) {
+      console.log(`[sim] unable to get character with id ${characterId}`)
+      return;
     }
+    
+    this.getWorld().submitIntent(
+      touchIntent(
+        PLAYER_CHARACTER_ID,
+        characterId,
+        withId,
+        targetId,
+        verbId,
+      ),
+      (success) => {
+        if (success && characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
+          main.imageRequest(buildAvatarPrompt(targetEntity))
+        }
+      },
+    )
   }
 
   private getWorld(): SimWorld {

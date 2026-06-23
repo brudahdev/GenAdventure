@@ -29,6 +29,7 @@ export const duoInteractions: TouchDuoConfig[] = [
 
     {//hands_tits_grope
         id: 'hands_tits_grope',
+        verb: 'grope',
         verbTags: gropeTags,
 
         actorPart: 'hands',
@@ -76,6 +77,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_nipples_pinch
         id: 'hands_nipples_pinch',
+        verb: 'pinch',
         verbTags: pinchTags,
 
         actorPart: 'hands',
@@ -109,6 +111,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_ass_grope
         id: 'hands_ass_grope',
+        verb: 'grope',
         verbTags: gropeTags,
 
         actorPart: 'hands',
@@ -142,6 +145,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_penis_stroke
         id: 'hands_penis_stroke',
+        verb: 'stroke',
         compatibleWith: {
             targetSlotContains: ['mouth_penis_suck', 'mouth_penis_lick', 'mouth_penis_kiss'],
         },
@@ -193,7 +197,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_pussy_finger
         id: 'hands_pussy_finger',
-
+        verb: 'finger',
         verbTags: fingerTags,
 
         actorPart: 'hands',
@@ -235,6 +239,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_hands_hold
         id: 'hands_hands_hold',
+        verb: 'hold',
         dontApplyIf: {
             targetSlotContains: ['hands_hands_hold'], //its the same in each direction
         },
@@ -271,6 +276,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_hips_hold
         id: 'hands_hips_hold', //todo maybe restrict to sitting on compatiblity matrix, option to not move others or self
+        verb: 'hold',
 
         verbTags: gropeTags,
 
@@ -304,6 +310,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_thighs_hold
         id: 'hands_thighs_hold', //todo maybe restrict to sitting on compatiblity matrix, option to not move others or self
+        verb: 'hold',
 
         verbTags: gropeTags,
 
@@ -337,6 +344,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_head_hold
         id: 'hands_head_hold',
+        verb: 'hold',
 
         verbTags: gropeTags,
 
@@ -370,6 +378,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//hands_shoulders_hold
         id: 'hands_shoulders_hold',
+        verb: 'hold',
 
         verbTags: gropeTags,
 
@@ -404,6 +413,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     //todo hands arms hold, but only if target lying on back
     {//hands_neck_choke
         id: 'hands_neck_choke',
+        verb: 'choke',
 
         verbTags: chokeTags,
 
@@ -437,6 +447,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//penis_pussy_penitrate
         id: 'penis_pussy_penitrate',
+        verb: 'penitrate',
         verbTags: penitrateTags,
 
         actorPart: 'penis',
@@ -491,6 +502,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//penis_anus_penitrate
         id: 'penis_anus_penitrate',
+        verb: 'penitrate',
         verbTags: penitrateTags,
 
         actorPart: 'penis',
@@ -550,6 +562,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//penis_mouth_penitrate
         id: 'penis_mouth_penitrate',
+        verb: 'penitrate',
         verbTags: penitrateTags,
         //todo also apply hands_head_hold
         actorPart: 'penis',
@@ -605,6 +618,7 @@ export const duoInteractions: TouchDuoConfig[] = [
         //todo inform llm it can switch between kissing sucking and licking?
         //or do it automatically?
         id: 'mouth_penis_suck',
+        verb: 'suck',
         verbTags: suckTags,
 
         actorPart: 'mouth',
@@ -658,6 +672,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//mouth_penis_lick
         id: 'mouth_penis_lick',
+        verb: 'lick',
         verbTags: lickTags,
 
         actorPart: 'mouth',
@@ -711,6 +726,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     {//mouth_penis_kiss
         //make one off? stop after msgs todo
         id: 'mouth_penis_kiss',
+        verb: 'kiss',
         verbTags: kissTags,
 
         actorPart: 'mouth',
@@ -756,6 +772,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//tits_penis_job
         id: 'tits_penis_job',
+        verb: 'rub',
         compatibleWith: {
             targetSlotContains: ['mouth_penis_suck', 'mouth_penis_lick', 'mouth_penis_kiss'],
         },
@@ -813,7 +830,7 @@ export const duoInteractions: TouchDuoConfig[] = [
     },
     {//feet_penis_job
         id: 'feet_penis_job',
-
+        verb: 'rub',
         verbTags: footJobTags,
 
         actorPart: 'feet',
@@ -868,6 +885,7 @@ export const duoInteractions: TouchDuoConfig[] = [
 export const soloInteractions: TouchConfig[] = [ //todo combine definition with a self flag
     {//hands_pussy_finger_self
         id: 'hands_pussy_finger_self',
+        verb: 'finger',
         dontApplyIf: {
             targetSlotContains: ['hands_pussy_finger'], //ie dont finger self if someone else is already fingering me
         },
@@ -903,6 +921,7 @@ export const soloInteractions: TouchConfig[] = [ //todo combine definition with 
     },
     {//hands_tits_grope_self
         id: 'hands_tits_grope_self',
+        verb: 'grope',
         dontApplyIf: {
             targetSlotContains: ['hands_tits_grope', 'hands_nipples_pinch'], //ie dont grope self if someone else is already groping me
         },
@@ -946,6 +965,7 @@ export const soloInteractions: TouchConfig[] = [ //todo combine definition with 
     },
     {//hands_tits_cover_self
         id: 'hands_tits_cover_self',
+        verb: 'cover',
         dontApplyIf: {
             targetSlotContains: ['hands_tits_grope', 'hands_nipples_pinch'],
         },
@@ -984,6 +1004,7 @@ export const soloInteractions: TouchConfig[] = [ //todo combine definition with 
     },
     {//hands_pussy_cover_self
         id: 'hands_pussy_cover_self',
+        verb: 'cover',
         dontApplyIf: {
             targetSlotContains: ['hands_pussy_finger', 'penis_pussy_penitrate'],
         },
@@ -1019,6 +1040,7 @@ export const soloInteractions: TouchConfig[] = [ //todo combine definition with 
     },
     {//hands_nipples_pinch_self
         id: 'hands_nipples_pinch_self',
+        verb: 'pinch',
         verbTags: pinchTags,
 
         actorPart: 'hands',
@@ -1044,6 +1066,7 @@ export const soloInteractions: TouchConfig[] = [ //todo combine definition with 
     },
     {//hands_penis_stroke_self
         id: 'hands_penis_stroke_self',
+        verb: 'stroke',
         verbTags: hjTags,
 
         actorPart: 'hands',

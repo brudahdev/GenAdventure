@@ -122,13 +122,13 @@ function buildPoseMenu(characterId: string, poses: string[]): ContextMenuItem[] 
  *  three ids. Returns the target-level items. */
 function buildTouchMenu(characterId: string, options: TouchOptions): ContextMenuItem[] {
   return options.targets.map((target) => ({
-    label: target.displayName,
+    label: target.id,
     childLabel: 'With',
     children: target.with.map((w) => ({
-      label: w.displayName,
+      label: w.id,
       childLabel: 'Action',
       children: w.verb.map((v) => ({
-        label: v.displayName,
+        label: v.id,
         onSelect: () =>
           void window.electronAPI.touch.action(characterId, target.id, w.id, v.id)
       }))

@@ -4,10 +4,12 @@ import * as path from "path";
 import {
     buildManifest,
     CURRENT_SAVE_VERSION,
+    PLAYER_CHARACTER_ID,
     serializeManifest,
     serializeSaveDocument,
     type PromptRequest,
     type SaveDocument,
+    type TouchOptions,
 } from "@gen-adventure/shared";
 import type { GameSystem } from "../core/GameSystem";
 import type { WorldSaveable } from "../core/save/Saveable";
@@ -19,6 +21,8 @@ import { EntityRegistry } from "./entity/EntityRegistry";
 import { CharacterSpawner } from "./entity/CharacterSpawner";
 import { WorldState } from "./world/WorldState";
 import { buildAvatarPrompt, buildBackgroundPrompt } from "./character/characterViews";
+import { buildTouchOptions } from "./character/body/touch/touchOptions";
+import { getDuoInteractions, getSoloInteractions } from "./character/body/touch/config/touchInteractionData";
 import { EventSystem } from "./EventSystem";
 import { ContextManager } from "../core/context/ContextManager";
 import { LocationManager } from "./location/LocationManager";
@@ -103,6 +107,20 @@ export class SimWorld {
 
     getAvatarPromptForCharacter(characterId: string): PromptRequest {
         return buildAvatarPrompt(this.registry.requireById(characterId))
+    }
+
+    /** A character's touch options: solo interactions for the player (acting on
+     *  self), duo interactions for an NPC (player acting on them). Filtered to the
+     *  parts both bodies actually have. */
+    getTouchOptions(characterId: string): TouchOptions {
+        const player = this.registry.getById(PLAYER_CHARACTER_ID)
+        const target = this.registry.getById(characterId)
+        if (!player || !target) return { targets: [] }
+
+        const interactions = characterId === PLAYER_CHARACTER_ID
+            ? getSoloInteractions()
+            : getDuoInteractions()
+        return buildTouchOptions(player, target, interactions)
     }
 
     persist(savePath: string, chatId: string, slot: number): void {

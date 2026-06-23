@@ -11,7 +11,7 @@ const simManager = container.resolve(SimManager)
 export class TouchIpcHandlers {
     constructor() {
         ipcMain.handle(ICP.TOUCH_OPTIONS_GET, (_e, characterId: string) =>
-            touchService.getOptions(characterId)
+            touchService.getOptions(characterId, () => simManager.getTouchOptions(characterId))
         )
 
         ipcMain.handle(

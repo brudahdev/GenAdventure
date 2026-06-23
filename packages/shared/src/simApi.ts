@@ -28,6 +28,10 @@ export interface SimApi {
 
   getAvatarPromptForCharacter(characterId: string): Promise<PromptRequest>
 
+  /** A character's available touch options, computed on demand from the
+   *  interaction configs (solo for the player, duo for an NPC). */
+  getTouchOptions(characterId: string): Promise<TouchOptions>
+
   /** Tell the worker which Voxta chat session is active, so it can be embedded in saves. */
   setChatId(chatId: string): void
   /** Snapshot game state to saves/<scenarioId>/<saveName>/game.json (chatId + slot embedded). */
@@ -57,8 +61,6 @@ export interface MainApi {
   locationOptions(characterId: string, options: NearbyLocationSummary): void,
   /** Push a character's current available pose options up to PoseService. */
   poseOptions(characterId: string, options: string[]): void,
-  /** Push a character's current available touch options up to TouchService. */
-  touchOptions(characterId: string, options: TouchOptions): void,
 
   /** An NPC became active/inactive (co-located with the player). Drives Voxta
    *  participant add/remove and avatar generation/removal. */

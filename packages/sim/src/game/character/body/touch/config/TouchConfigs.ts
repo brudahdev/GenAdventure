@@ -54,6 +54,9 @@ export interface TouchConfig {
         targetSlotContains?: string[]; //ids of othger interactions
     };
     verbTags: Taggable;
+    /** The canonical verb word surfaced as a touch option; must match
+     *  {@link verbTags} so a UI selection round-trips back to this interaction. */
+    verb: string;
 
     actorPart: keyof Body;
     actorPartTag: Taggable;

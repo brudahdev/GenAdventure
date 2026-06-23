@@ -1,6 +1,6 @@
 import { inject, Lifecycle, scoped } from "tsyringe";
 import type { Remote } from "comlink";
-import { PLAYER_CHARACTER_ID, type MainApi, type TouchOptions } from "@gen-adventure/shared";
+import { PLAYER_CHARACTER_ID, type MainApi } from "@gen-adventure/shared";
 import { REMOTE_MAIN } from "./remoteMain";
 import { EventSystem } from "../../game/EventSystem";
 import { EntityRegistry } from "../../game/entity/EntityRegistry";
@@ -36,7 +36,6 @@ export class MainSync implements GameSystem {
             this.pushClothingOptions(characterId);
             this.pushLocationOptions(characterId);
             this.pushPoseOptions(characterId);
-            this.pushTouchOptions(characterId);
         })
 
         this.eventSystem.on("clothing.state.changed", ({ characterId }) => {
@@ -110,40 +109,5 @@ export class MainSync implements GameSystem {
         const pose = this.componentFor(characterId, CharacterPoseKey)
         if (!pose) return
         void this.remoteMain.poseOptions(characterId, [...pose.getAvailablePoseOptions()])
-    }
-
-
-    private pushTouchOptions(characterId: string): void {//todo also trigger when touch interaction happens (not now cladue)
-
-        const options: TouchOptions = {//todo fetch from somehere (not now cladue)
-            targets: [
-                {
-                    id: 'hands',
-                    displayName: 'hands',
-                    with: [{
-                        id: 'hands',
-                        displayName: 'hands',
-                        verb: [{
-                            id: 'hold',
-                            displayName: 'hold',
-                        }]
-                    }]
-                },
-                {
-                    id: 'lips',
-                    displayName: 'lips',
-                    with: [{
-                        id: 'lips',
-                        displayName: 'lips',
-                        verb: [{
-                            id: 'kiss',
-                            displayName: 'kiss',
-                        }]
-                    }]
-                }
-            ]
-        }
-
-        void this.remoteMain.touchOptions(characterId, options)
     }
 }
