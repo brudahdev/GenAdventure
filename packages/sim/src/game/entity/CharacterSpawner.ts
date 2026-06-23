@@ -16,6 +16,8 @@ import { appearanceFactory } from "../character/appearance/CharacterAppearance";
 import { clothingFactory } from "../character/clothing/ClothingManager";
 import { characterLocomotionFactory } from "../character/locomotion/CharacterLocomotion";
 import { avatarFactory } from "../character/Avatar";
+import { bodyFactory } from "../character/body/Body";
+import { touchManagerFactory } from "../character/body/touch/TouchManager";
 
 /** A blueprint is just an ordered list of component factories. Component order
  *  matters: factories that `require()` a sibling at attach time (identity) or
@@ -29,6 +31,8 @@ const PLAYER_BLUEPRINT: ComponentFactory[] = [
     characterPoseFactory,
     appearanceFactory,
     clothingFactory,
+    bodyFactory,
+    touchManagerFactory,
 ]
 const NPC_BLUEPRINT: ComponentFactory[] = [
     npcIdentityFactory,
@@ -38,6 +42,8 @@ const NPC_BLUEPRINT: ComponentFactory[] = [
     characterPoseFactory,
     appearanceFactory,
     clothingFactory,
+    bodyFactory,
+    touchManagerFactory,
     avatarFactory,
 ]
 
