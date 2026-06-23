@@ -18,6 +18,7 @@ import { PLAYER_CHARACTER_ID } from "@gen-adventure/shared";
 import { EventSystem } from "../../../EventSystem";
 import { BehaviorDispatcher } from "../../../behavior/BehaviorDispatcher";
 import { InferenceActionManager } from "../../../../core/action-inference/InferenceActionManager";
+import { AvatarKey } from "../../Avatar";
 
 export interface TouchInteractionArgs {
     actorId: string;
@@ -92,11 +93,13 @@ export class TouchManager {
             }
         }
 
+        const actor = this.registry.getById(args.actorId);
+        const target = this.registry.getById(args.targetId);
+
         if (!applied) {
             const nonVisualInteraction = this.findMatchingNonVisualInteraction(args, getNonVisualInteractions());
             if (nonVisualInteraction) {
-                const actor = this.registry.getById(args.actorId);
-                const target = this.registry.getById(args.targetId);
+
                 if (actor && target) {
                     nonVisualInteraction.onActivate?.({ args, actor, target });
                 }
@@ -106,6 +109,8 @@ export class TouchManager {
 
         if (applied) {
             // this.touchPersister.touchApplied(args)
+            actor?.require(AvatarKey).dirtied();
+            target?.require(AvatarKey).dirtied();
         }
 
         return applied;
