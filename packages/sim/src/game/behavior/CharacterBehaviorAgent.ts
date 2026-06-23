@@ -15,20 +15,7 @@ import { Location } from "../location/Location"
 import { Pose } from "../character/pose/Pose"
 import { ClothingItemState } from "../item/clothing/ClothingItemState"
 import { StringUtils } from "../../utils/StringUtils"
-
-/** The fields any of the behaviour-tree leaves might need, resolved from the
- *  originating intent by the {@link import("./BehaviorDispatcher").BehaviorDispatcher}.
- *  Different intents fill different subsets. */
-export interface BehaviorParams {
-    actorId: string
-    /** Pose/clothing subject, or the character to walk to (goto-character). */
-    targetId?: string
-    locationId?: string
-    subLocationId?: string
-    poseId?: string
-    clothingId?: string
-    stateId?: string
-}
+import type { BehaviorParams } from "./BehaviorDefinition"
 
 export interface BehaviorDeps {
     registry: EntityRegistry
@@ -37,7 +24,7 @@ export interface BehaviorDeps {
 }
 
 /** One mistreevous agent per submitted intent: every action/condition referenced
- *  in `behaviorTrees.ts` is a method here. mistreevous calls them with `this`
+ *  in a `*Behavior.ts` tree is a method here. mistreevous calls them with `this`
  *  bound to this instance. The state mutation + witness notifications that used to
  *  live in the deleted `*CommandSystem`s now live here, recomputed from live world
  *  state on each step. Conditions return `boolean`; actions return {@link State}

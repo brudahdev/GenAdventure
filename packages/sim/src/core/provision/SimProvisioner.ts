@@ -15,6 +15,11 @@ import { STARTING_CLOTHING_ADAPTER, OutfitStartingClothingAdapter } from "../../
 import { INIT_CHARACTERS } from "../../game/entity/initCharacters";
 import { CLOTHING_ITEM_CONFIG_ADAPTER, FileClothingItemConfigAdapter } from "../../game/item/clothing/ClothingItemConfigAdapter";
 import { FileOutfitConfigAdapter, OUTFIT_CONFIG_ADAPTER } from "../../game/item/clothing/OutfitConfigAdapter";
+import { BEHAVIOR_DEFINITION } from "../../game/behavior/BehaviorDefinition";
+import { POSE_BEHAVIOR } from "../../game/character/pose/behavior/PoseBehavior";
+import { GO_TO_BEHAVIOR } from "../../game/character/locomotion/behavior/GoToBehavior";
+import { GOTO_CHARACTER_BEHAVIOR } from "../../game/character/locomotion/behavior/GoToCharacter/GoToCharacterBehavior";
+import { ALTER_CLOTHING_BEHAVIOR } from "../../game/character/clothing/behavior/AlterClothingStateBehavior";
 
 /** A run's composition seam: registers the concrete adapter set and run-scoped
  *  values into a fresh child container, then `SimWorld` (and the rest of the
@@ -71,5 +76,11 @@ export class SimProvisioner {
         scope.register(STARTING_CLOTHING_ADAPTER, {
             useValue: new OutfitStartingClothingAdapter(roleStartingState, outfitConfigAdapter)
         })
+
+        // Behaviour-tree definitions (one per intent type), collected by
+        // BehaviorRegistry via @injectAll. Adding an intent = one more entry here.
+        for (const def of [POSE_BEHAVIOR, GO_TO_BEHAVIOR, GOTO_CHARACTER_BEHAVIOR, ALTER_CLOTHING_BEHAVIOR]) {
+            scope.register(BEHAVIOR_DEFINITION, { useValue: def })
+        }
     }
 }
