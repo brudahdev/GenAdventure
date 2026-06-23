@@ -6,8 +6,8 @@ import { EntityRegistry } from "../../../entity/EntityRegistry";
 import { EventSystem } from "../../../EventSystem";
 import { CharacterIdentityKey } from "../../identity/CharacterIdentity";
 import { resolveTargetCharacter } from "../../identity/characterLookup";
-import { TouchIntent } from "./behavior/TouchIntent";
-import { TouchManagerKey } from "./TouchManager";
+import { touchIntent } from "./behavior/TouchIntent";
+import { AvatarKey } from "../../Avatar";
 
 
 const touchInferenceArgs = {
@@ -62,28 +62,19 @@ export class TouchInferenceAction extends CharacterInferenceAction<TouchInferenc
         }
         const targetEntity = targetData.target
 
-
-        const touchIntent: TouchIntent = {
-            actorId: this.entity.id,
-            targetId: targetEntity.id,
-            actorPartTag: args.actingBodyPart.trim(),
-            targetPartTag: args.targetBodyPart.trim(),
-            verb: args.verb
-        }
-
-
-        this.entity.require(TouchManagerKey)
-            .applyTouch(touchIntent)
-
-
-
-        // this.dispatcher.submit(todo dispatch touch event
-        //     alterTouchStateIntent(this.entity.id, targetEntity.id, couchItem.id, state.id),
-        //     (success) => {
-        //         if (!success) return
-        //         this.entity.get(AvatarKey)?.updateAvatar();
-        //         targetEntity.get(AvatarKey)?.updateAvatar();
-        //     },
-        // )
+        this.dispatcher.submit(
+            touchIntent(
+                this.entity.id,
+                targetEntity.id,
+                args.actingBodyPart.trim(),
+                args.targetBodyPart.trim(),
+                args.verb,
+            ),
+            (success) => {
+                if (!success) return
+                this.entity.get(AvatarKey)?.updateAvatar();
+                targetEntity.get(AvatarKey)?.updateAvatar();
+            },
+        )
     }
 }

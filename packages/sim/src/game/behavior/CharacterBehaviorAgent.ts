@@ -6,6 +6,7 @@ import { CharacterLocationKey } from "../character/location/CharacterLocation"
 import { CharacterLocomotion } from "../character/locomotion/CharacterLocomotion"
 import { CharacterPoseKey } from "../character/pose/CharacterPose"
 import { ClothingManagerKey } from "../character/clothing/ClothingManager"
+import { TouchManagerKey } from "../character/body/touch/TouchManager"
 import { isStanding, standPoseId } from "../plan/poseGuards"
 import { SubLocation } from "../location/SubLocation"
 import { Location } from "../location/Location"
@@ -119,5 +120,16 @@ export class CharacterBehaviorAgent {
         const futureState = item.getStateById(stateId)!
         this.notifier.notifyClothing(actor.id, target.id, futureState)
         return item.setStateById(stateId) ? State.SUCCEEDED : State.FAILED
+    }
+
+    Touch(): State {
+        const { actorId, targetId, actorPartTag, targetPartTag, verb } = this.params
+        const actor = this.deps.registry.getById(actorId)
+        if (!actor || !targetId || !actorPartTag || !targetPartTag || verb === undefined) return State.FAILED
+
+        const applied = actor.require(TouchManagerKey).applyTouch({
+            actorId, targetId, actorPartTag, targetPartTag, verb,
+        })
+        return applied ? State.SUCCEEDED : State.FAILED
     }
 }

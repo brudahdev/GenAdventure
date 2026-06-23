@@ -75,7 +75,7 @@ export class TouchManager {
         // this.touchPersister.save();
     }
 
-    applyTouch(args: TouchInteractionArgs) {
+    applyTouch(args: TouchInteractionArgs): boolean {
 
         let applied = false;
 
@@ -100,7 +100,7 @@ export class TouchManager {
                 if (actor && target) {
                     nonVisualInteraction.onActivate?.({ args, actor, target });
                 }
-                return;
+                return false;
             }
         }
 
@@ -108,6 +108,7 @@ export class TouchManager {
             // this.touchPersister.touchApplied(args)
         }
 
+        return applied;
     }
 
     tryApplyInteraction(

@@ -13,6 +13,9 @@ export interface BehaviorParams {
     poseId?: string
     clothingId?: string
     stateId?: string
+    actorPartTag?: string
+    targetPartTag?: string
+    verb?: string
 }
 
 /** One intent type's behaviour: the MDSL tree it drives and how to flatten the

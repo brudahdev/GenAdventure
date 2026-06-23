@@ -20,6 +20,7 @@ import { POSE_BEHAVIOR } from "../../game/character/pose/behavior/PoseBehavior";
 import { GO_TO_BEHAVIOR } from "../../game/character/locomotion/behavior/GoToBehavior";
 import { GOTO_CHARACTER_BEHAVIOR } from "../../game/character/locomotion/behavior/GoToCharacter/GoToCharacterBehavior";
 import { ALTER_CLOTHING_BEHAVIOR } from "../../game/character/clothing/behavior/AlterClothingStateBehavior";
+import { TOUCH_BEHAVIOR } from "../../game/character/body/touch/behavior/TouchBehavior";
 
 /** A run's composition seam: registers the concrete adapter set and run-scoped
  *  values into a fresh child container, then `SimWorld` (and the rest of the
@@ -79,7 +80,7 @@ export class SimProvisioner {
 
         // Behaviour-tree definitions (one per intent type), collected by
         // BehaviorRegistry via @injectAll. Adding an intent = one more entry here.
-        for (const def of [POSE_BEHAVIOR, GO_TO_BEHAVIOR, GOTO_CHARACTER_BEHAVIOR, ALTER_CLOTHING_BEHAVIOR]) {
+        for (const def of [POSE_BEHAVIOR, GO_TO_BEHAVIOR, GOTO_CHARACTER_BEHAVIOR, ALTER_CLOTHING_BEHAVIOR, TOUCH_BEHAVIOR]) {
             scope.register(BEHAVIOR_DEFINITION, { useValue: def })
         }
     }
