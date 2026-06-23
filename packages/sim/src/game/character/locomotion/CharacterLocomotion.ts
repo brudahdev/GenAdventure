@@ -1,3 +1,4 @@
+import { State } from "mistreevous";
 import { PLAYER_CHARACTER_ID, type NearbyLocationSummary } from "@gen-adventure/shared";
 import { Component } from "../../../core/ec/Component";
 import { defineKey } from "../../../core/ec/ComponentKey";
@@ -12,6 +13,10 @@ import { LocomotionInferenceAction } from "./LocomotionInferenceAction";
 import { InferenceActionManager } from "../../../core/action-inference/InferenceActionManager";
 import { EntityRegistry } from "../../entity/EntityRegistry";
 import { BehaviorDispatcher } from "../../behavior/BehaviorDispatcher";
+import { LocationManager } from "../../location/LocationManager";
+import { isStanding } from "../../plan/poseGuards";
+import { calcPath } from "../../plan/locationPath";
+import type { CharacterActionNotifier } from "../../behavior/CharacterActionNotifier";
 
 export const CharacterLocomotionKey = defineKey<CharacterLocomotion>("character.locomotion")
 export const characterLocomotionFactory = defineFactory(CharacterLocomotionKey, (entity, c) =>
@@ -109,6 +114,43 @@ export class CharacterLocomotion implements Component {
 
 
 
+
+    /** One hop toward `target`. Used by BT leaves `HopTowardLocation` /
+     *  `HopTowardTarget`: SUCCEEDED when already there, FAILED when unreachable
+     *  or not standing, RUNNING after a hop. Static so callers pass explicit deps
+     *  rather than needing a component instance. */
+    static stepToward(
+        actor: Entity,
+        target: SubLocation | Location,
+        locationManager: LocationManager,
+        notifier: CharacterActionNotifier,
+    ): State {
+        const actorLoc = actor.require(CharacterLocationKey)
+        const currentSub = actorLoc.getCurrentSubLocation()
+
+        const arrived = target instanceof SubLocation
+            ? currentSub === target
+            : currentSub.getParent() === target
+        if (arrived) return State.SUCCEEDED
+
+        if (!isStanding(actor)) return State.FAILED // backstop for the while(IsStanding) guard
+
+        const path = calcPath(locationManager, currentSub, target)
+        if (path.length === 0) return State.FAILED // unreachable
+
+        const step = path[0]
+        const stepIsSubLocation = !locationManager.getLocationById(step)
+        const previousSub = currentSub
+        const previousLoc = currentSub.getParent()
+
+        actor.require(CharacterLocomotionKey).gotoNearbyLocation(step)
+        notifier.notifyGoTo(
+            actor,
+            stepIsSubLocation ? previousSub : undefined,
+            stepIsSubLocation ? undefined : previousLoc,
+        )
+        return State.RUNNING
+    }
 
     getNearbyLocationSummary(): NearbyLocationSummary {
         const summary: NearbyLocationSummary = {
