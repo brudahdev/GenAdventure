@@ -83,6 +83,10 @@ importers:
   packages/shared: {}
 
   packages/sim:
+    dependencies:
+      mistreevous:
+        specifier: ^4.3.1
+        version: 4.3.1
     devDependencies:
       '@gen-adventure/shared':
         specifier: workspace:*
@@ -1664,6 +1668,9 @@ packages:
   lodash@4.18.1:
     resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
+  lotto-draw@1.0.2:
+    resolution: {integrity: sha512-1ih414A35BWpApfNlWAHBKOBLSxTj45crAJ+CMWF/kVY5nx6N22DA1OVF/FWW5WM5CGJbIMRh1O+xe8ukyoQ8Q==}
+
   loupe@3.2.1:
     resolution: {integrity: sha512-CdzqowRJCeLU72bHvWqwRBBlLcMEtIvGrlvef74kMnV2AolS9Y8xUv1I0U/MNAWMhBlKIoyuEgoJ0t/bbwHbLQ==}
 
@@ -1763,6 +1770,9 @@ packages:
   minizlib@2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
     engines: {node: '>= 8'}
+
+  mistreevous@4.3.1:
+    resolution: {integrity: sha512-AnDNOd8qGcBbz1fDRGYh5Kf+FodR4KcZyc+H4rPpFL7kdOAmGSwnpW57HwX9h0J8pDrj6FJRSAXdfqI6/N1UTw==}
 
   mkdirp@1.0.4:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
@@ -4009,6 +4019,8 @@ snapshots:
 
   lodash@4.18.1: {}
 
+  lotto-draw@1.0.2: {}
+
   loupe@3.2.1: {}
 
   lowercase-keys@2.0.0: {}
@@ -4102,6 +4114,10 @@ snapshots:
     dependencies:
       minipass: 3.3.6
       yallist: 4.0.0
+
+  mistreevous@4.3.1:
+    dependencies:
+      lotto-draw: 1.0.2
 
   mkdirp@1.0.4: {}
 

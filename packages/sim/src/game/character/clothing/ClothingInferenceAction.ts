@@ -7,7 +7,7 @@ import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentityKey } from "../identity/CharacterIdentity"
 import { resolveTargetCharacter } from "../identity/characterLookup"
 import { ClothingManagerKey } from "./ClothingManager"
-import { PlanExecutor } from "../../plan/PlanExecutor"
+import { BehaviorDispatcher } from "../../behavior/BehaviorDispatcher"
 import { alterClothingStateIntent } from "./behavior/AlterClothingStateIntent"
 import { AvatarKey } from "../Avatar"
 
@@ -31,7 +31,7 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
         private eventSystem: EventSystem,
         manager: InferenceActionManager,
         private readonly registry: EntityRegistry,
-        private readonly planExecutor: PlanExecutor,
+        private readonly dispatcher: BehaviorDispatcher,
     ) {
         const characterName = entity.require(CharacterIdentityKey).name
         super({
@@ -78,15 +78,13 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
             return;
         }
 
-        const status = this.planExecutor.submit(
-            alterClothingStateIntent(this.entity.id, targetEntity.id, clothingItem.id, state.id)
+        this.dispatcher.submit(
+            alterClothingStateIntent(this.entity.id, targetEntity.id, clothingItem.id, state.id),
+            (success) => {
+                if (!success) return
+                this.entity.get(AvatarKey)?.updateAvatar();
+                targetEntity.get(AvatarKey)?.updateAvatar();
+            },
         )
-        if (status.state !== 'completed') {
-            console.log(`[sim] clothing plan did not complete (${status.state})`)
-            return;
-        }
-
-        this.entity.get(AvatarKey)?.updateAvatar();
-        targetEntity.get(AvatarKey)?.updateAvatar();
     }
 }

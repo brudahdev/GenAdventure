@@ -4,7 +4,7 @@ import { Entity } from "../../../core/ec/Entity"
 import { EntityRegistry } from "../../entity/EntityRegistry"
 import { EventSystem } from "../../EventSystem"
 import { LocationLink } from "../../location/LocationLink"
-import { PlanExecutor } from "../../plan/PlanExecutor"
+import { BehaviorDispatcher } from "../../behavior/BehaviorDispatcher"
 import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentity, CharacterIdentityKey } from "../identity/CharacterIdentity"
 import { resolveTargetCharacter } from "../identity/characterLookup"
@@ -31,7 +31,7 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
         private eventSystem: EventSystem,
         manager: InferenceActionManager,
         private readonly registry: EntityRegistry,
-        private readonly planExecutor: PlanExecutor,
+        private readonly dispatcher: BehaviorDispatcher,
     ) {
         const charId = entity.require(CharacterIdentityKey);
 
@@ -84,17 +84,13 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
         }
 
 
-        const status = this.planExecutor.submit(//todo async //todo wait until done talking? as command?
-            goToIntent(this.entity.id, targetLocationId, targetSubLocationId)
+        this.dispatcher.submit(
+            goToIntent(this.entity.id, targetLocationId, targetSubLocationId),
+            (success) => {
+                if (success && targetEntity.require(NpcActivityKey).isActive) {
+                    this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))
+                }
+            },
         )
-        if (status.state !== 'completed') {
-            console.log(`[sim] goTo plan did not complete (${status.state})`)
-            return;
-        }
-
-        if (targetEntity.require(NpcActivityKey).isActive) {
-            this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))
-        }
-
     }
 }

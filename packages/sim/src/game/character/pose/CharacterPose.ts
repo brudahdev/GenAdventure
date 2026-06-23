@@ -20,7 +20,7 @@ import { InferenceActionManager } from "../../../core/action-inference/Inference
 import { EntityRegistry } from "../../entity/EntityRegistry";
 import { findFirstInMapWithTag, findFirstWithTag } from "../../../core/TagUtils";
 import { AvatarKey } from "../Avatar";
-import { PlanExecutor } from "../../plan/PlanExecutor";
+import { BehaviorDispatcher } from "../../behavior/BehaviorDispatcher";
 
 export const CharacterPoseKey = defineKey<CharacterPose>("character.pose")
 export const characterPoseFactory = defineFactory(CharacterPoseKey, (entity, c) =>
@@ -33,7 +33,7 @@ export const characterPoseFactory = defineFactory(CharacterPoseKey, (entity, c) 
         c.resolve(LocationContextItemFactory),
         c.resolve(InferenceActionManager),
         c.resolve(EntityRegistry),
-        c.resolve(PlanExecutor)
+        c.resolve(BehaviorDispatcher)
     ))
 
 /** {@link CharacterPose}'s save blob: the current pose id. */
@@ -59,7 +59,7 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         contextItemFactory: LocationContextItemFactory,
         inferenceManager: InferenceActionManager,
         registry: EntityRegistry,
-        planExecutor: PlanExecutor
+        dispatcher: BehaviorDispatcher
     ) {
         this.characterName = entity.require(CharacterIdentityKey).name
         this.characterLocation = entity.require(CharacterLocationKey)
@@ -102,7 +102,7 @@ export class CharacterPose implements Component, Saveable<PoseSave> {
         })
 
         if (entity.id != PLAYER_CHARACTER_ID) {
-            this.inferenceAction = new PoseInferenceAction(this.entity, eventSystem, inferenceManager, registry, planExecutor);
+            this.inferenceAction = new PoseInferenceAction(this.entity, eventSystem, inferenceManager, registry, dispatcher);
         }
     }
 

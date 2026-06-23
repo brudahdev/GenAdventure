@@ -66,6 +66,10 @@ export interface SimTestWorld {
   npcs: Entity[]
   /** Fresh temp directory backing this run's saves. */
   savesLocation: string
+  /** Pump the behaviour-tree runner (these tests never start the real time
+   *  interval) until every actor's tree has settled, or `maxTicks` is hit.
+   *  Returns the number of ticks taken. */
+  runBehaviors(maxTicks?: number): number
   /** Tears down the run and removes the temp save directory. */
   dispose(): void
 }
@@ -91,6 +95,14 @@ function boot(savesLocation: string, provision: (scope: DependencyContainer) => 
     player,
     npcs,
     savesLocation,
+    runBehaviors(maxTicks = 64) {
+      let ticks = 0
+      while (!world.behaviorRunner.allIdle() && ticks < maxTicks) {
+        world.behaviorRunner.stepAll()
+        ticks++
+      }
+      return ticks
+    },
     dispose() {
       world.dispose()
       fs.rmSync(savesLocation, { recursive: true, force: true })

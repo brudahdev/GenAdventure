@@ -3,7 +3,7 @@ import { InferenceActionManager } from "../../../core/action-inference/Inference
 import { Entity } from "../../../core/ec/Entity"
 import { EntityRegistry } from "../../entity/EntityRegistry"
 import { EventSystem } from "../../EventSystem"
-import { PlanExecutor } from "../../plan/PlanExecutor"
+import { BehaviorDispatcher } from "../../behavior/BehaviorDispatcher"
 import { AvatarKey } from "../Avatar"
 import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentity, CharacterIdentityKey } from "../identity/CharacterIdentity"
@@ -31,7 +31,7 @@ export class PoseInferenceAction extends CharacterInferenceAction<PoseInferenceA
         private eventSystem: EventSystem,
         manager: InferenceActionManager,
         private readonly registry: EntityRegistry,
-        private readonly planExecutor: PlanExecutor,
+        private readonly dispatcher: BehaviorDispatcher,
     ) {
         const charId = entity.require(CharacterIdentityKey);
 
@@ -71,15 +71,13 @@ export class PoseInferenceAction extends CharacterInferenceAction<PoseInferenceA
         }
 
         const targetPoseId = targetPose.id
-        const status = this.planExecutor.submit(
-            poseIntent(this.entity.id, targetEntity.id, targetPoseId)//todo could be async
+        this.dispatcher.submit(
+            poseIntent(this.entity.id, targetEntity.id, targetPoseId),
+            (success) => {
+                if (!success) return
+                this.entity.get(AvatarKey)?.updateAvatar();
+                targetEntity.get(AvatarKey)?.updateAvatar();
+            },
         )
-        if (status.state !== 'completed') {
-            console.log(`[sim] pose plan did not complete (${status.state})`)
-            return;
-        }
-
-        this.entity.get(AvatarKey)?.updateAvatar();
-        targetEntity.get(AvatarKey)?.updateAvatar();
     }
 }

@@ -15,7 +15,6 @@ import { characterPoseFactory } from "../character/pose/CharacterPose";
 import { appearanceFactory } from "../character/appearance/CharacterAppearance";
 import { clothingFactory } from "../character/clothing/ClothingManager";
 import { characterLocomotionFactory } from "../character/locomotion/CharacterLocomotion";
-import { actorPlanFactory } from "../../core/plan/ActorPlan";
 import { avatarFactory } from "../character/Avatar";
 
 /** A blueprint is just an ordered list of component factories. Component order
@@ -30,7 +29,6 @@ const PLAYER_BLUEPRINT: ComponentFactory[] = [
     characterPoseFactory,
     appearanceFactory,
     clothingFactory,
-    actorPlanFactory,
 ]
 const NPC_BLUEPRINT: ComponentFactory[] = [
     npcIdentityFactory,
@@ -40,7 +38,6 @@ const NPC_BLUEPRINT: ComponentFactory[] = [
     characterPoseFactory,
     appearanceFactory,
     clothingFactory,
-    actorPlanFactory,
     avatarFactory,
 ]
 

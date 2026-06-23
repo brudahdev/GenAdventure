@@ -111,18 +111,16 @@ class SimService implements SimApi {
     }
 
 
-    const status = this.getWorld().submitIntent(
-      alterClothingStateIntent(PLAYER_CHARACTER_ID, characterId, clothingItemId, stateId)
+    // Avatar regeneration stays in the handler, now deferred to the tree settling
+    // (gated on success + NPC active).
+    this.getWorld().submitIntent(
+      alterClothingStateIntent(PLAYER_CHARACTER_ID, characterId, clothingItemId, stateId),
+      (success) => {
+        if (success && characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
+          main.imageRequest(buildAvatarPrompt(targetEntity))
+        }
+      },
     )
-    if (status.state !== 'completed') {
-      console.log(`[sim] clothing plan did not complete (${status.state})`)
-      return;
-    }
-
-    // Avatar regeneration stays in the handler (gated on success + NPC active).
-    if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
-      main.imageRequest(buildAvatarPrompt(targetEntity))
-    }
   }
 
   moveUiAction(
@@ -147,17 +145,14 @@ class SimService implements SimApi {
 
 
 
-    const status = this.getWorld().submitIntent(//todo async
-      goToIntent(characterId, targetLocation!.id, targetSubLocation)
+    this.getWorld().submitIntent(
+      goToIntent(characterId, targetLocation!.id, targetSubLocation),
+      (success) => {
+        if (success && characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
+          main.imageRequest(buildAvatarPrompt(targetEntity))
+        }
+      },
     )
-    if (status.state !== 'completed') {
-      console.log(`[sim] targetPoseId plan did not complete (${status.state})`)
-      return;
-    }
-
-    if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
-      main.imageRequest(buildAvatarPrompt(targetEntity))
-    }
   }
 
   poseUiAction(
@@ -174,17 +169,14 @@ class SimService implements SimApi {
     const targetPoseId = poseId
 
 
-    const status = this.getWorld().submitIntent(//todo async
-      poseIntent(PLAYER_CHARACTER_ID, characterId, targetPoseId)
+    this.getWorld().submitIntent(
+      poseIntent(PLAYER_CHARACTER_ID, characterId, targetPoseId),
+      (success) => {
+        if (success && characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
+          main.imageRequest(buildAvatarPrompt(targetEntity))
+        }
+      },
     )
-    if (status.state !== 'completed') {
-      console.log(`[sim] targetPoseId plan did not complete (${status.state})`)
-      return;
-    }
-
-    if (characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
-      main.imageRequest(buildAvatarPrompt(targetEntity))
-    }
   }
 
   touchUiAction(

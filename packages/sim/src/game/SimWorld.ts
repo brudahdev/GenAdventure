@@ -23,9 +23,9 @@ import { EventSystem } from "./EventSystem";
 import { ContextManager } from "../core/context/ContextManager";
 import { LocationManager } from "./location/LocationManager";
 import { InferenceActionManager } from "../core/action-inference/InferenceActionManager";
-import { PlanExecutor } from "./plan/PlanExecutor";
+import { BehaviorTreeRunner, type OnSettle } from "../core/bt/BehaviorTreeRunner";
+import { BehaviorDispatcher } from "./behavior/BehaviorDispatcher";
 import type { ActorIntent } from "./plan/planDefs";
-import type { PlanStatus } from "../core/plan/planTypes";
 import { NotificationService } from "../core/NotificationService";
 
 
@@ -58,19 +58,21 @@ export class SimWorld {
         readonly inferenceActionManager: InferenceActionManager,
         readonly characterSpawner: CharacterSpawner,
         readonly scheduler: Scheduler,
-        readonly planExecutor: PlanExecutor,
+        readonly behaviorRunner: BehaviorTreeRunner,
+        readonly behaviorDispatcher: BehaviorDispatcher,
         readonly notificationService: NotificationService,
         private readonly mainSync: MainSync,
     ) {
-        this.systems = [eventSystem, time, mainSync, characterSpawner]
+        this.systems = [eventSystem, time, behaviorRunner, mainSync, characterSpawner]
         this.worldSaveables = [time, worldState, scheduler]
     }
 
-    /** Submit a top-level intent for decomposition + execution. Returns the
-     *  resulting plan status. The entry point both intent sources (UI handler,
+    /** Submit a top-level intent. It selects + parameterizes a behaviour tree that
+     *  the runner steps across ticks. `onSettle` fires when the tree finishes
+     *  (`true` = succeeded). The entry point both intent sources (UI handler,
      *  inference handler) funnel through. */
-    submitIntent(intent: ActorIntent): PlanStatus {
-        return this.planExecutor.submit(intent)
+    submitIntent(intent: ActorIntent, onSettle?: OnSettle): void {
+        this.behaviorDispatcher.submit(intent, onSettle)
     }
 
     /** Second boot phase: the whole graph is constructed, so systems can emit

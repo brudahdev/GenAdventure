@@ -75,6 +75,9 @@ describe('sim world (system test)', () => {
       clothingName: 'shirt',
       clothingState: 'open'
     })
+    // Acting on another character now walks to them first (goto-character subtree),
+    // which spans ticks — pump the behaviour runner to completion.
+    sim.runBehaviors()
     const shirt = npc2.require(ClothingManagerKey).getClothingItemByTag("shirt")
     expect(shirt?.getCurrentStateId()).toBe("open")
 
