@@ -19,6 +19,8 @@ import { Shoulders } from "./parts/Shoulders";
 import { Thighs } from "./parts/Thighs";
 import { Penis } from "./parts/Penis";
 import { Pussy } from "./parts/Pussy";
+import { PromptBuilder } from "../../../core/PromptBuilder";
+import { TouchInteraction } from "./touch/Touch";
 
 export const BodyKey = defineKey<Body>("character.body")
 export const bodyFactory = defineFactory(BodyKey, (entity) => new Body(entity))
@@ -65,10 +67,10 @@ export class Body implements Component {
         this.neck = new Neck(this, this.entity);
         this.shoulders = new Shoulders(this, this.entity);
         this.thighs = new Thighs(this, this.entity);
+        this.nipples = new Nipples(this, this.entity);
 
         if (config?.hasTits) {
             this.tits = new Tits(this, this.entity);
-            this.nipples = new Nipples(this, this.entity);
         }
         if (config?.hasPenis) {
             this.penis = new Penis(this, this.entity);
@@ -91,5 +93,26 @@ export class Body implements Component {
     getPart(name: keyof Body): BodyPart | undefined {
         const part = this[name];
         return part instanceof BodyPart ? part : undefined;
+    }
+
+    buildAvatarImage(prompt: PromptBuilder) {
+        this.forEachUniqueInteraction(effect => effect.appendImagePrompt(prompt));
+    }
+
+    private forEachUniqueInteraction(callback: (interaction: TouchInteraction) => void) {
+        const seen = new Set<TouchInteraction>();
+
+        for (const bodyPart of this.bodyParts) {
+            for (const slot of bodyPart.getAllSlots()) {
+                const interactions = slot.getInteractions(); // now returns an array
+
+                for (const interaction of interactions) {
+                    if (!seen.has(interaction)) {
+                        seen.add(interaction);
+                        callback(interaction);
+                    }
+                }
+            }
+        }
     }
 }

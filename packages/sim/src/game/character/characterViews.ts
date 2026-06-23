@@ -6,6 +6,8 @@ import { AppearanceKey } from "./appearance/CharacterAppearance"
 import { CharacterPoseKey } from "./pose/CharacterPose"
 import { CharacterLocationKey } from "./location/CharacterLocation"
 import { CharacterIdentityKey } from "./identity/CharacterIdentity"
+import { TouchManagerKey } from "./body/touch/TouchManager"
+import { BodyKey } from "./body/Body"
 
 
 /** Read-only projections over a character entity's components: builds the avatar
@@ -27,6 +29,7 @@ export function buildAvatarPrompt(entity: Entity): PromptRequest {
     }
     entity.require(CharacterPoseKey).buildAvatarImage(prompt)
     entity.require(AppearanceKey).buildAvatarImage(prompt)
+    entity.require(BodyKey).buildAvatarImage(prompt)
     entity.require(ClothingManagerKey).buildAvatarImage(prompt)
 
     return {

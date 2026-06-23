@@ -13,18 +13,29 @@ import { TouchInteraction } from "./Touch";
 import { DuoTouchInteraction } from "./TouchDuo";
 import { TouchInteractionSlot } from "./TouchSlot";
 import { TouchValidator } from "./TouchValidator";
+import { TouchInferenceAction } from "./TouchInferenceAction";
+import { PLAYER_CHARACTER_ID } from "@gen-adventure/shared";
+import { EventSystem } from "../../../EventSystem";
+import { BehaviorDispatcher } from "../../../behavior/BehaviorDispatcher";
+import { InferenceActionManager } from "../../../../core/action-inference/InferenceActionManager";
 
 export interface TouchInteractionArgs {
     actorId: string;
-    interactingThing: string;
     targetId: string;
-    targetBodyPart: string;
+    actorPartTag: string;
+    targetPartTag: string;
     verb: string;
 }
 
 export const TouchManagerKey = defineKey<TouchManager>("character.touch")
 export const touchManagerFactory = defineFactory(TouchManagerKey, (entity, c) =>
-    new TouchManager(entity, c.resolve(EntityRegistry)))
+    new TouchManager(
+        entity,
+        c.resolve(EntityRegistry),
+        c.resolve(EventSystem),
+        c.resolve(InferenceActionManager),
+        c.resolve(BehaviorDispatcher),
+    ))
 
 export class TouchManager {
     logger: Logger
@@ -32,9 +43,14 @@ export class TouchManager {
     // private touchPersister: TouchPersister;
     private validator: TouchValidator;
 
+    private touchAction?: TouchInferenceAction;
+
     constructor(
         private readonly entity: Entity,
         private readonly registry: EntityRegistry,
+        eventSystem: EventSystem,
+        manager: InferenceActionManager,
+        dispatcher: BehaviorDispatcher
     ) {
 
         this.logger = new Logger(entity.require(CharacterIdentityKey).name + "_TouchManager");
@@ -42,6 +58,16 @@ export class TouchManager {
             // this.character
         );
         // this.touchPersister = new TouchPersister(character);
+
+        if (entity.id != PLAYER_CHARACTER_ID) {
+            this.touchAction = new TouchInferenceAction(
+                entity,
+                eventSystem,
+                manager,
+                registry,
+                dispatcher
+            );
+        }
 
     }
 
@@ -134,8 +160,8 @@ export class TouchManager {
 
     findMatchingInteraction(args: TouchInteractionArgs, interactions: TouchDuoConfig[]): TouchDuoConfig | undefined {
         const matchingRule = interactions.find(rule => {
-            const actorPartMatches = matchesTaggable(args.interactingThing, rule.actorPartTag);
-            const touchedPartMatches = matchesTaggable(args.targetBodyPart, rule.targetPartTags);
+            const actorPartMatches = matchesTaggable(args.actorPartTag, rule.actorPartTag);
+            const touchedPartMatches = matchesTaggable(args.targetPartTag, rule.targetPartTags);
             const verbMatches = matchesTaggable(args.verb, rule.verbTags);
             return verbMatches && actorPartMatches && touchedPartMatches;
         });
@@ -154,8 +180,8 @@ export class TouchManager {
     findMatchingNonVisualInteraction(args: TouchInteractionArgs, interactions: TouchNonVisualConfig[]): TouchNonVisualConfig | undefined {
         const matchingRule = interactions.find(rule => {
 
-            const actorPartMatches = rule.actorPartTag === 'any' || matchesTaggable(args.interactingThing, rule.actorPartTag);
-            const touchedPartMatches = rule.targetPartTags === 'any' || matchesTaggable(args.targetBodyPart, rule.targetPartTags);
+            const actorPartMatches = rule.actorPartTag === 'any' || matchesTaggable(args.actorPartTag, rule.actorPartTag);
+            const touchedPartMatches = rule.targetPartTags === 'any' || matchesTaggable(args.targetPartTag, rule.targetPartTags);
             const verbMatches = matchesTaggable(args.verb, rule.verbTags);
             return verbMatches && actorPartMatches && touchedPartMatches;
         });
