@@ -7,10 +7,11 @@ import { LocationLink } from "../../location/LocationLink"
 import { BehaviorDispatcher } from "../../behavior/BehaviorDispatcher"
 import { buildAvatarPrompt } from "../characterViews"
 import { CharacterIdentity, CharacterIdentityKey } from "../identity/CharacterIdentity"
-import { resolveTargetCharacter } from "../identity/characterLookup"
+import { resolveTargetCharacter, resolveTargetCharacterByNameInString } from "../identity/characterLookup"
 import { NpcActivityKey } from "../npc/NpcActivity"
 import { goToIntent } from "./behavior/GoToIntent"
 import { CharacterLocomotionKey } from "./CharacterLocomotion"
+import { CharacterLocation, CharacterLocationKey } from "../location/CharacterLocation"
 
 
 
@@ -55,19 +56,18 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
     }
 
     handle(args: InferredArgs<LocomotionInferenceArgs>): void {//todo move other character
-        // const targetData = resolveTargetCharacter(this.registry, args.subjectName, this.entity)
-        // if (!targetData) {
-        //     console.log("unable to find target character with name " + args.subjectName)
-        //     return;
-        // }
-
-        ///<invoke>Neena_change_Locomotion("<user name>")
-        // <invoke>Cortney_change_Locomotion("standing near <user name>")
 
         const targetEntity = this.entity
 
         const targetLocomotionManager = targetEntity.require(CharacterLocomotionKey)
-        const targetLocation = targetLocomotionManager.findNearbyLocationByTag(args.newLocationName)
+        let targetLocation = targetLocomotionManager.findNearbyLocationByTag(args.newLocationName)
+
+        if (!targetLocation) { //try to resolve targs location if llm gave us something like "Over to Jane"
+            const targetCharEntity = resolveTargetCharacterByNameInString(this.registry, args.newLocationName);
+            if (targetCharEntity && targetCharEntity.id != this.entity.id) {
+                targetLocation = targetEntity.require(CharacterLocationKey).getCurrentSubLocation() //gotoCharacter intent?
+            }
+        }
         if (!targetLocation) {
             console.log("unable to find Locomotion by tag " + args.newLocationName)
             return;

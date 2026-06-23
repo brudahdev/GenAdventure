@@ -17,3 +17,14 @@ export function resolveTargetCharacter(
     if (!target) return undefined
     return { target, isActingOnSelf: false }
 }
+
+//If the string contains a character's name, return that characters entitiy. 
+//Example "Over to Jane" returns janes' entitiy id
+export function resolveTargetCharacterByNameInString(
+    registry: EntityRegistry,
+    string: string,
+): Entity | undefined {
+    return registry.with(CharacterIdentityKey).find(
+        e => string.includes(e.require(CharacterIdentityKey).name)
+    )
+}
