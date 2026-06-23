@@ -2,6 +2,7 @@ import type {
   VoxtaConfig,
   VoxtaCharacterSummary,
   VoxtaScenarioSummary,
+  VoxtaScenarioDetail,
   CharacterDetail,
   VoxtaServerMessage,
   SimContextItem,
@@ -11,10 +12,11 @@ import type {
 import type {
   CharacterCardDto,
   CharactersResponseDto,
-  ScenariosResponseDto
+  ScenariosResponseDto,
+  ScenarioDetailDto
 } from './voxtaDtos'
 
-import { mapCharacter, mapCharacterDetail, mapInferenceActionToScenarioActionDto, mapScenario } from './voxtaMappers'
+import { mapCharacter, mapCharacterDetail, mapInferenceActionToScenarioActionDto, mapScenario, mapScenarioDetail } from './voxtaMappers'
 import { mapServerMessage } from './voxtaSignalMappers'
 import { VoxtaSignal } from './voxtaSignal'
 import { singleton } from 'tsyringe'
@@ -60,6 +62,19 @@ export class VoxtaClient {
   /** The active session id, or null if no chat has been started. */
   get sessionId(): string | null {
     return this.signal.sessionId
+  }
+
+  /** The logged-in Voxta user's name, or null before the `welcome` handshake. */
+  get userName(): string | null {
+    return this.signal.userName
+  }
+
+  /** Ensure an authenticated session (connecting if needed) and return the
+   *  logged-in user's name from the `welcome` message. Used as the player-name
+   *  fallback when a scenario has no impersonation name. */
+  async ensureUserName(): Promise<string | null> {
+    await this.signal.ensureSession()
+    return this.signal.userName
   }
 
   /**
@@ -207,6 +222,13 @@ export class VoxtaClient {
   async listScenarios(): Promise<VoxtaScenarioSummary[]> {
     const data = await this.request<ScenariosResponseDto>('/api/scenarios')
     return data.scenarios.map(mapScenario)
+  }
+
+  /** Fetch full scenario detail (richer than the list summary), including the
+   *  configured impersonation/player name. */
+  async getScenarioDetail(scenarioId: string): Promise<VoxtaScenarioDetail> {
+    const dto = await this.request<ScenarioDetailDto>(`/api/scenarios/${scenarioId}`)
+    return mapScenarioDetail(dto)
   }
 
   async getCharacter(characterId: string): Promise<CharacterDetail> {

@@ -47,6 +47,15 @@ export interface VoxtaScenarioSummary {
   roles: VoxtaScenarioRole[]
 }
 
+/** Full scenario detail from `/api/scenarios/<id>` (richer than the summary).
+ *  `impersonationName` is the scenario-configured player name (flattened from the
+ *  DTO's `impersonation.name`), used as the sim player name when present. */
+export interface VoxtaScenarioDetail {
+  id: string
+  name: string
+  impersonationName?: string
+}
+
 /** A fully-assembled chat message routed to the UI. Character replies arrive from
  *  Voxta as a stream of chunks; ChatService assembles them into one of these and
  *  emits it once the reply completes. User messages (typed or recognized from

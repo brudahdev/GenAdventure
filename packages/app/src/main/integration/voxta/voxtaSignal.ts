@@ -52,6 +52,8 @@ export class VoxtaSignal {
   private _chatId: string | null = null
   private _authenticated = false
   private _registered = false
+  /** The logged-in Voxta user's name, captured from the `welcome` message. */
+  private _userName: string | null = null
   private _characterAppConfigs = new Map<string, Record<string, string>>()
 
   /** Pending handshake/chat replies we are awaiting, settled from the receive handler. */
@@ -72,6 +74,19 @@ export class VoxtaSignal {
 
   get authenticated(): boolean {
     return this._authenticated
+  }
+
+  /** The logged-in Voxta user's name, or null before the `welcome` handshake. */
+  get userName(): string | null {
+    return this._userName
+  }
+
+  /** Bring the connection up and authenticate (awaiting `welcome`) if needed, so
+   *  callers can rely on session state — e.g. {@link userName} — without starting
+   *  a chat. Idempotent; a later `startChat` reuses the live connection. */
+  async ensureSession(): Promise<void> {
+    await this.ensureConnected()
+    await this.ensureAuthenticated()
   }
 
   get characterAppConfigs(): ReadonlyMap<string, Record<string, string>> {
@@ -318,6 +333,7 @@ export class VoxtaSignal {
       case 'welcome': {
         this._authenticated = true
         const welcome = message as VoxtaServerWelcomeDto
+        this._userName = welcome.user.name
         console.log(`[Voxta] Welcome, ${welcome.user.name}!`)
         this.welcomeWaiter?.resolve()
         break

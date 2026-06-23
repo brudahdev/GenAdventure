@@ -3,6 +3,7 @@ import * as path from 'path'
 import { describe, expect, it } from 'vitest'
 import { CURRENT_SAVE_VERSION } from '@gen-adventure/shared'
 import { NPC_A, NPC_B, PLAYER_CHARACTER_ID, componentBlob, readSave, startSimWorld } from './simTestWorld'
+import { CharacterIdentityKey } from '../../src/game/character/identity/CharacterIdentity'
 
 const LOCATION_KEY = 'character.location'
 const POSE_KEY = 'character.pose'
@@ -66,6 +67,12 @@ describe('sim start → persist (system test)', () => {
     expect(componentBlob<PoseBlob>(saved, NPC_B, POSE_KEY)).toEqual({ poseId: 'stand' })
     expect(componentBlob<ClothingBlob>(saved, NPC_B, CLOTHING_KEY).items.map((i) => i.id)).toEqual(ANIME)
 
+    dispose()
+  })
+
+  it('names the player from the run userName', () => {
+    const { player, dispose } = startSimWorld({ userName: 'Alice' })
+    expect(player.require(CharacterIdentityKey).name).toBe('Alice')
     dispose()
   })
 })

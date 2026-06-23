@@ -64,6 +64,7 @@ export type {
   VoxtaCharacterSummary,
   VoxtaScenarioRole,
   VoxtaScenarioSummary,
+  VoxtaScenarioDetail,
   CharacterDetail,
   ScenarioCharacter,
   ChatMessage,

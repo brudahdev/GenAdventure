@@ -32,6 +32,15 @@ export interface ScenarioRoleDto {
   defaultCharacterId: string
 }
 
+/** The `/api/scenarios/<id>` detail response (richer than the list `ScenarioDto`).
+ *  Only the fields we consume are typed; `impersonation.name` is the scenario's
+ *  configured player name. */
+export interface ScenarioDetailDto {
+  id: string
+  name: string
+  impersonation?: { name?: string }
+}
+
 export interface TextToSpeechConfigDto {
   voice?: Record<string, unknown>
   service?: Record<string, unknown>

@@ -5,6 +5,7 @@ import { CHARACTER_CONFIG_ADAPTER, type CharacterConfigAdapter } from "../Charac
 import { PLAYER_PERSONA_CONFIG_ADAPTER, type PlayerPersonaConfigAdapter } from "../PlayerPersonaConfigAdapter"
 import { STARTING_STATE_ADAPTER, type StartingStateAdapter } from "../StartingStateAdapter"
 import { INIT_CHARACTERS } from "../../entity/initCharacters"
+import { USER_NAME } from "./userName"
 
 
 /** Holds the character's static configuration (pronouns, appearance entries,
@@ -17,12 +18,10 @@ export class CharacterIdentity {
     constructor(readonly config: CharacterConfig, readonly name: string) { }
 }
 
-//todo load from persona
-const DEFAULT_PLAYER_NAME = "{{user}}"
-
 /** Attaches the player's identity: the persona config selected by the player
  *  role's `personaId` (from `roles.json`, role order -1), loaded from
- *  `player_personas.json`. The name still uses {@link DEFAULT_PLAYER_NAME}. */
+ *  `player_personas.json`, with the name resolved from the run's `USER_NAME`
+ *  (the scenario impersonation / logged-in Voxta user, see `SimStartData.userName`). */
 export const playerIdentityFactory = defineFactory(CharacterIdentityKey, (entity, c) => {
     const startingState = c.resolve<StartingStateAdapter>(STARTING_STATE_ADAPTER)
     const personaId = startingState.getRoleConfig(entity.id).personaId
@@ -30,7 +29,8 @@ export const playerIdentityFactory = defineFactory(CharacterIdentityKey, (entity
         throw new Error("player role config has no personaId")
     }
     const personas = c.resolve<PlayerPersonaConfigAdapter>(PLAYER_PERSONA_CONFIG_ADAPTER)
-    return new CharacterIdentity(personas.getConfig(personaId), DEFAULT_PLAYER_NAME)
+    const userName = c.resolve<string>(USER_NAME)
+    return new CharacterIdentity(personas.getConfig(personaId), userName)
 })
 
 /** Attaches an npc's identity: static config from the per-character config

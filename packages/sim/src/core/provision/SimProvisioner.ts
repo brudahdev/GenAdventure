@@ -14,6 +14,7 @@ import { POSE_CONFIG_ADAPTER, FilePoseConfigAdapter } from "../../game/character
 import { STARTING_STATE_ADAPTER, RoleStartingStateAdapter } from "../../game/character/StartingStateAdapter";
 import { STARTING_CLOTHING_ADAPTER, OutfitStartingClothingAdapter } from "../../game/character/clothing/StartingClothingAdapter";
 import { INIT_CHARACTERS } from "../../game/entity/initCharacters";
+import { USER_NAME } from "../../game/character/identity/userName";
 import { CLOTHING_ITEM_CONFIG_ADAPTER, FileClothingItemConfigAdapter } from "../../game/item/clothing/ClothingItemConfigAdapter";
 import { FileOutfitConfigAdapter, OUTFIT_CONFIG_ADAPTER } from "../../game/item/clothing/OutfitConfigAdapter";
 import { BEHAVIOR_DEFINITION } from "../../game/behavior/BehaviorDefinition";
@@ -47,6 +48,7 @@ export class SimProvisioner {
         scope.register(RUN_CONTAINER, { useValue: scope })
         scope.register(REMOTE_MAIN, { useValue: this.main })
         scope.register(INIT_CHARACTERS, { useValue: this.initData.characters })
+        scope.register(USER_NAME, { useValue: this.initData.userName })
         scope.register(RESTORE_SOURCE, { useValue: new RestoreSource(this.snapshot) })
 
         scope.register(TIME_CONFIG_ADAPTER, {

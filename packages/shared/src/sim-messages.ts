@@ -13,6 +13,9 @@ export interface SimStartData {
   clothingItemConfigLocation: string,
   outfitConfigLocation: string,
   playerPersonaConfigLocation: string,
+  /** The resolved player name (scenario impersonation, else the logged-in Voxta
+   *  user, else the literal `{{user}}` token). Becomes the player's identity name. */
+  userName: string,
   savesLocation: string,
 }
 

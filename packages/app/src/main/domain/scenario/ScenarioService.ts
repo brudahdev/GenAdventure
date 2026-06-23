@@ -160,8 +160,25 @@ export class ScenarioService {
       clothingItemConfigLocation: absolutePath('configs/clothing.json'),
       outfitConfigLocation: absolutePath('configs/outfit.json'),
       playerPersonaConfigLocation: absolutePath('configs/player_personas.json'),
+      userName: await this.resolveUserName(scenario.id),
       savesLocation: absolutePath(`saves/${scenario.id}`),
     }
+  }
+
+  /** Resolve the player name to send into the sim: the scenario's configured
+   *  impersonation name if set, otherwise the logged-in Voxta user's name, and as
+   *  a last resort the literal `{{user}}` token (Voxta substitutes it downstream). */
+  private async resolveUserName(scenarioId: string): Promise<string> {
+    let impersonationName: string | undefined
+    try {
+      impersonationName = (await voxtaClient.getScenarioDetail(scenarioId)).impersonationName
+    } catch (e) {
+      console.error('[ScenarioService] scenario detail fetch failed:', e instanceof Error ? e.message : e)
+    }
+    if (impersonationName) {
+      return impersonationName
+    }
+    return (await voxtaClient.ensureUserName()) ?? '{{user}}'
   }
 
   /** Generate the background (player POV) and an avatar per active NPC from the

@@ -4,12 +4,14 @@ import {
   type InferenceAction,
   type VoxtaCharacterSummary,
   type VoxtaScenarioRole,
-  type VoxtaScenarioSummary
+  type VoxtaScenarioSummary,
+  type VoxtaScenarioDetail
 } from '@gen-adventure/shared'
 import type {
   CharacterCardDto,
   CharacterDto,
   ScenarioDto,
+  ScenarioDetailDto,
   ScenarioRoleDto,
   VoxtaScenarioActionDto,
   VoxtaFunctionTimingDto
@@ -52,6 +54,14 @@ export function mapScenario(dto: ScenarioDto): VoxtaScenarioSummary {
     name: dto.name,
     description: dto.description ?? '',
     roles: (dto.roles ?? []).map(mapRole)
+  }
+}
+
+export function mapScenarioDetail(dto: ScenarioDetailDto): VoxtaScenarioDetail {
+  return {
+    id: dto.id,
+    name: dto.name,
+    impersonationName: dto.impersonation?.name
   }
 }
 

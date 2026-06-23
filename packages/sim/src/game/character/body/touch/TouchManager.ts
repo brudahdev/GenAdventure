@@ -108,9 +108,8 @@ export class TouchManager {
         }
 
         if (applied) {
-            // this.touchPersister.touchApplied(args)
-            actor?.require(AvatarKey).dirtied();
-            target?.require(AvatarKey).dirtied();
+            actor?.get(AvatarKey)?.dirtied();
+            target?.get(AvatarKey)?.dirtied();
         }
 
         return applied;
