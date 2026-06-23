@@ -63,7 +63,7 @@ GenAdventure/
 │   │   │   ├── worker.ts          # Worker entry: SimService (SimApi) + Comlink bridge to main
 │   │   │   ├── core/              # Domain-neutral engine (no game specifics)
 │   │   │   │   ├── ec/            # Entity-Component: Entity, Component, ComponentKey, ComponentFactory
-│   │   │   │   ├── plan/          # Intent→Command planner: planTypes, Decomposer, CommandSystem, planWalk, ActorPlan
+│   │   │   │   ├── plan/          # planTypes (Intent), bt/ BehaviorTreeRunner + Agent
 │   │   │   │   ├── action-inference/ # CharacterInferenceAction + InferenceActionManager (Voxta fn-calling)
 │   │   │   │   ├── context/       # ContextManager, ContextItem (prompt-context items → Voxta)
 │   │   │   │   ├── time/          # Time (30 TPS), Scheduler (persistable min-heap), MinHeap
@@ -82,7 +82,8 @@ GenAdventure/
 │   │   │       │                  #   pose, appearance, clothing, npc, player (each w/ ConfigAdapter)
 │   │   │       ├── location/      # Location, SubLocation, LocationManager, LocationContextItem
 │   │   │       ├── item/clothing/ # ClothingItem(+State), Outfit/ClothingItem ConfigAdapters
-│   │   │       └── plan/          # PlanExecutor, planDefs (intent/command shapes), decomposers/command-systems
+│   │   │       ├── behavior/      # BehaviorDispatcher, CharacterBehaviorAgent, behaviorTrees (MDSL)
+│   │   │       └── plan/          # planDefs (ActorIntent), poseGuards, locationPath; per-aspect *Intent files
 │   │   └── test/                  # Vitest; test/system/* boots a real SimWorld from fixtures
 │   │
 │   └── app/                       # Electron application
@@ -203,28 +204,32 @@ process only over a Comlink bridge (`SimApi` / `MainApi`, defined in
 - `SaveDocument` = `{ version, meta, world, entities[] }`, written atomically
   (`game.json` then `manifest.json`) under `savesLocation/<saveName>/`.
 
-### Intent → Command low level planning layer (`core/plan/`, `game/plan/`; spec: `docs/intent.txt`)
-- A plan is **pure data**: `PlanEntry[]` (a mix of `Intent` goals and `Command`
-  primitives) + a cursor + each command's `status`. That structure is the plan, the
-  expansion frontier, and the save format at once — so the executor is a data cursor,
-  never a coroutine.
-- Behavior lives in registered systems keyed by `type`: one `Decomposer` per intent
-  type, one `CommandSystem` (`validate` pure precondition → `execute`) per command
-  type. Register both by adding them to `PlanExecutor`'s constructor lists.
-- `advancePlan` walks **lazily at the cursor**: intents decompose just-in-time against
-  *current* world state; commands validate then execute; only `completed` advances;
-  `running` holds position for time-extended commands (continued by the `Scheduler`).
-- Single entry point: `SimWorld.submitIntent(intent)` → `PlanExecutor.submit`. Both UI
-  handlers and inference actions funnel through it. Intent/command shapes + factories
-  live in `game/plan/planDefs.ts` and per-aspect `behavior/` folders.
-- **Reference implementation — AlterClothingState** (`game/character/clothing/behavior/`):
-  the canonical worked example of the layer. `AlterClothingStateIntent.ts` (intent shape +
-  factory), `AlterClothingStateDecomposer.ts` (emits a `goToCharacter` intent when not
-  co-located — which nests further into movement commands — then the alter command,
-  guarding on live world state), and `AlterClothingStateCommand.ts` +
-  `AlterClothingStateCommandSystem.ts` (the primitive's `validate`/`execute`). Sourced
-  from both `worker.ts`'s `clothingStateChangeUiAction` (UI) and `ClothingInferenceAction`
-  (Voxta) — mirror it when adding a new intent.
+### Behaviour-tree action layer (`core/bt/`, `game/behavior/`, `game/plan/`)
+- Actions are driven by **mistreevous** behaviour trees (MDSL strings in
+  `game/behavior/behaviorTrees.ts`). An `Intent` is plain data that selects and
+  parameterizes a tree; execution is **tick-driven** — the `BehaviorTreeRunner`
+  `GameSystem` steps all active trees on every `time.tick`, so long-running actions
+  (multi-hop walks) span ticks naturally.
+- Single entry point: `SimWorld.submitIntent(intent, onSettle?)` →
+  `BehaviorDispatcher.submit`. `onSettle(success)` fires when the tree settles (used
+  for avatar regen). Both UI handlers and inference actions funnel through it.
+- **Intent models** (plain data, no behaviour) live in per-aspect `behavior/*Intent.ts`
+  files; `game/plan/planDefs.ts` defines the `ActorIntent` base. `core/plan/planTypes.ts`
+  defines `Intent`.
+- **One `CharacterBehaviorAgent` per submission** holds the actor + params and exposes
+  the leaf methods the MDSL tree calls (`IsStanding`, `Stand`, `HopTowardLocation`,
+  `HopTowardTarget`, `IsCoLocatedWithTarget`, `SetPose`, `AlterClothing`). Reusable
+  utilities: `game/plan/poseGuards.ts` (`isStanding`, `standPoseId`) and
+  `game/plan/locationPath.ts` (`calcPath` BFS).
+- **Tree composition** uses mistreevous named-root subtrees (`branch [Name]`). Current
+  trees: `StandUp`, `GoToLocation` (guard: standing), `GoToCharacter` (reactive — re-paths
+  when target moves), `Pose`, `AlterClothing` (reuses GoToCharacter). Add a new intent:
+  write an `*Intent.ts`, add an MDSL entry to `behaviorTrees.ts`, add leaf methods to
+  `CharacterBehaviorAgent`, and extend `BehaviorDispatcher.toParams`.
+- **Reference implementation — AlterClothingState**: `AlterClothingStateIntent.ts` (shape
+  + factory) → `ALTER_CLOTHING_TREE` in `behaviorTrees.ts` → `AlterClothing` method in
+  `CharacterBehaviorAgent`. Sourced from `worker.ts`'s `clothingStateChangeUiAction` (UI)
+  and `ClothingInferenceAction` (Voxta) — mirror it when adding a new intent.
 
 ### Inference actions (Voxta function calling) (`core/action-inference/`)
 - Subclass `CharacterInferenceAction<S>`: declare an `ArgSchema` once (drives both
@@ -252,5 +257,7 @@ process only over a Comlink bridge (`SimApi` / `MainApi`, defined in
 
 ### Testing
 - Vitest (`pnpm --filter @gen-adventure/sim test`). System tests in `test/system/`
-  boot a real `SimWorld` from fixture configs (`simTestWorld.ts`) and assert on the
-  persisted `SaveDocument` and plan execution.
+  boot a real `SimWorld` from fixture configs (`simTestWorld.ts`).
+- The harness exposes `sim.runBehaviors(maxTicks?)` to pump the `BehaviorTreeRunner`
+  until all actors are idle (replaces the old synchronous-completion assumption). Submit
+  an intent, call `runBehaviors()`, then assert on entity state.

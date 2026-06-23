@@ -56,7 +56,7 @@ export class BehaviorDispatcher {
             this.toParams(intent),
         )
         const tree = new BehaviourTree(mdsl, agent as unknown as MistreevousAgent)
-        this.runner.start(intent.actorId, tree, onSettle)
+        this.runner.start(intent.actorId, tree, onSettle, mdsl)
     }
 
     /** Flatten the concrete intent's fields into the shape the agent reads. */
