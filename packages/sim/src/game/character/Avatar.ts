@@ -32,7 +32,11 @@ export class Avatar {
         }
         this.isAvatarDirtied = false;
 
-        this.eventSystem.emit("image.request", buildAvatarPrompt(this.entity))
+        const prompt = buildAvatarPrompt(this.entity)
+
+        this.eventSystem.emit("image.request", prompt)
+
+        return prompt;
     }
 
 }

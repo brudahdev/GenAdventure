@@ -69,6 +69,13 @@ export class DuoTouchInteraction extends TouchInteraction {
             this.getActorInteractionSlot()?.removeInteraction(this, false);
             this.getTargetInteractionSlot()?.removeInteraction(this, false);
             this.sisterInteraction?.deActivate(true);
+
+            // Both parties' avatars showed this interaction; mark them dirty so they
+            // regenerate without it. The displacing touch only refreshes its own
+            // actor/target, so the displaced *target* (e.g. groped npc) would
+            // otherwise keep a stale image.
+            this.entity.get(AvatarKey)?.dirtied();
+            this.sisterInteraction?.getEntity().get(AvatarKey)?.dirtied();
         }
     }
 

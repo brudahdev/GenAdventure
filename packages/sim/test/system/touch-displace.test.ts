@@ -23,7 +23,7 @@ describe('touch displacement (system test)', () => {
   beforeEach(() => { sim = startSimWorld() })
   afterEach(() => { sim.dispose() })
 
-  it('dirties the displaced duo target\'s avatar (and clears its slot)', () => {
+  it('dirties the displaced duo target\'s avatar (and clears its slot) three way displacement', () => {
     const tm = sim.player.require(TouchManagerKey)
     const npc1 = sim.npcs[0] // NpcA — has tits
     const npc2 = sim.npcs[1] // NpcB — has thighs
@@ -34,10 +34,10 @@ describe('touch displacement (system test)', () => {
       actorPartTag: 'hands', targetPartTag: 'tits', verb: 'grope',
     })).toBe(true)
 
-    // Clear npc1's dirty flag, mirroring the avatar regen the grope's onSettle does
-    // in the real app — so npc1 starts this scenario clean.
-    npc1.require(AvatarKey).updateAvatar()
-    expect(npc1.require(AvatarKey).getIsDirtied()).toBe(false)
+    // Regenerate npc1's avatar (mirrors the grope's onSettle in the real app) and
+    // capture the prompt — it reflects the grope, and clears npc1's dirty flag.
+    const gropePrompt = npc1.require(AvatarKey).updateAvatar()
+    expect(gropePrompt).toBeDefined()
 
     // Player holds npc2's thighs — same hands `hold` slot, so it displaces the grope.
     expect(tm.applyTouch({
@@ -52,8 +52,16 @@ describe('touch displacement (system test)', () => {
     // The grope interaction is correctly gone from npc1's tits slot.
     expect(interactionsOn(npc1, 'tits')).toHaveLength(0)
 
-    // BUG: displacing the grope must dirty npc1's avatar so it gets regenerated
-    // without the grope. Currently it doesn't, so the stale image survives.
-    expect(npc1.require(AvatarKey).getIsDirtied()).toBe(true)
+    // Displacing the grope must dirty npc1's avatar, so regenerating it now yields a
+    // *different* prompt (the grope visual gone). Without the fix npc1 isn't dirty,
+    // so updateAvatar returns undefined and the stale image would survive.
+    const afterPrompt = npc1.require(AvatarKey).updateAvatar()
+    expect(afterPrompt).toBeDefined()
+    console.log("firts " + JSON.stringify(gropePrompt))
+    console.log("after " + JSON.stringify(afterPrompt))
+
+    expect(gropePrompt?.positive.includes("groping")).toBe(true)
+    expect(afterPrompt?.positive.includes("groping")).toBe(false)
+    expect(JSON.stringify(afterPrompt)).not.toEqual(JSON.stringify(gropePrompt))
   })
 })
