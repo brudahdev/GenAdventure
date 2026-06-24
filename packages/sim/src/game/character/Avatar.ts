@@ -22,6 +22,10 @@ export class Avatar {
         this.isAvatarDirtied = true;
     }
 
+    getIsDirtied() {
+        return this.isAvatarDirtied
+    }
+
     updateAvatar() {
         if (!this.isAvatarDirtied) {
             return;
