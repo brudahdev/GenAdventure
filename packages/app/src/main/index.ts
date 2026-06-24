@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import { container } from 'tsyringe'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu, globalShortcut } from 'electron'
 import { join } from 'path'
 
 import { VoxtaClient } from './integration/voxta/voxtaClient'
@@ -25,10 +25,21 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
+    fullscreen: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false
+    }
+  })
+
+  globalShortcut.register('F11', () => {
+    win.setFullScreen(!win.isFullScreen())
+  })
+
+  win.webContents.on('before-input-event', (_event, input) => {
+    if (input.type === 'keyDown' && input.key === 'F12') {
+      win.webContents.toggleDevTools()
     }
   })
 
@@ -40,6 +51,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null)
   registerImageProtocol()
 
   createWindow()
