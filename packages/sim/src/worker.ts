@@ -207,9 +207,7 @@ class SimService implements SimApi {
       ),
       (success) => {
         if (success && characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
-          let targetAvatar = targetEntity.get(AvatarKey)?.updateAvatar()
-          // targetAvatar?.updateAvatar();
-          // main.imageRequest(buildAvatarPrompt(targetEntity))
+          targetEntity.get(AvatarKey)?.updateAvatar()
         }
       },
     )

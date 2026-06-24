@@ -1,6 +1,6 @@
 # GenAdventure
 
-**GenAdventure** is an AI-driven evolution of the classic text adventure. With LLM diologue and stable diffusion graphics.
+**GenAdventure** is an 18+ AI-driven evolution of the classic text adventure. With LLM diologue and stable diffusion graphics.
  You play a
 character inside a simulated scene, alongside AI-driven NPC's. World state is fed as context to the LLM at a per character level and is reactive to state changes induced by action inference. A Visiblity ruleset builds stable diffusion prompts wich are used as avatar images.
 Most content is delcarivly defined and stored in JSON config files. A UI is provided to edit and validate these configurations.
@@ -58,6 +58,11 @@ characters act by **choosing** to do those same things. Both paths run through t
 "undress that character" will first walk over to them, then do it.
 </details>
 
+<details>
+<summary>Character interaction</summary>
+Characters can touch each other, You can configure target parts acting parts, and verbs which parse into an interaction with context and image subprompts. Currently supports many sexual acts
+</details>
+
 ---
 
 ## Content Authoring
@@ -103,7 +108,7 @@ the generated images. For the full mechanics, see
   * Emotion
   * Needs
   * Schedules
-- **Authored diologue** - Both scripted and rule based. Either litterally or presented to be interpreted by LLM.
+- **Authored diologue** - Both scripted and rule based. Either explicitly presented or interpreted through LLM.
 - **Emotion Modeling** - Will guide LLM diologue and enrich Avatar generation.
 - **Relationships/Memory/hysterisis** — A lightweight version of Comme il Faut. Relationships will provide addtional context to the llm. Actions can change relationships, and past events can prompt LLM on what to discuss.
 - **Configuration loading and export** — To eaisly share scenairos.
