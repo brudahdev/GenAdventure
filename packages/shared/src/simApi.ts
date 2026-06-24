@@ -44,6 +44,10 @@ export interface SimApi {
   poseUiAction(characterId: string, poseId: string): void
   /** UI-requested touch interaction performed by a character. */
   touchUiAction(characterId: string, targetId: string, withId: string, verbId: string): void
+  /** A character's currently-active touch interaction ids (walks its body). */
+  getActiveTouchInteractions(targetId: string): Promise<string[]>
+  /** UI-requested stop of an active touch interaction on a character's body. */
+  stopTouchUiAction(characterId: string, interactionId: string): void
   onChatStarted(): void,
   /** An inference action fired by Voxta, routed to the run's InferenceActionManager. */
   onInvocation(invocation: InferenceInvocation): void,

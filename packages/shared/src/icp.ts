@@ -62,5 +62,7 @@ export const ICP = {
     POSE_SET: 'pose:set',                             // request a character pose change
     // Touch: renderer → main (invoke)
     TOUCH_OPTIONS_GET: 'touch:options:get',           // get a character's available touch options
-    TOUCH_ACTION: 'touch:action'                      // request a character touch interaction
+    TOUCH_ACTION: 'touch:action',                     // request a character touch interaction
+    TOUCH_ACTIVE_GET: 'touch:active:get',             // get a character's active touch interaction ids
+    TOUCH_STOP: 'touch:stop'                          // request stopping an active touch interaction
 } as const

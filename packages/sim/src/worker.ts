@@ -99,6 +99,14 @@ class SimService implements SimApi {
     return this.getWorld().getTouchOptions(characterId)
   }
 
+  async getActiveTouchInteractions(targetId: string): Promise<string[]> {
+    return this.getWorld().getActiveTouchInteractions(targetId)
+  }
+
+  stopTouchUiAction(characterId: string, interactionId: string): void {
+    this.getWorld().stopTouchUiAction(characterId, interactionId)
+  }
+
   timeResume(): void {
     this.world?.timeResume()
   }

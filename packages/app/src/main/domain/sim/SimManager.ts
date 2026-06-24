@@ -225,6 +225,14 @@ export class SimManager {
         return (await this.sim?.getTouchOptions(characterId)) ?? { targets: [] }
     }
 
+    async getActiveTouchInteractions(characterId: string): Promise<string[]> {
+        return (await this.sim?.getActiveTouchInteractions(characterId)) ?? []
+    }
+
+    stopTouchUiAction(characterId: string, interactionId: string): void {
+        void this.sim?.stopTouchUiAction(characterId, interactionId)
+    }
+
     async persist(saveName: string, slot: number): Promise<void> {
         await this.sim?.persist(saveName, slot)
     }

@@ -136,6 +136,15 @@ function buildTouchMenu(characterId: string, options: TouchOptions): ContextMenu
   }))
 }
 
+/** Build the list of touch interactions currently active on a character. Selecting
+ *  one requests stopping it over IPC. */
+function buildStopTouchMenu(characterId: string, interactionIds: string[]): ContextMenuItem[] {
+  return interactionIds.map((id) => ({
+    label: id,
+    onSelect: () => void window.electronAPI.touch.stop(characterId, id)
+  }))
+}
+
 /**
  * The live chat screen. Subscribes to assembled messages from Voxta (character
  * replies and recognized-speech user turns) via ChatService over IPC, stacks them
@@ -184,11 +193,12 @@ export default function ChatPage(): JSX.Element {
 
   // NPC avatar right-click: action menu at the cursor, cascading down/right.
   const openAvatarMenu = async (characterId: string, x: number, y: number): Promise<void> => {
-    const [options, locations, poses, touch] = await Promise.all([
+    const [options, locations, poses, touch, activeTouches] = await Promise.all([
       window.electronAPI.clothing.getOptions(characterId),
       window.electronAPI.location.getOptions(characterId),
       window.electronAPI.pose.getOptions(characterId),
-      window.electronAPI.touch.getOptions(characterId)
+      window.electronAPI.touch.getOptions(characterId),
+      window.electronAPI.touch.getActiveInteractions(characterId)
     ])
     setMenu({
       x,
@@ -197,6 +207,7 @@ export default function ChatPage(): JSX.Element {
       submenuSide: 'right',
       items: [
         { label: 'Touch', childLabel: 'Target Part', children: buildTouchMenu(characterId, touch) },
+        { label: 'StopTouch', childLabel: 'Active', children: buildStopTouchMenu(characterId, activeTouches) },
         { label: 'Clothing', children: buildClothingItemsMenu(characterId, options) },
         { label: 'Pose', children: buildPoseMenu(characterId, poses) },
         { label: 'Move', children: buildLocationMenu(characterId, locations) },
@@ -259,6 +270,21 @@ export default function ChatPage(): JSX.Element {
       submenuSide: 'right',
       label: 'Target Part',
       items: buildTouchMenu(PLAYER_CHARACTER_ID, touch)
+    })
+  }
+
+  // Player Stop Touch button: lists the touch interactions active on the player's
+  // body; selecting one requests stopping it.
+  const openPlayerStopTouchMenu = async (e: MouseEvent): Promise<void> => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const active = await window.electronAPI.touch.getActiveInteractions(PLAYER_CHARACTER_ID)
+    setMenu({
+      x: rect.left,
+      y: rect.top,
+      openUp: true,
+      submenuSide: 'right',
+      label: 'Active Touches',
+      items: buildStopTouchMenu(PLAYER_CHARACTER_ID, active)
     })
   }
 
@@ -555,6 +581,13 @@ export default function ChatPage(): JSX.Element {
           onClick={(e) => void openPlayerTouchMenu(e)}
         >
           Touch
+        </button>
+        <button
+          class="chat-stoptouch-btn"
+          title="Stop an active touch interaction"
+          onClick={(e) => void openPlayerStopTouchMenu(e)}
+        >
+          Stop Touch
         </button>
         <ChatInputBox onSend={send} partialText={partialText()} />
         <button

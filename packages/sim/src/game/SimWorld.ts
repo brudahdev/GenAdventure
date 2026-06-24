@@ -23,6 +23,7 @@ import { WorldState } from "./world/WorldState";
 import { buildAvatarPrompt, buildBackgroundPrompt } from "./character/characterViews";
 import { buildTouchOptions } from "./character/body/touch/touchOptions";
 import { getDuoInteractions, getSoloInteractions } from "./character/body/touch/config/touchInteractionData";
+import { TouchManagerKey } from "./character/body/touch/TouchManager";
 import { EventSystem } from "./EventSystem";
 import { ContextManager } from "../core/context/ContextManager";
 import { LocationManager } from "./location/LocationManager";
@@ -121,6 +122,16 @@ export class SimWorld {
             ? getSoloInteractions()
             : getDuoInteractions()
         return buildTouchOptions(player, target, interactions)
+    }
+
+    /** The interaction ids active on a character's body. */
+    getActiveTouchInteractions(targetId: string): string[] {
+        return this.registry.getById(targetId)?.get(TouchManagerKey)?.getActiveInteractionIds() ?? []
+    }
+
+    /** UI-requested stop of an active touch interaction on a character's body. */
+    stopTouchUiAction(characterId: string, interactionId: string): void {
+        this.registry.getById(characterId)?.get(TouchManagerKey)?.stopTouchByPlayer(interactionId)
     }
 
     persist(savePath: string, chatId: string, slot: number): void {

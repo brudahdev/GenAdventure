@@ -19,5 +19,15 @@ export class TouchIpcHandlers {
             (_e, characterId: string, targetId: string, withId: string, verbId: string) =>
                 simManager.touchUiAction(characterId, targetId, withId, verbId)
         )
+
+        ipcMain.handle(ICP.TOUCH_ACTIVE_GET, (_e, characterId: string) =>
+            simManager.getActiveTouchInteractions(characterId)
+        )
+
+        ipcMain.handle(
+            ICP.TOUCH_STOP,
+            (_e, characterId: string, interactionId: string) =>
+                simManager.stopTouchUiAction(characterId, interactionId)
+        )
     }
 }

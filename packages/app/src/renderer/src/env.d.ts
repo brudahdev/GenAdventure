@@ -127,6 +127,8 @@ declare global {
       touch: {
         getOptions(characterId: string): Promise<TouchOptions>
         action(characterId: string, targetId: string, withId: string, verbId: string): Promise<void>
+        getActiveInteractions(characterId: string): Promise<string[]>
+        stop(characterId: string, interactionId: string): Promise<void>
       }
     }
   }

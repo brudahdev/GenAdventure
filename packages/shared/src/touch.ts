@@ -7,5 +7,5 @@ export interface TouchOptions {
                 id: string,
             }[]
         }[]
-    }[]
+    }[],
 }

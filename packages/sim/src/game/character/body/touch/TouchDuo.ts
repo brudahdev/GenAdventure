@@ -18,7 +18,7 @@ import { StopTouchInferenceAction } from "./StopTouchInferenceAction";
 
 export class DuoTouchInteraction extends TouchInteraction {
 
-    protected sisterInteraction: TouchInteraction | null = null;
+    protected sisterInteraction: DuoTouchInteraction | null = null;
     private targetStopAction: StopTouchInferenceAction | null = null;
 
     constructor(
@@ -36,6 +36,10 @@ export class DuoTouchInteraction extends TouchInteraction {
     linkInteractions(sister: DuoTouchInteraction) {
         this.sisterInteraction = sister;
         sister.sisterInteraction = this;
+    }
+
+    getSisterInteraction() {
+        return this.sisterInteraction;
     }
 
     getTargetStopAction() {

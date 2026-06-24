@@ -265,6 +265,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getOptions: (characterId: string): Promise<TouchOptions> =>
       ipcRenderer.invoke(ICP.TOUCH_OPTIONS_GET, characterId),
     action: (characterId: string, targetId: string, withId: string, verbId: string): Promise<void> =>
-      ipcRenderer.invoke(ICP.TOUCH_ACTION, characterId, targetId, withId, verbId)
+      ipcRenderer.invoke(ICP.TOUCH_ACTION, characterId, targetId, withId, verbId),
+    getActiveInteractions: (characterId: string): Promise<string[]> =>
+      ipcRenderer.invoke(ICP.TOUCH_ACTIVE_GET, characterId),
+    stop: (characterId: string, interactionId: string): Promise<void> =>
+      ipcRenderer.invoke(ICP.TOUCH_STOP, characterId, interactionId)
   }
 })

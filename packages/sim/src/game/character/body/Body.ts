@@ -99,6 +99,14 @@ export class Body implements Component {
         this.forEachUniqueInteraction(effect => effect.appendImagePrompt(prompt));
     }
 
+    /** Every touch interaction currently active on this body (deduped by
+     *  reference across parts/slots). */
+    getActiveInteractions(): TouchInteraction[] {
+        const result: TouchInteraction[] = [];
+        this.forEachUniqueInteraction(interaction => result.push(interaction));
+        return result;
+    }
+
     private forEachUniqueInteraction(callback: (interaction: TouchInteraction) => void) {
         const seen = new Set<TouchInteraction>();
 

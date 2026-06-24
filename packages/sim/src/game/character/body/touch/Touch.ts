@@ -41,6 +41,10 @@ export class TouchInteraction {
         this.charLoc = entity.require(CharacterLocationKey)
     }
 
+    get id() {
+        return this.interactionData.id
+    }
+
     getEntity() {
         return this.entity;
     }

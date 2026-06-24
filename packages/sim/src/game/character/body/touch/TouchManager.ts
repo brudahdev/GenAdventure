@@ -123,6 +123,33 @@ export class TouchManager implements Component, Saveable<TouchSave> {
         this.active.delete(args)
     }
 
+    /** The interaction ids active anywhere on this character's body (both touches
+     *  it performs and touches performed on it). */
+    getActiveInteractionIds(): string[] {
+        return this.entity.require(BodyKey).getActiveInteractions().map(interaction => interaction.id)
+    }
+
+    //When the player is stoping a touch interaction
+    stopTouchByPlayer(interactionId: string): void {
+        const interaction = this.entity.require(BodyKey).getActiveInteractions()
+            .find(interaction => interaction.id === interactionId)
+        if (!interaction) {
+            this.logger.debug(`no active touch interaction '${interactionId}' on ${nameOf(this.entity)}`)
+            return
+        }
+        if (this.entity.id == PLAYER_CHARACTER_ID) {//its a solo interaction
+            // interaction.getActorStopAction()?.handle({})
+            interaction.deActivate();
+            return
+        }
+
+        if (interaction instanceof DuoTouchInteraction) {
+            interaction.getSisterInteraction()
+                ?.deActivateFromStopAction();
+        }
+
+    }
+
 
 
     applyTouch(args: TouchInteractionArgs): boolean {

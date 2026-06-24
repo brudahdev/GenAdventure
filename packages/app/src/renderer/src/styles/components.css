@@ -854,7 +854,8 @@
 .chat-clothing-btn,
 .chat-move-btn,
 .chat-pose-btn,
-.chat-touch-btn {
+.chat-touch-btn,
+.chat-stoptouch-btn {
   flex-shrink: 0;
   height: 40px;
   padding: 0 14px;
@@ -872,7 +873,8 @@
 .chat-clothing-btn:hover,
 .chat-move-btn:hover,
 .chat-pose-btn:hover,
-.chat-touch-btn:hover {
+.chat-touch-btn:hover,
+.chat-stoptouch-btn:hover {
   background: #404040;
 }
 
