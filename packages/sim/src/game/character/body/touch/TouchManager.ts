@@ -241,6 +241,9 @@ export class TouchManager implements Component, Saveable<TouchSave> {
 
     findMatchingInteraction(args: TouchInteractionArgs, interactions: TouchDuoConfig[]): TouchDuoConfig | undefined {
         const matchingRule = interactions.find(rule => {
+            if (rule.id == "penis_anus_penitrate") {
+                console.log();
+            }
             const actorPartMatches = matchesTaggable(args.actorPartTag, rule.actorPartTag);
             const touchedPartMatches = matchesTaggable(args.targetPartTag, rule.targetPartTags);
             const verbMatches = matchesTaggable(args.verb, rule.verbTags);

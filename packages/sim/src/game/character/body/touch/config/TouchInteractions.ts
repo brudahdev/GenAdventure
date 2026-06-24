@@ -84,7 +84,7 @@ export const duoInteractions: TouchDuoConfig[] = [
         actorPartTag: handTags,
         actorPartSlot: HandsEffectSlots.HOLD,
 
-        targetPart: 'tits',
+        targetPart: 'nipples',
         targetPartTags: nippleTags,
         targetPartSlot: TitsEffectSlots.TOUCH,
 

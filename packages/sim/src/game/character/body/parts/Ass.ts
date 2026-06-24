@@ -5,7 +5,7 @@ import { Body } from "../Body";
 
 export const assTags: Taggable =
 {
-    tags: ['butt', 'ass', 'cheek'],
+    tags: ['anus', 'butt', 'ass', 'cheek'],
     excludeTags: []
 }
 
