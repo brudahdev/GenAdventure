@@ -207,7 +207,9 @@ export default function ChatPage(): JSX.Element {
       submenuSide: 'right',
       items: [
         { label: 'Touch', childLabel: 'Target Part', children: buildTouchMenu(characterId, touch) },
-        { label: 'StopTouch', childLabel: 'Active', children: buildStopTouchMenu(characterId, activeTouches) },
+        ...(activeTouches.length > 0
+          ? [{ label: 'StopTouch', childLabel: 'Active', children: buildStopTouchMenu(characterId, activeTouches) }]
+          : []),
         { label: 'Clothing', children: buildClothingItemsMenu(characterId, options) },
         { label: 'Pose', children: buildPoseMenu(characterId, poses) },
         { label: 'Move', children: buildLocationMenu(characterId, locations) },
