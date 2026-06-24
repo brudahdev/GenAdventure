@@ -19,6 +19,7 @@ import { NpcActivityKey } from './game/character/npc/NpcActivity'
 import { poseIntent } from './game/character/pose/behavior/PoseIntent'
 import { goToIntent } from './game/character/locomotion/behavior/GoToIntent'
 import { touchIntent } from './game/character/body/touch/behavior/TouchIntent'
+import { AvatarKey } from './game/character/Avatar'
 
 /** The worker's implementation of the surface the main process calls. Each run
  *  gets its own child container (provisioned with a mode-specific adapter set)
@@ -195,7 +196,7 @@ class SimService implements SimApi {
       console.log(`[sim] unable to get character with id ${characterId}`)
       return;
     }
-    
+
     this.getWorld().submitIntent(
       touchIntent(
         PLAYER_CHARACTER_ID,
@@ -206,7 +207,10 @@ class SimService implements SimApi {
       ),
       (success) => {
         if (success && characterId != PLAYER_CHARACTER_ID && targetEntity.require(NpcActivityKey).isActive) {
-          main.imageRequest(buildAvatarPrompt(targetEntity))
+          let targetAvatar = targetEntity.get(AvatarKey)
+          targetAvatar?.dirtied()
+          targetAvatar?.updateAvatar();
+          // main.imageRequest(buildAvatarPrompt(targetEntity))
         }
       },
     )

@@ -73,9 +73,12 @@ export class DuoTouchInteraction extends TouchInteraction {
             // Both parties' avatars showed this interaction; mark them dirty so they
             // regenerate without it. The displacing touch only refreshes its own
             // actor/target, so the displaced *target* (e.g. groped npc) would
-            // otherwise keep a stale image.
-            this.entity.get(AvatarKey)?.dirtied();
-            this.sisterInteraction?.getEntity().get(AvatarKey)?.dirtied();
+            // otherwise keep a stale image.//see the test dirties the displaced duo target\'s avatar (and clears its slot) three way displacement
+            // this.entity.get(AvatarKey)?.dirtied(); i dont think this is needed
+            const sisterAvatar = this.sisterInteraction?.getEntity().get(AvatarKey)
+            sisterAvatar?.dirtied();//I think the slot should set dirtied
+            sisterAvatar?.updateAvatar();//caller may be activating a new touch action which deactivates this one, so they dont know the existing char to call update on their avatar... But I dont really like having presentation here... maybe add dirtied character ids to the blackboard?
+
         }
     }
 
