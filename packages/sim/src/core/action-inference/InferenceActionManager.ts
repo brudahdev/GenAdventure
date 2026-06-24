@@ -19,6 +19,10 @@ export class InferenceActionManager {//todo removing actions, removing on charac
         this.handlerMap.set(getInvocationValue(action), action)
     }
 
+    removeAction(action: CharacterInferenceAction) {
+        //todo
+    }
+
 
     async onInvocation(invocation: InferenceInvocation) {
         console.log("InferenceActionManager - ACTION CALLED: " + JSON.stringify(invocation))

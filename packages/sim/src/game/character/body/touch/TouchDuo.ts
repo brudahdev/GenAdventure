@@ -7,21 +7,30 @@ import { TouchInteraction } from "./Touch";
 import { Entity } from "../../../../core/ec/Entity";
 import { EntityRegistry } from "../../../entity/EntityRegistry";
 import { PromptBuilder } from "../../../../core/PromptBuilder";
+import { CharacterIdentityKey } from "../../identity/CharacterIdentity";
+import { NotificationService } from "../../../../core/NotificationService";
+import { LocationContextItemFactory } from "../../../location/LocationContextItemFactory";
+import { InferenceActionManager } from "../../../../core/action-inference/InferenceActionManager";
+import { AvatarKey } from "../../Avatar";
+import { StopTouchInferenceAction } from "./StopTouchInferenceAction";
 
 
 
 export class DuoTouchInteraction extends TouchInteraction {
 
     protected sisterInteraction: TouchInteraction | null = null;
-    // private targetStopAction: ActionStopTouchInteraction | null = null;
+    private targetStopAction: StopTouchInferenceAction | null = null;
 
     constructor(
         args: TouchInteractionArgs,
         entity: Entity,
         public duoInteractionData: TouchDuoConfig,
         registry: EntityRegistry,
+        notificationService: NotificationService,
+        contextItemFactory: LocationContextItemFactory,
+        inferenceActionManager: InferenceActionManager
     ) {
-        super(args, entity, duoInteractionData, registry);
+        super(args, entity, duoInteractionData, registry, notificationService, contextItemFactory, inferenceActionManager);
     }
 
     linkInteractions(sister: DuoTouchInteraction) {
@@ -36,6 +45,16 @@ export class DuoTouchInteraction extends TouchInteraction {
     deActivateFromStopAction() {
 
         this.deActivate();
+
+        const avatar = this.entity.get(AvatarKey);
+        avatar?.dirtied();
+        avatar?.updateAvatar();
+
+        if (this.sisterInteraction) {
+            const sisterAvatar = this.sisterInteraction.getEntity().get(AvatarKey);
+            sisterAvatar?.dirtied();
+            sisterAvatar?.updateAvatar();
+        }
     }
 
     deActivate(sisterAlreadyDeactivated = false) {
@@ -95,7 +114,7 @@ export class DuoTouchInteraction extends TouchInteraction {
             return;
         }
 
-        // this.targetStopAction = this.getNewAction(this.args.targetChar, stopActionDetails);
+        this.targetStopAction = this.newStopAction(this.entity, stopActionDetails);
     }
 
     protected sendStopNote() {
@@ -112,8 +131,8 @@ export class DuoTouchInteraction extends TouchInteraction {
     protected getTemplateValues(): Record<string, string> {
         const templates = super.getTemplateValues();
 
-        // templates['target_name'] = this.args.targetChar.name;
-        // templates['target_hisHer'] = this.args.targetChar.hisHer;
+        templates['target_name'] = this.registry.requireById(this.args.targetId).require(CharacterIdentityKey).name;
+        templates['target_hisHer'] = this.registry.requireById(this.args.targetId).require(CharacterIdentityKey).config.pronouns.hisHer;
 
         return templates;
     }

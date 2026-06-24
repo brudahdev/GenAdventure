@@ -19,7 +19,14 @@ import { EventSystem } from "../../../EventSystem";
 import { BehaviorDispatcher } from "../../../behavior/BehaviorDispatcher";
 import { InferenceActionManager } from "../../../../core/action-inference/InferenceActionManager";
 import { AvatarKey } from "../../Avatar";
+import { NotificationService } from "../../../../core/NotificationService";
+import { LocationContextItemFactory } from "../../../location/LocationContextItemFactory";
 
+
+
+//  targetCharEffects: {
+//             img_txt: 'pov fucking tits, penis between breasts, cleavage',
+//             appearanceClass todo check this field
 export interface TouchInteractionArgs {
     actorId: string;
     targetId: string;
@@ -36,6 +43,9 @@ export const touchManagerFactory = defineFactory(TouchManagerKey, (entity, c) =>
         c.resolve(EventSystem),
         c.resolve(InferenceActionManager),
         c.resolve(BehaviorDispatcher),
+        c.resolve(NotificationService),
+        c.resolve(LocationContextItemFactory),
+        c.resolve(InferenceActionManager),
     ))
 
 export class TouchManager {
@@ -51,7 +61,10 @@ export class TouchManager {
         private readonly registry: EntityRegistry,
         eventSystem: EventSystem,
         manager: InferenceActionManager,
-        dispatcher: BehaviorDispatcher
+        dispatcher: BehaviorDispatcher,
+        private readonly notificationService: NotificationService,
+        private readonly contextItemFactory: LocationContextItemFactory,
+        private readonly inferenceActionManager: InferenceActionManager,
     ) {
 
         this.logger = new Logger(entity.require(CharacterIdentityKey).name + "_TouchManager");
@@ -270,7 +283,10 @@ export class TouchManager {
             args,
             actorEntity,
             interaction,
-            this.registry
+            this.registry,
+            this.notificationService,
+            this.contextItemFactory,
+            this.inferenceActionManager
         );
 
         if (actorPart.slotContains(interaction.actorPartSlot, actorInteraction)) {
@@ -309,28 +325,24 @@ export class TouchManager {
         targetPart: BodyPart,
         targetSlot: TouchInteractionSlot<TouchInteraction>
     ): boolean {
-        // args.actorChar.location.goToCharacterIfInSameParentLocation(
-        //     args.targetChar
-        // ); todo
-
-        // if (!args.actorChar.location.isAtSameSublocationAsOtherCharacter(args.targetChar)) {
-        //     this.logger.debug(
-        //         `touch interaction ${interaction.id} failed: characters are not in the same location`
-        //     );
-        //     return false;
-        // }
 
         const actorInteraction = new DuoTouchInteraction(
             args,
             actorEntity,
             interaction,
-            this.registry
+            this.registry,
+            this.notificationService,
+            this.contextItemFactory,
+            this.inferenceActionManager
         );
         const targetInteraction = new DuoTouchInteraction(
             args,
             targetEntity,
             interaction,
-            this.registry
+            this.registry,
+            this.notificationService,
+            this.contextItemFactory,
+            this.inferenceActionManager
         );
 
         actorInteraction.linkInteractions(targetInteraction);

@@ -10,22 +10,39 @@ import { EntityRegistry } from "../../../entity/EntityRegistry";
 import { StringUtils } from "../../../../utils/StringUtils";
 import { DuoTouchInteraction } from "./TouchDuo";
 import { AppearanceKey, CharacterAppearance } from "../../appearance/CharacterAppearance";
+import { CharacterIdentity, CharacterIdentityKey } from "../../identity/CharacterIdentity";
+import { CharacterLocation, CharacterLocationKey } from "../../location/CharacterLocation";
+import { Notif, PLAYER_CHARACTER_ID } from "@gen-adventure/shared";
+import { NotificationService } from "../../../../core/NotificationService";
+import { LocationContextItem } from "../../../location/LocationContextItem";
+import { LocationContextItemFactory } from "../../../location/LocationContextItemFactory";
+import { StopTouchInferenceAction } from "./StopTouchInferenceAction";
+import { InferenceActionManager } from "../../../../core/action-inference/InferenceActionManager";
 
 export class TouchInteraction {
     private actorInteractionSlot: TouchInteractionSlot | null = null;
     private targetInteractionSlot: TouchInteractionSlot | null = null;
-    // private actorStopAction: ActionStopTouchInteraction | null = null;
+    private actorStopAction: StopTouchInferenceAction | null = null;
 
-    // private contextItem?: CharacterLocationContextItem;
+    private contextItem?: LocationContextItem;
 
     protected characterAppearance: CharacterAppearance
+    protected charLoc: CharacterLocation;
     constructor(
         public args: TouchInteractionArgs,
-        protected entity: Entity,
+        protected entity: Entity,//Entitiy this instance lives on
         protected interactionData: TouchConfig,
         protected registry: EntityRegistry,
+        private notificationService: NotificationService,
+        private contextItemFactory: LocationContextItemFactory,
+        private inferenceActionManager: InferenceActionManager,
     ) {
         this.characterAppearance = entity.require(AppearanceKey)
+        this.charLoc = entity.require(CharacterLocationKey)
+    }
+
+    getEntity() {
+        return this.entity;
     }
 
     /** Resolves the id-based touch args into the actor/target {@link Entity}s the
@@ -57,7 +74,7 @@ export class TouchInteraction {
         this.targetInteractionSlot = slot;
     }
     getActorStopAction() {
-        // return this.actorStopAction;
+        return this.actorStopAction;
     }
 
     equals(other: TouchInteraction): boolean {
@@ -72,8 +89,7 @@ export class TouchInteraction {
     activate() {
         const startNote = this.interactionData.actorCharEffects?.onStartNote;
         if (startNote) {
-            const txt = StringUtils.fillTemplate(startNote, this.getTemplateValues())
-            // NotificationService.addTryPush(txt)
+            this.noteHelper(startNote)
         }
         this.interactionData.onActivate?.(this.buildCallbackArgs());
         this.activateContext();
@@ -94,8 +110,8 @@ export class TouchInteraction {
         }
 
 
-        // this.actorStopAction?.removeFromActionSet();
-        // this.actorStopAction = null;
+        this.actorStopAction?.removeAction();
+        this.actorStopAction = null;
         // this.character.touch.getPersister().touchDeactivated(this.args)
 
         this.deactivateContext();
@@ -160,22 +176,30 @@ export class TouchInteraction {
             return;
         }
 
-        // this.actorStopAction = this.getNewAction(this.args.actorChar, stopActionDetails);
+        this.actorStopAction = this.newStopAction(this.entity, stopActionDetails);
     }
 
-    // protected getNewAction(character: Character, stopArgs: TouchStopArgs): ActionStopTouchInteraction {
-    //     const newAction = new ActionStopTouchInteraction(character, this);
-    //     const templateValues = this.getTemplateValues();
-    //     newAction.setActionArgs({
-    //         name: StringUtils.fillTemplate(stopArgs.name, templateValues),
-    //         layer: CharacterActionLayers.TOUCH,
-    //         timing: character instanceof Player ? VoxtaActionTiming.USER_AFTER : VoxtaActionTiming.ASSISTANT_AFTER,
-    //         description: StringUtils.fillTemplate(stopArgs.description, templateValues),
-    //     });
-    //     newAction.init();
+    protected newStopAction(entity: Entity, stopArgs: TouchStopArgs): StopTouchInferenceAction | null {
+        if (entity.id == PLAYER_CHARACTER_ID) {
+            return null
+        }
 
-    //     return newAction;
-    // }
+        const templateValues = this.getTemplateValues();
+        const newAction = new StopTouchInferenceAction(
+            entity,
+            this.inferenceActionManager,
+            this,
+            {
+                name: StringUtils.fillTemplate(stopArgs.name, templateValues),
+                description: StringUtils.fillTemplate(stopArgs.description, templateValues),
+            }
+
+        );
+
+        newAction.init();
+
+        return newAction;
+    }
 
     protected charIsActor() {
         return this.entity.id === this.args.actorId;
@@ -187,30 +211,33 @@ export class TouchInteraction {
 
     protected activateContext() {
         if (this.interactionData.ctx_txt) {
-            // this.contextItem = new CharacterLocationContextItem({
-            //     key: this.getContextKey(),
-            //     value: StringUtils.fillTemplate(this.interactionData.ctx_txt, this.getTemplateValues()),
-            //     roles: []
-            // }, this.character.location.getLocationRoleObserver());
+
+            this.contextItem = this.contextItemFactory.create(
+                {
+                    key: this.getContextKey(),
+                    value: StringUtils.fillTemplate(this.interactionData.ctx_txt, this.getTemplateValues()),
+                    characterIds: []
+                },
+                this.entity.require(CharacterLocationKey).getCharacterLocationObserver()
+            );
         }
     }
 
     protected getContextKey() {
-        //todo override in duo
-        // return `${this.character.role}_${this.interactionData.id}`;
+        //todo override in duo ? may not be needed
+        return `${this.interactionData.id}_${this.entity.require(CharacterIdentityKey).name}`;
     }
 
     protected deactivateContext() {
-        // if (this.contextItem) {
-        //     this.contextItem.delete();
-        //     this.contextItem = undefined;
-        // }
+        this.contextItem?.delete();
+        this.contextItem = undefined;
     }
 
     protected getTemplateValues(): Record<string, string> {
         const templates: Record<string, string> = {};
-        // templates['actor_name'] = this.args.actorChar.name;
-        // templates['actor_hisHer'] = this.args.actorChar.hisHer;
+
+        templates['actor_name'] = this.registry.requireById(this.args.actorId).require(CharacterIdentityKey).name;
+        templates['actor_hisHer'] = this.registry.requireById(this.args.actorId).require(CharacterIdentityKey).config.pronouns.hisHer;
 
         return templates;
     }
@@ -231,6 +258,9 @@ export class TouchInteraction {
 
     protected noteHelper(note: string) {
         const txt = StringUtils.fillTemplate(note, this.getTemplateValues());
-        // NotificationService.addTryPush(txt)
+        console.log(txt)
+        const witnesses = this.charLoc.getCurrentLocation().getCharactersInLocation().map(ent => ent.id)
+        const notif: Notif = { text: txt, characterIds: witnesses }
+        this.notificationService.send(notif)
     }
 }

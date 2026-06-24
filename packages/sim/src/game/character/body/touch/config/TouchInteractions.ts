@@ -614,6 +614,65 @@ export const duoInteractions: TouchDuoConfig[] = [
             ctx.actor.get(BodyKey)?.penis?.setPenitrateMouth(null);
         },
     },
+    {//penis_tits_penitrate
+        id: 'penis_tits_penitrate',
+        verb: 'fuck',
+        compatibleWith: {
+            targetSlotContains: ['mouth_penis_suck', 'mouth_penis_lick', 'mouth_penis_kiss'],
+        },
+
+        verbTags: penitrateTags,
+
+        actorPart: 'penis',
+        actorPartTag: penisTags,
+        actorPartSlot: PenisEffectSlots.PENITRATE,
+
+        targetPart: 'tits',
+        targetPartTags: titsTags,
+        targetPartSlot: TitsEffectSlots.CLEAVAGE,
+
+
+        ctx_txt: "{{actor_name}} is fucking {{target_name}}'s tits'.",
+
+        actorCharEffects: {
+            img_txt: 'tit job',
+            onStartNote: "{{actor_name}} started fucking {{target_name}}'s tits.",
+            onStopNote: "{{actor_name}} stoppeed fucking {{target_name}}'s tits.",
+            stopAction: {
+                name: "{{actor_name}}_stop_tit_fuck",
+                description: "When {{actor_name}} stops fucking {{target_name}}'s tits'"
+            }
+        },
+        targetCharEffects: {
+            img_txt: 'pov fucking tits, penis between breasts, cleavage',
+            appearanceClass: 'chest',
+            onStopNote: "{{target_name}} pulled her tits away from {{actor_name}}'s cock.",
+            stopAction: {
+                name: "{{target_name}}_stop_tit_fuck",
+                description: "When {{target_name}} stops letting {{actor_name}} fuck her tits."
+            }
+        },
+        // poseMatrix: [ //todo
+        //     { actorPoseIds: ['kneel', 'sit', 'squat'], targetPoseIds: ['stand', 'sit'] },
+        //     { actorPoseIds: [], targetPoseIds: ['lay_on_stomach'] },
+        //     { actorPoseIds: ['lay_on_stomach'], targetPoseIds: ['lay_on_back', 'lay_on_side', 'kneel', 'squat'] },
+        // ],
+
+        validate(validationArgs: ICharacterTouchValidationArgs) {
+            // const penis = validationArgs.touchArgs.actorChar.body.penis; // TODO(port): isObstructedByClothing check
+            // if (penis?.isObstructedByClothing()) {
+            //     return false;
+            // }todo
+        },
+
+        onActivate(ctx: TouchCallbackArgs) {
+            ctx.actor.get(BodyKey)?.penis?.setTitJob(ctx.actor);
+        },
+
+        onDeactivate(ctx: TouchCallbackArgs) {
+            ctx.actor.get(BodyKey)?.penis?.setTitJob(null);
+        },
+    },
     {//mouth_penis_suck
         //todo inform llm it can switch between kissing sucking and licking?
         //or do it automatically?

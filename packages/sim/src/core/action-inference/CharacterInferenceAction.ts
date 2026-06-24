@@ -146,6 +146,10 @@ export abstract class CharacterInferenceAction<S extends ArgSchema = ArgSchema> 
         manager.registerAction(this);
     }
 
+    removeAction() {
+        this.manager.removeAction(this)
+    }
+
     /** Declarative argument schema. Subclasses pin `S` to a concrete shape,
      *  which then types `handle`/`computeContent`. Recover the shape without
      *  restating it via `type Args = typeof mySchema`. */
