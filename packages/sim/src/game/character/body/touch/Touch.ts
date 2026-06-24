@@ -1,5 +1,5 @@
 
-import { TouchInteractionArgs } from "./TouchManager";
+import { TouchInteractionArgs, TouchManagerKey } from "./TouchManager";
 
 import { TouchInteractionSlot } from "./TouchSlot";
 import { TouchCallbackArgs, TouchConfig, TouchStopArgs } from "./config/TouchConfigs";
@@ -112,7 +112,11 @@ export class TouchInteraction {
 
         this.actorStopAction?.removeAction();
         this.actorStopAction = null;
-        // this.character.touch.getPersister().touchDeactivated(this.args)
+
+        // The acting character owns the active-touch set; drop this touch from it.
+        if (this.charIsActor()) {
+            this.entity.get(TouchManagerKey)?.touchDeactivated(this.args);
+        }
 
         this.deactivateContext();
     }

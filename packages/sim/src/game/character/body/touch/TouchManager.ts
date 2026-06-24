@@ -1,6 +1,10 @@
 import { Entity } from "../../../../core/ec/Entity";
 import { defineKey } from "../../../../core/ec/ComponentKey";
 import { defineFactory } from "../../../../core/ec/ComponentFactory";
+import type { Component } from "../../../../core/ec/Component";
+import type { Saveable } from "../../../../core/save/Saveable";
+import { RESTORE_SOURCE, RestoreSource } from "../../../../core/save/RestoreSource";
+import { STARTING_TOUCH_ADAPTER, type StartingTouchAdapter } from "./StartingTouchAdapter";
 import { Logger } from "../../../../core/Logger";
 import { matchesTaggable } from "../../../../core/TagUtils";
 import { EntityRegistry } from "../../../entity/EntityRegistry";
@@ -35,6 +39,10 @@ export interface TouchInteractionArgs {
     verb: string;
 }
 
+/** {@link TouchManager}'s save blob: the touches this character is actively
+ *  performing (kept only on the acting character — never the target). */
+interface TouchSave { interactions: TouchInteractionArgs[] }
+
 export const TouchManagerKey = defineKey<TouchManager>("character.touch")
 export const touchManagerFactory = defineFactory(TouchManagerKey, (entity, c) =>
     new TouchManager(
@@ -46,15 +54,21 @@ export const touchManagerFactory = defineFactory(TouchManagerKey, (entity, c) =>
         c.resolve(NotificationService),
         c.resolve(LocationContextItemFactory),
         c.resolve(InferenceActionManager),
+        c.resolve<RestoreSource>(RESTORE_SOURCE),
+        c.resolve<StartingTouchAdapter>(STARTING_TOUCH_ADAPTER),
     ))
 
-export class TouchManager {
+export class TouchManager implements Component, Saveable<TouchSave> {
     logger: Logger
-
-    // private touchPersister: TouchPersister;
     private validator: TouchValidator;
 
     private touchAction?: TouchInferenceAction;
+
+    /** Touches this character is actively performing, keyed by the args object
+     *  reference (the same reference flows back through `deActivate`). */
+    private readonly active = new Set<TouchInteractionArgs>()
+    /** Saved touches to re-apply once the whole run graph exists (see lateInit). */
+    private readonly savedArgs: TouchInteractionArgs[]
 
     constructor(
         private readonly entity: Entity,
@@ -65,13 +79,20 @@ export class TouchManager {
         private readonly notificationService: NotificationService,
         private readonly contextItemFactory: LocationContextItemFactory,
         private readonly inferenceActionManager: InferenceActionManager,
+        restore: RestoreSource,
+        startingTouch: StartingTouchAdapter,
     ) {
 
         this.logger = new Logger(entity.require(CharacterIdentityKey).name + "_TouchManager");
         this.validator = new TouchValidator(
             // this.character
         );
-        // this.touchPersister = new TouchPersister(character);
+
+        // Saved active touches on resume; the (stub) start adapter on a fresh start.
+        const saved = restore.forEntity<TouchSave>(entity.id, TouchManagerKey.id, () => ({
+            interactions: startingTouch.getStartingInteractions(entity.id),
+        }))
+        this.savedArgs = saved.interactions
 
         if (entity.id != PLAYER_CHARACTER_ID) {
             this.touchAction = new TouchInferenceAction(
@@ -85,9 +106,25 @@ export class TouchManager {
 
     }
 
-    save() {
-        // this.touchPersister.save();
+    /** Re-applies the saved/started touches once every entity (and its body) is
+     *  constructed and has emitted its initial state. */
+    lateInit(): void {
+        for (const args of this.savedArgs) {
+            this.applyTouch(args)
+        }
     }
+
+    save(): TouchSave {
+        return { interactions: [...this.active] }
+    }
+
+    /** Called by the actor-side {@link TouchInteraction} when it deactivates, so the
+     *  acting character drops it from its active set. */
+    touchDeactivated(args: TouchInteractionArgs): void {
+        this.active.delete(args)
+    }
+
+
 
     applyTouch(args: TouchInteractionArgs): boolean {
 
@@ -121,6 +158,7 @@ export class TouchManager {
         }
 
         if (applied) {
+            this.active.add(args);
             actor?.get(AvatarKey)?.dirtied();
             target?.get(AvatarKey)?.dirtied();
         }

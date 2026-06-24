@@ -196,10 +196,10 @@ export default function ChatPage(): JSX.Element {
       openUp: false,
       submenuSide: 'right',
       items: [
-        { label: 'Clothing', children: buildClothingItemsMenu(characterId, options) },
-        { label: 'Move', children: buildLocationMenu(characterId, locations) },
-        { label: 'Pose', children: buildPoseMenu(characterId, poses) },
         { label: 'Touch', childLabel: 'Target Part', children: buildTouchMenu(characterId, touch) },
+        { label: 'Clothing', children: buildClothingItemsMenu(characterId, options) },
+        { label: 'Pose', children: buildPoseMenu(characterId, poses) },
+        { label: 'Move', children: buildLocationMenu(characterId, locations) },
         { label: 'Regen Avatar', onSelect: () => void window.electronAPI.avatar.regenerate(characterId) }
       ]
     })

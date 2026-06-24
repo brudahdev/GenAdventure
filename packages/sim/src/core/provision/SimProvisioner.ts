@@ -23,6 +23,7 @@ import { GO_TO_BEHAVIOR } from "../../game/character/locomotion/behavior/GoToBeh
 import { GOTO_CHARACTER_BEHAVIOR } from "../../game/character/locomotion/behavior/GoToCharacter/GoToCharacterBehavior";
 import { ALTER_CLOTHING_BEHAVIOR } from "../../game/character/clothing/behavior/AlterClothingStateBehavior";
 import { TOUCH_BEHAVIOR } from "../../game/character/body/touch/behavior/TouchBehavior";
+import { STARTING_TOUCH_ADAPTER, EmptyStartingTouchAdapter } from "../../game/character/body/touch/StartingTouchAdapter";
 
 /** A run's composition seam: registers the concrete adapter set and run-scoped
  *  values into a fresh child container, then `SimWorld` (and the rest of the
@@ -83,6 +84,7 @@ export class SimProvisioner {
         scope.register(STARTING_CLOTHING_ADAPTER, {
             useValue: new OutfitStartingClothingAdapter(roleStartingState, outfitConfigAdapter)
         })
+        scope.register(STARTING_TOUCH_ADAPTER, { useValue: new EmptyStartingTouchAdapter() })
 
         // Behaviour-tree definitions (one per intent type), collected by
         // BehaviorRegistry via @injectAll. Adding an intent = one more entry here.
