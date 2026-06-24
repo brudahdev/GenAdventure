@@ -39,7 +39,7 @@ export class DuoTouchInteraction extends TouchInteraction {
     }
 
     getTargetStopAction() {
-        // return this.targetStopAction;
+        return this.targetStopAction;
     }
 
     deActivateFromStopAction() {
@@ -59,13 +59,11 @@ export class DuoTouchInteraction extends TouchInteraction {
 
     deActivate(sisterAlreadyDeactivated = false) {
 
-
         super.deActivate(sisterAlreadyDeactivated);
 
 
-
-        // this.targetStopAction?.removeFromActionSet(); //hereherr
-        // this.targetStopAction = null;
+        this.targetStopAction?.removeAction();
+        this.targetStopAction = null;
 
         if (!sisterAlreadyDeactivated) {
             this.getActorInteractionSlot()?.removeInteraction(this, false);

@@ -33,8 +33,7 @@ export class InferenceService {
         voxtaClient.onMessage((message) => this.handleServerMessage(message))
     }
 
-    /** Track and (re)register an action with Voxta, tagging it with the acting
-     *  character's role name so Voxta scopes it to that role. */
+    // Add or disable action with voxta
     private register(action: InferenceAction): void {
         this.registered.set(action.name, action)
         const roleName = characterService.getScenarioCharacterById(action.characterId)?.roleName

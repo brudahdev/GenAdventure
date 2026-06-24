@@ -16,7 +16,8 @@ export class ContextManager {
     }
 
     removeItem(item: SimContextItem) {
-        //todo
+        item.value = ""
+        this.contextItems.push(item)
     }
 
     sync(item: SimContextItem) {

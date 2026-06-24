@@ -83,7 +83,7 @@ export function mapInferenceActionToScenarioActionDto(
   return {
     name: action.name,
     description: action.description,
-    disabled: false,
+    disabled: action.disabled,
     layer: action.layer,
     arguments: (action.arguments ?? []).map((arg) => ({
       name: arg.name,

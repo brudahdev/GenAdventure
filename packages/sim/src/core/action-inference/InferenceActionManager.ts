@@ -20,7 +20,11 @@ export class InferenceActionManager {//todo removing actions, removing on charac
     }
 
     removeAction(action: CharacterInferenceAction) {
-        //todo
+        this.eventSystem.emit("inference.action.sync", {
+            ...this.toInferenceAction(action),
+            disabled: true,
+        })
+
     }
 
 
@@ -65,6 +69,7 @@ export class InferenceActionManager {//todo removing actions, removing on charac
             before: action.getBefore(),
             arguments: action.resolveArguments(),
             shortDescription: action.getShortDescription(),
+            disabled: false
         }
     }
 

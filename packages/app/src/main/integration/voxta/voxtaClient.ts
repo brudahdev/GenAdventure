@@ -161,13 +161,19 @@ export class VoxtaClient {
 
   /** Push a sim context item into the active chat's prompt context. No-op without a session. */
   async updateContext(item: SimContextItem): Promise<void> {
+    const disabled = item.value == ""
     const sessionId = this.signal.sessionId
     if (!sessionId) return
     await this.signal.send({
       $type: 'updateContext',
       sessionId,
       contextKey: item.key,
-      contexts: [{ name: item.key, text: item.value }]
+      contexts: [
+        {
+          name: item.key,
+          text: item.value,
+          disabled
+        }]
     })
   }
 

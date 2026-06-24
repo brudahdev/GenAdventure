@@ -17,6 +17,7 @@ export interface InferenceAction {
   before: boolean;
   arguments?: InferenceArgument[];
   shortDescription?: string;
+  disabled: boolean;
 }
 
 export interface InferenceArgument {
