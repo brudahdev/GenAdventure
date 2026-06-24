@@ -32,7 +32,7 @@ export class BodyPart implements Taggable {
 
     getSlot(name: string = 'default'): TouchInteractionSlot<TouchInteraction> {
         if (!this.slots[name]) {
-            this.slots[name] = new TouchInteractionSlot<TouchInteraction>(this.connonicalName, name);
+            this.slots[name] = new TouchInteractionSlot<TouchInteraction>(this.connonicalName, name, this.entity);
         }
         return this.slots[name];
     }

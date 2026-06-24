@@ -22,7 +22,6 @@ import { PLAYER_CHARACTER_ID } from "@gen-adventure/shared";
 import { EventSystem } from "../../../EventSystem";
 import { BehaviorDispatcher } from "../../../behavior/BehaviorDispatcher";
 import { InferenceActionManager } from "../../../../core/action-inference/InferenceActionManager";
-import { AvatarKey } from "../../Avatar";
 import { NotificationService } from "../../../../core/NotificationService";
 import { LocationContextItemFactory } from "../../../location/LocationContextItemFactory";
 
@@ -159,8 +158,7 @@ export class TouchManager implements Component, Saveable<TouchSave> {
 
         if (applied) {
             this.active.add(args);
-            actor?.get(AvatarKey)?.dirtied();
-            target?.get(AvatarKey)?.dirtied();
+            // The actor/target slots dirty their owners' avatars on add.
         }
 
         return applied;

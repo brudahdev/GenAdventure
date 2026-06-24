@@ -57,9 +57,8 @@ export class StopTouchInferenceAction extends CharacterInferenceAction<StopTouch
             this.touchInteraction.deActivateFromStopAction();
         } else {
             this.touchInteraction.deActivate();
-            const avatar = this.entity.get(AvatarKey);
-            avatar?.dirtied();
-            avatar?.updateAvatar();
+            // Dirtying is handled by the slot (on remove); just flush the regeneration.
+            this.entity.get(AvatarKey)?.updateAvatar();
         }
     }
 }

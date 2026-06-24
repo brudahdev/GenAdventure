@@ -46,15 +46,9 @@ export class DuoTouchInteraction extends TouchInteraction {
 
         this.deActivate();
 
-        const avatar = this.entity.get(AvatarKey);
-        avatar?.dirtied();
-        avatar?.updateAvatar();
-
-        if (this.sisterInteraction) {
-            const sisterAvatar = this.sisterInteraction.getEntity().get(AvatarKey);
-            sisterAvatar?.dirtied();
-            sisterAvatar?.updateAvatar();
-        }
+        // Dirtying is handled by the slots (on remove); just flush the regeneration.
+        this.entity.get(AvatarKey)?.updateAvatar();
+        this.sisterInteraction?.getEntity().get(AvatarKey)?.updateAvatar();
     }
 
     deActivate(sisterAlreadyDeactivated = false) {
@@ -69,16 +63,12 @@ export class DuoTouchInteraction extends TouchInteraction {
             this.getActorInteractionSlot()?.removeInteraction(this, false);
             this.getTargetInteractionSlot()?.removeInteraction(this, false);
             this.sisterInteraction?.deActivate(true);
+            // Both parties' avatars were dirtied by their slots losing this interaction.
+            // Regeneration (updateAvatar) is the caller's / a later flush's job — the
+            // displacing caller can't know to refresh this displaced target.
 
-            // Both parties' avatars showed this interaction; mark them dirty so they
-            // regenerate without it. The displacing touch only refreshes its own
-            // actor/target, so the displaced *target* (e.g. groped npc) would
-            // otherwise keep a stale image.//see the test dirties the displaced duo target\'s avatar (and clears its slot) three way displacement
-            // this.entity.get(AvatarKey)?.dirtied(); i dont think this is needed
-            const sisterAvatar = this.sisterInteraction?.getEntity().get(AvatarKey)
-            sisterAvatar?.dirtied();//I think the slot should set dirtied
-            sisterAvatar?.updateAvatar();//caller may be activating a new touch action which deactivates this one, so they dont know the existing char to call update on their avatar... But I dont really like having presentation here... maybe add dirtied character ids to the blackboard?
-
+            //see test dirties the displaced duo target\'s avatar (and clears its slot) three way displacement
+            this.sisterInteraction?.getEntity().get(AvatarKey)?.updateAvatar();//caller may be activating a new touch action which deactivates this one, so they dont know the existing char to call update on their avatar... But I dont really like having presentation here... maybe add dirtied character ids to the blackboard?
         }
     }
 

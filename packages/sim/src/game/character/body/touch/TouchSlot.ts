@@ -1,6 +1,8 @@
 
 import { TouchInteraction } from "./Touch";
 import { DuoTouchInteraction } from "./TouchDuo";
+import type { Entity } from "../../../../core/ec/Entity";
+import { AvatarKey } from "../../Avatar";
 
 export class TouchInteractionSlot<T extends TouchInteraction = TouchInteraction> {
     private interactions: T[] = [];
@@ -9,10 +11,17 @@ export class TouchInteractionSlot<T extends TouchInteraction = TouchInteraction>
     private bodyPartName: string;
     constructor(
         bodyPartName: string,
-        slotName: string
+        slotName: string,
+        private readonly owner: Entity,
     ) {
         this.bodyPartName = bodyPartName;
         this.slotName = slotName;
+    }
+
+    /** This slot's contents changed — the owning character's avatar showed (or no
+     *  longer shows) these interactions, so mark it for regeneration. */
+    private dirtyOwnerAvatar() {
+        this.owner.get(AvatarKey)?.dirtied();
     }
 
     addInteraction(newInteraction: T): boolean {
@@ -66,6 +75,7 @@ export class TouchInteractionSlot<T extends TouchInteraction = TouchInteraction>
 
         this.interactions.push(newInteraction);
         // newInteraction.setTouchInteractionSlot(this);
+        this.dirtyOwnerAvatar();
         return true;
     }
 
@@ -83,6 +93,7 @@ export class TouchInteractionSlot<T extends TouchInteraction = TouchInteraction>
         const index = this.interactions.findIndex(i => i.getInteractionData().id === id);
         if (index !== -1) {
             const [removed] = this.interactions.splice(index, 1);
+            this.dirtyOwnerAvatar();
             if (callDeactivate)
                 removed.deActivate();
         }
