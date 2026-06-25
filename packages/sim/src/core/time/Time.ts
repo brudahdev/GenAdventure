@@ -4,6 +4,9 @@ import type { GameSystem } from "../GameSystem";
 import type { WorldSaveable } from "../save/Saveable";
 import { RESTORE_SOURCE, RestoreSource } from "../save/RestoreSource";
 import { EventSystem } from "../../game/EventSystem";
+import { ContextManager } from "../context/ContextManager";
+import { SimpleContextItem } from "../context/ContextItem";
+import { TimeUtils } from "../../utils/TimeUtils";
 
 const TICKS_PER_SECOND = 30;
 
@@ -12,6 +15,8 @@ interface TimeSave { gameTimeMs: number }
 
 @scoped(Lifecycle.ContainerScoped)
 export class Time implements GameSystem, WorldSaveable<TimeSave> {
+
+
     readonly saveKey = 'time'
 
     private lastReal = Date.now();
@@ -19,10 +24,13 @@ export class Time implements GameSystem, WorldSaveable<TimeSave> {
     private lastSecond = 0;
     private intervalHandle: ReturnType<typeof setInterval> | null = null;
 
+    private contextItem: SimpleContextItem;
+
     constructor(
         @inject(TIME_CONFIG_ADAPTER) private readonly config: TimeConfigAdapter,
         @inject(RESTORE_SOURCE) restore: RestoreSource,
         private readonly eventSystem: EventSystem,
+        private readonly contextManager: ContextManager,
     ) {
         // Resume from the saved instant, else start from scenario time config.
         this.gameTime = restore.forWorld<TimeSave>(
@@ -31,6 +39,10 @@ export class Time implements GameSystem, WorldSaveable<TimeSave> {
         ).gameTimeMs;
 
         this.config.saveTime(this.gameTime)
+        this.contextItem = new SimpleContextItem({
+            key: 'time',
+            value: `${this.getContextItemValue()}`
+        }, true, contextManager);
         console.log('[sim] Time manager initialized with time: ' + this.formatGameTime())
     }
 
@@ -75,7 +87,12 @@ export class Time implements GameSystem, WorldSaveable<TimeSave> {
     }
 
     private onSecond(): void {
+        this.contextItem.setValue(this.getContextItemValue())
         this.eventSystem.emit("time.second", { gameTimeMs: this.gameTime })
+    }
+
+    private getContextItemValue() {
+        return `Current time: ${this.formatGameTime()}`
     }
 
     private formatGameTime(): string {
@@ -87,7 +104,21 @@ export class Time implements GameSystem, WorldSaveable<TimeSave> {
 
         const ordinal = this.getOrdinal(day);
 
-        return `${month} ${day}${ordinal}, ${year}`;
+        const minutes = date.getMinutes();
+
+        let hours = date.getHours();
+        const ampm =
+            hours >= 12 ? "pm" : "am";
+        hours = hours % 12;
+
+        if (hours === 0) {
+            hours = 12;
+        }
+
+        const minuteStr =
+            String(minutes).padStart(2, "0");
+
+        return `${month} ${day}${ordinal}, ${year} ${hours}:${minuteStr}${ampm}`;
     }
 
     private getOrdinal(day: number): string {

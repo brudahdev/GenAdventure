@@ -623,6 +623,12 @@ export default function ClothingItemConfigPage(): JSX.Element {
     setSelectedItemIdx(null)
   }
 
+  const copyItem = (item: ClothingItemConfig): void => {
+    const newId = uniqueId(`${item.id}_copy`, itemIdSet())
+    setItems((arr) => [...arr, { ...item, id: newId }])
+    setSelectedItemIdx(items().length - 1)
+  }
+
   return (
     <div class="list-page">
       <FixedTopBar title="Clothing Item Config" onBack={() => navigate(-1)} />
@@ -655,6 +661,12 @@ export default function ClothingItemConfigPage(): JSX.Element {
                       {item.id} · {item.states.length} state(s)
                     </span>
                   </div>
+                  <button
+                    class="btn"
+                    onClick={(e) => { e.stopPropagation(); copyItem(item) }}
+                  >
+                    Copy
+                  </button>
                 </div>
               )
             }}
