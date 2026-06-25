@@ -12,6 +12,7 @@ import { NpcActivityKey } from "../npc/NpcActivity"
 import { goToIntent } from "./behavior/GoToIntent"
 import { CharacterLocomotionKey } from "./CharacterLocomotion"
 import { CharacterLocation, CharacterLocationKey } from "../location/CharacterLocation"
+import { AvatarKey } from "../Avatar"
 
 
 
@@ -87,9 +88,7 @@ export class LocomotionInferenceAction extends CharacterInferenceAction<Locomoti
         this.dispatcher.submit(
             goToIntent(this.entity.id, targetLocationId, targetSubLocationId),
             (success) => {
-                if (success && targetEntity.require(NpcActivityKey).isActive) {
-                    this.eventSystem.emit("image.request", buildAvatarPrompt(targetEntity))
-                }
+                targetEntity.get(AvatarKey)?.updateAvatar();
             },
         )
     }

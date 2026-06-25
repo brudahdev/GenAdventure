@@ -74,7 +74,6 @@ export class PoseInferenceAction extends CharacterInferenceAction<PoseInferenceA
         this.dispatcher.submit(
             poseIntent(this.entity.id, targetEntity.id, targetPoseId),
             (success) => {
-                if (!success) return
                 this.entity.get(AvatarKey)?.updateAvatar();
                 targetEntity.get(AvatarKey)?.updateAvatar();
             },

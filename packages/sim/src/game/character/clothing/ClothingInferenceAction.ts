@@ -81,7 +81,6 @@ export class ClothingInferenceAction extends CharacterInferenceAction<ClothingIn
         this.dispatcher.submit(
             alterClothingStateIntent(this.entity.id, targetEntity.id, clothingItem.id, state.id),
             (success) => {
-                if (!success) return
                 this.entity.get(AvatarKey)?.updateAvatar();
                 targetEntity.get(AvatarKey)?.updateAvatar();
             },

@@ -17,7 +17,7 @@ export function getName(entity: Entity): string {
     return entity.require(CharacterIdentityKey).name
 }
 
-export function buildAvatarPrompt(entity: Entity): PromptRequest {
+export function buildAvatarPrompt(entity: Entity): PromptRequest {//todo check if npc is active
     const prompt = new PromptBuilder(',')
     const heShe = entity.require(CharacterIdentityKey).config.pronouns.heShe;
     if (heShe == 'he') {

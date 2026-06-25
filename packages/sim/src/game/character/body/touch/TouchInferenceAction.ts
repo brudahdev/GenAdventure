@@ -71,7 +71,6 @@ export class TouchInferenceAction extends CharacterInferenceAction<TouchInferenc
                 args.verb,
             ),
             (success) => {
-                if (!success) return
                 this.entity.get(AvatarKey)?.updateAvatar();
                 targetEntity.get(AvatarKey)?.updateAvatar();
             },
