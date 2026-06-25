@@ -3,10 +3,14 @@ import { ActorIntent } from "../../../plan/planDefs";
 
 export const GO_TO_INTENT = 'goToInt';
 
-export interface GoToIntent extends ActorIntent {
-    type: typeof GO_TO_INTENT;
+/** Role slice: a fixed destination. Read by the `HopTowardLocation` leaf. */
+export interface LocatedIntent {
     locationId: string;
     subLocationId?: string;
+}
+
+export interface GoToIntent extends ActorIntent, LocatedIntent {
+    type: typeof GO_TO_INTENT;
 }
 
 export const goToIntent = (

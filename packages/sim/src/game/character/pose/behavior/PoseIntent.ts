@@ -1,12 +1,14 @@
-import { ActorIntent } from "../../../plan/planDefs";
+import { ActorIntent, TargetedIntent } from "../../../plan/planDefs";
 
 export const POSE_INTENT = 'poseInt';
 
-
-export interface PoseIntent extends ActorIntent {
-    type: typeof POSE_INTENT;
-    targetId: string;
+/** Role slice: the pose to set. Read by the `SetPose` leaf. */
+export interface PosedIntent {
     poseId: string;
+}
+
+export interface PoseIntent extends ActorIntent, TargetedIntent, PosedIntent {
+    type: typeof POSE_INTENT;
 }
 
 

@@ -1,13 +1,16 @@
-import { ActorIntent } from "../../../../plan/planDefs";
+import { ActorIntent, TargetedIntent } from "../../../../plan/planDefs";
 
 export const TOUCH_INTENT = 'touch';
 
-export interface TouchIntent extends ActorIntent {
-    type: typeof TOUCH_INTENT;
-    targetId: string;
+/** Role slice: the body-part touch parameters. Read by the `Touch` leaf. */
+export interface TouchActionIntent {
     actorPartTag: string;
     targetPartTag: string;
     verb: string;
+}
+
+export interface TouchIntent extends ActorIntent, TargetedIntent, TouchActionIntent {
+    type: typeof TOUCH_INTENT;
 }
 
 export const touchIntent = (

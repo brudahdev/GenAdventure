@@ -1,14 +1,17 @@
 
 
-import { ActorIntent } from "../../../plan/planDefs";
+import { ActorIntent, TargetedIntent } from "../../../plan/planDefs";
 
 export const ALTER_CLOTHING_STATE_INTENT = 'alterClothingState';
 
-export interface AlterClothingStateIntent extends ActorIntent {
-    type: typeof ALTER_CLOTHING_STATE_INTENT;
-    targetId: string;
+/** Role slice: the clothing item + target state. Read by the `AlterClothing` leaf. */
+export interface ClothingChangeIntent {
     clothingId: string;
     stateId: string;
+}
+
+export interface AlterClothingStateIntent extends ActorIntent, TargetedIntent, ClothingChangeIntent {
+    type: typeof ALTER_CLOTHING_STATE_INTENT;
 }
 
 export const alterClothingStateIntent = (

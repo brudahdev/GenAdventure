@@ -1,7 +1,6 @@
-import type { ActorIntent } from "../../../../plan/planDefs"
 import type { BehaviorDefinition } from "../../../../behavior/BehaviorDefinition"
 import { STAND_UP_SUBTREE } from "../../../pose/behavior/standUpSubtree"
-import { GOTO_CHARACTER_INTENT, type GoToCharacterIntent } from "./GoToCharacter"
+import { GOTO_CHARACTER_INTENT } from "./GoToCharacter"
 
 /** Walk to the target character's *current* sub-location (reactive), standing
  *  first. Short-circuits when already co-located — so a self/co-located action
@@ -26,12 +25,8 @@ root {
 ${GO_TO_CHARACTER_SUBTREE}
 ${STAND_UP_SUBTREE}`
 
-/** Behaviour for the {@link GoToCharacterIntent}. */
+/** Behaviour for the {@link import("./GoToCharacter").GoToCharacterIntent}. */
 export const GOTO_CHARACTER_BEHAVIOR: BehaviorDefinition = {
     type: GOTO_CHARACTER_INTENT,
     tree: GO_TO_CHARACTER_TREE,
-    toParams: (intent: ActorIntent) => {
-        const i = intent as GoToCharacterIntent
-        return { actorId: i.actorId, targetId: i.characterId }
-    },
 }

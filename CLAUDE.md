@@ -82,7 +82,7 @@ GenAdventure/
 │   │   │       │                  #   pose, appearance, clothing, npc, player (each w/ ConfigAdapter)
 │   │   │       ├── location/      # Location, SubLocation, LocationManager, LocationContextItem
 │   │   │       ├── item/clothing/ # ClothingItem(+State), Outfit/ClothingItem ConfigAdapters
-│   │   │       ├── behavior/      # BehaviorDispatcher, CharacterBehaviorAgent, behaviorTrees (MDSL)
+│   │   │       ├── behavior/      # BehaviorDispatcher, BehaviorLeafRegistry, *Leaves (MDSL leaf-sets)
 │   │   │       └── plan/          # planDefs (ActorIntent), poseGuards, locationPath; per-aspect *Intent files
 │   │   └── test/                  # Vitest; test/system/* boots a real SimWorld from fixtures
 │   │
@@ -216,20 +216,37 @@ process only over a Comlink bridge (`SimApi` / `MainApi`, defined in
 - **Intent models** (plain data, no behaviour) live in per-aspect `behavior/*Intent.ts`
   files; `game/plan/planDefs.ts` defines the `ActorIntent` base. `core/plan/planTypes.ts`
   defines `Intent`.
-- **One `CharacterBehaviorAgent` per submission** holds the actor + params and exposes
-  the leaf methods the MDSL tree calls (`IsStanding`, `Stand`, `HopTowardLocation`,
-  `HopTowardTarget`, `IsCoLocatedWithTarget`, `SetPose`, `AlterClothing`). Reusable
-  utilities: `game/plan/poseGuards.ts` (`isStanding`, `standPoseId`) and
-  `game/plan/locationPath.ts` (`calcPath` BFS).
+- **Per-domain leaf-sets, composed per submission.** MDSL leaves (`IsStanding`, `Stand`,
+  `HopTowardLocation`, `HopTowardTarget`, `IsCoLocatedWithTarget`, `SetPose`,
+  `AlterClothing`, `Touch`) live in per-aspect `behavior/*Leaves.ts` files as `LeafSet`s
+  (each leaf is `(ctx: BehaviorContext, ...args) => State | boolean`). `BehaviorLeafRegistry`
+  imports them all (`LEAF_SETS`), flattens them (throwing on duplicate names), and
+  `compose(ctx)` builds the single mistreevous agent per submit. The thin per-submission
+  `BehaviorContext` carries `{ deps, intent, notifier }` — there is no god-agent class.
+  Leaves read the originating intent off `ctx.intent`, cast to the **role interface** they
+  need (`ActorIntent`/`TargetedIntent` in `planDefs.ts`; `LocatedIntent`/`PosedIntent`/
+  `ClothingChangeIntent`/`TouchActionIntent` exported from each `*Intent.ts`). Shared leaves
+  (`HopTowardTarget`, `IsCoLocatedWithTarget`) cast to the shared `TargetedIntent` role since
+  several intents drive them; there is no `BehaviorParams`/`toParams` flattening layer.
+  **Leaf-sets are imported in `BehaviorLeafRegistry`, not registered from `SimProvisioner`,
+  on purpose:** the provisioner is the earliest-loaded module, and pulling the component-key
+  graph in that early re-exposes a latent import cycle in the body/touch modules; the
+  registry sits in the dispatcher graph (the safe, late load position). Reusable utilities:
+  `game/plan/poseGuards.ts` (`isStanding`, `standPoseId`) and `game/plan/locationPath.ts`
+  (`calcPath` BFS).
 - **Tree composition** uses mistreevous named-root subtrees (`branch [Name]`). Current
   trees: `StandUp`, `GoToLocation` (guard: standing), `GoToCharacter` (reactive — re-paths
   when target moves), `Pose`, `AlterClothing` (reuses GoToCharacter). Add a new intent:
-  write an `*Intent.ts`, add an MDSL entry to `behaviorTrees.ts`, add leaf methods to
-  `CharacterBehaviorAgent`, and extend `BehaviorDispatcher.toParams`.
+  write an `*Intent.ts` (extending the role interfaces it fills — reuse `TargetedIntent` etc.,
+  or export a new role slice for its own fields), an `*Behavior.ts` (just `{ type, tree }`),
+  and an `*Leaves.ts` (the `LeafSet`); register the definition in `SimProvisioner`
+  (`BEHAVIOR_DEFINITION`) and add the leaf-set to `LEAF_SETS` in `BehaviorLeafRegistry`. No
+  existing file changes.
 - **Reference implementation — AlterClothingState**: `AlterClothingStateIntent.ts` (shape
-  + factory) → `ALTER_CLOTHING_TREE` in `behaviorTrees.ts` → `AlterClothing` method in
-  `CharacterBehaviorAgent`. Sourced from `worker.ts`'s `clothingStateChangeUiAction` (UI)
-  and `ClothingInferenceAction` (Voxta) — mirror it when adding a new intent.
+  + factory) → `ALTER_CLOTHING_TREE` + `ALTER_CLOTHING_BEHAVIOR` in
+  `AlterClothingStateBehavior.ts` → `AlterClothing` leaf in `clothingLeaves.ts`. Sourced
+  from `worker.ts`'s `clothingStateChangeUiAction` (UI) and `ClothingInferenceAction`
+  (Voxta) — mirror it when adding a new intent.
 
 ### Inference actions (Voxta function calling) (`core/action-inference/`)
 - Subclass `CharacterInferenceAction<S>`: declare an `ArgSchema` once (drives both

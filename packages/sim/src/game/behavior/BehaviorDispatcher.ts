@@ -4,8 +4,10 @@ import { EntityRegistry } from "../entity/EntityRegistry"
 import { LocationManager } from "../location/LocationManager"
 import { NotificationService } from "../../core/NotificationService"
 import { BehaviorTreeRunner, type OnSettle } from "../../core/bt/BehaviorTreeRunner"
-import { CharacterBehaviorAgent } from "./CharacterBehaviorAgent"
 import { BehaviorRegistry } from "./BehaviorRegistry"
+import { BehaviorLeafRegistry } from "./BehaviorLeafRegistry"
+import { CharacterActionNotifier } from "./CharacterActionNotifier"
+import type { BehaviorContext } from "./BehaviorContext"
 import type { ActorIntent } from "../plan/planDefs"
 
 /** mistreevous does not export its `Agent` type, so derive the constructor's
@@ -15,8 +17,8 @@ type MistreevousAgent = ConstructorParameters<typeof BehaviourTree>[1]
 /** The intent layer's entry point — the BT replacement for the old
  *  `PlanExecutor`. Looks an intent's {@link import("./BehaviorDefinition").BehaviorDefinition}
  *  up in the {@link BehaviorRegistry} (its tree + param-mapping live in the
- *  intent's domain `behavior/` folder), builds a per-submission
- *  {@link CharacterBehaviorAgent}, and hands the tree to the
+ *  intent's domain `behavior/` folder), composes a per-submission agent from the
+ *  registered leaf-sets via {@link BehaviorLeafRegistry}, and hands the tree to the
  *  {@link BehaviorTreeRunner}, which steps it across ticks. Both intent sources
  *  (worker UI actions, Voxta inference actions) funnel through `submit`.
  *  `onSettle` fires when the tree finishes (used for avatar regeneration that the
@@ -29,6 +31,7 @@ export class BehaviorDispatcher {
         private readonly notificationService: NotificationService,
         private readonly runner: BehaviorTreeRunner,
         private readonly behaviors: BehaviorRegistry,
+        private readonly leaves: BehaviorLeafRegistry,
     ) { }
 
     submit(intent: ActorIntent, onSettle?: OnSettle): void {
@@ -46,14 +49,17 @@ export class BehaviorDispatcher {
             return
         }
 
-        const agent = new CharacterBehaviorAgent(
-            {
-                registry: this.registry,
-                locationManager: this.locationManager,
-                notificationService: this.notificationService,
-            },
-            def.toParams(intent),
-        )
+        const deps = {
+            registry: this.registry,
+            locationManager: this.locationManager,
+            notificationService: this.notificationService,
+        }
+        const ctx: BehaviorContext = {
+            deps,
+            intent,
+            notifier: new CharacterActionNotifier(deps),
+        }
+        const agent = this.leaves.compose(ctx)
         const tree = new BehaviourTree(def.tree, agent as unknown as MistreevousAgent)
         this.runner.start(intent.actorId, tree, onSettle, def.tree)
     }

@@ -10,11 +10,11 @@ import { Location } from "../location/Location"
 import { Pose } from "../character/pose/Pose"
 import { ClothingItemState } from "../item/clothing/ClothingItemState"
 import { StringUtils } from "../../utils/StringUtils"
-import type { BehaviorDeps } from "./CharacterBehaviorAgent"
+import type { BehaviorDeps } from "./BehaviorContext"
 
-/** Notification prose extracted from
- *  {@link import("./CharacterBehaviorAgent").CharacterBehaviorAgent}.
- *  Constructed once per submitted intent, reused across leaf calls. */
+/** Notification prose for behaviour-tree leaves. Carried on the
+ *  {@link import("./BehaviorContext").BehaviorContext}, constructed once per
+ *  submitted intent, reused across leaf calls. */
 export class CharacterActionNotifier {
     constructor(private readonly deps: BehaviorDeps) { }
 

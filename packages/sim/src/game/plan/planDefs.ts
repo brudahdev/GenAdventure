@@ -7,3 +7,11 @@ import type { Intent } from "../../core/plan/planTypes"
 export interface ActorIntent extends Intent {
     actorId: string
 }
+
+/** Role slice for any intent directed at another character (or self). The shared
+ *  `GoToCharacter` subtree's leaves read the intent through this, so every
+ *  target-directed intent (pose, clothing, touch, goto-character) implements it —
+ *  this is the shared vocabulary that lets those subtrees be reused. */
+export interface TargetedIntent {
+    targetId: string
+}

@@ -31,7 +31,9 @@ describe('touch options (system test)', () => {
     const opts = sim.world.getTouchOptions(npc.id)
 
     // hands -> tits supports both grope and pinch, grouped under the same with-part.
-    expect(verbs(opts, 'tits', 'hands')).toEqual(expect.arrayContaining(['grope', 'pinch']))
+    expect(verbs(opts, 'tits', 'hands')).toEqual(expect.arrayContaining(['grope']))
+    expect(verbs(opts, 'nipples', 'hands')).toEqual(expect.arrayContaining(['pinch']))
+
     // pussy is reachable with hands (finger) and penis (penitrate).
     expect(verbs(opts, 'pussy', 'hands')).toContain('finger')
     expect(verbs(opts, 'pussy', 'penis')).toContain('penitrate')
