@@ -182,7 +182,7 @@ describe('InferenceActionManager', () => {
 
   beforeEach(() => {
     manager = newManager()
-    vi.spyOn(manager, 'syncAction').mockImplementation(() => {})
+    vi.spyOn(manager, 'syncAction').mockImplementation(() => { })
     action = new FollowAction(manager)
     action.init()
   })
@@ -193,7 +193,7 @@ describe('InferenceActionManager', () => {
 
   it('decodes an invocation and dispatches typed args to handle()', async () => {
     await manager.onInvocation({
-      value: 'action:follow',
+      value: 'follow',
       arguments: [
         { name: 'destination', value: 'castle' },
         { name: 'speed', value: '7' },
@@ -203,15 +203,15 @@ describe('InferenceActionManager', () => {
   })
 
   it('ignores an invocation with no registered handler', async () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
-    await manager.onInvocation({ value: 'action:unknown' })
+    const log = vi.spyOn(console, 'log').mockImplementation(() => { })
+    await manager.onInvocation({ value: 'unknown' })
     expect(action.received).toBeUndefined()
     expect(log).toHaveBeenCalled()
   })
 
   it('does not dispatch when decoding fails (missing required arg)', async () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
-    await manager.onInvocation({ value: 'action:follow', arguments: [{ name: 'speed', value: '1' }] })
+    const log = vi.spyOn(console, 'log').mockImplementation(() => { })
+    await manager.onInvocation({ value: 'follow', arguments: [{ name: 'speed', value: '1' }] })
     expect(action.received).toBeUndefined()
     expect(log).toHaveBeenCalled()
   })
@@ -223,6 +223,7 @@ describe('InferenceActionManager', () => {
       description: 'follow the door',
       shortDescription: 'follow',
       layer: 'act',
+      disabled: false,
       before: false,
       arguments: [
         { name: 'destination', type: 'String', description: 'where to go (current: the door)', required: true },
