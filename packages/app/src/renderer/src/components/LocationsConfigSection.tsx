@@ -5,7 +5,7 @@ import type {
   LocationConfig,
   LocationPoseConfig,
   PoseConfig,
-  SubLocation
+  SubLocationConfig
 } from '@gen-adventure/shared'
 import CollapsibleSection from './CollapsibleSection'
 import FilteredSelect from './FilteredSelect'
@@ -34,7 +34,7 @@ function firstSubId(loc: LocationConfig | undefined): string {
 }
 
 const DEFAULT_STAND_POSE: LocationPoseConfig = { poseId: 'stand', context: 'standing', img_txt: 'standing' }
-const DEFAULT_SUB: SubLocation = { id: 'default-sublocation', onEnterText: '', poses: [DEFAULT_STAND_POSE], tags: [] }
+const DEFAULT_SUB: SubLocationConfig = { id: 'default-sublocation', onEnterText: '', poses: [DEFAULT_STAND_POSE], tags: [] }
 
 // --- Section component ---
 
@@ -131,7 +131,7 @@ export default function LocationsConfigSection(props: { scenarioId: string }): J
 
   // --- Sub-location mutations ---
 
-  const updateSub = (aIdx: number, sIdx: number, patch: Partial<SubLocation>): void => {
+  const updateSub = (aIdx: number, sIdx: number, patch: Partial<SubLocationConfig>): void => {
     setLocations(produce((d) => { Object.assign(d[aIdx].subLocations[sIdx], patch) }))
   }
 
@@ -292,7 +292,7 @@ export default function LocationsConfigSection(props: { scenarioId: string }): J
 
   const copySub = (aIdx: number, sIdx: number): void => {
     setLocations(produce((d) => {
-      const copy: SubLocation = JSON.parse(JSON.stringify(d[aIdx].subLocations[sIdx]))
+      const copy: SubLocationConfig = JSON.parse(JSON.stringify(d[aIdx].subLocations[sIdx]))
       const existingIds = new Set(d[aIdx].subLocations.map((s) => s.id))
       copy.id = uniqueId(copy.id + '-copy', existingIds)
       d[aIdx].subLocations.push(copy)

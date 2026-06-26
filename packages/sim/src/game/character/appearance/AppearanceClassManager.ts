@@ -47,7 +47,7 @@ export class AppearanceClassManager {
         if (!clothingItem) {
             return
         }
-        const state = clothingItem.stateManager.getActiveState();
+        const state = clothingItem.getCurrentState();
 
         const newCoveredClasses = new Set<string>();
         for (const clazz of state?.coversAppearanceClasses ?? []) {

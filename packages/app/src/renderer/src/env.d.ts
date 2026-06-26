@@ -1,5 +1,10 @@
 /// <reference types="vite/client" />
 
+declare module '*.svg?raw' {
+  const src: string
+  export default src
+}
+
 // Mirror of the preload contextBridge API (packages/app/src/preload/index.ts).
 // Keep this in sync with the preload — they are one contract.
 import type {

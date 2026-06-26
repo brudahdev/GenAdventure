@@ -1,9 +1,16 @@
-import type { Endpoint } from 'comlink'
 import type { MessagePort, Worker } from 'worker_threads'
+
+// Matches comlink's Endpoint interface without requiring comlink as a shared dep.
+interface Endpoint {
+  postMessage(message: unknown, transfer?: Transferable[]): void
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject): void
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject): void
+  start?: () => void
+}
 
 /**
  * Adapts a `worker_threads` {@link Worker}/{@link MessagePort} to Comlink's
- * {@link Endpoint} interface (which is modelled on the DOM `MessagePort`).
+ * Endpoint interface (which is modelled on the DOM `MessagePort`).
  *
  * Vendored rather than imported from `comlink/dist/umd/node-adapter` so we don't
  * depend on a deep import path. Kept out of the package barrel (`index.ts`) so
