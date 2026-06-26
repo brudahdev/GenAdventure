@@ -24,6 +24,7 @@ import { BehaviorDispatcher } from "../../../behavior/BehaviorDispatcher";
 import { InferenceActionManager } from "../../../../core/action-inference/InferenceActionManager";
 import { NotificationService } from "../../../../core/NotificationService";
 import { LocationContextItemFactory } from "../../../location/LocationContextItemFactory";
+import { LocationChangedEvent } from "../../../GameEvents";
 
 
 
@@ -69,6 +70,7 @@ export class TouchManager implements Component, Saveable<TouchSave> {
     /** Saved touches to re-apply once the whole run graph exists (see lateInit). */
     private readonly savedArgs: TouchInteractionArgs[]
 
+
     constructor(
         private readonly entity: Entity,
         private readonly registry: EntityRegistry,
@@ -103,7 +105,13 @@ export class TouchManager implements Component, Saveable<TouchSave> {
             );
         }
 
+        eventSystem.on("location.changed", (args) => {
+            this.onLocationChange(args);
+        })
+
     }
+
+
 
     /** Re-applies the saved/started touches once every entity (and its body) is
      *  constructed and has emitted its initial state. */
@@ -129,7 +137,7 @@ export class TouchManager implements Component, Saveable<TouchSave> {
         return this.entity.require(BodyKey).getActiveInteractions().map(interaction => interaction.id)
     }
 
-    //When the player is stoping a touch interaction
+    //When the player is stoping a touch interaction(from ui)
     stopTouchByPlayer(interactionId: string): void {
         const interaction = this.entity.require(BodyKey).getActiveInteractions()
             .find(interaction => interaction.id === interactionId)
@@ -137,18 +145,33 @@ export class TouchManager implements Component, Saveable<TouchSave> {
             this.logger.debug(`no active touch interaction '${interactionId}' on ${nameOf(this.entity)}`)
             return
         }
-        if (this.entity.id == PLAYER_CHARACTER_ID) {//its a solo interaction
-            // interaction.getActorStopAction()?.handle({})
+        if (this.entity.id == PLAYER_CHARACTER_ID) {//its a solo interaction, a
             interaction.deActivate();
             return
         }
 
-        if (interaction instanceof DuoTouchInteraction) {
+        if (interaction instanceof DuoTouchInteraction) {///player sops through ui, so the sister interaction is the player owned one
             interaction.getSisterInteraction()
                 ?.deActivateFromStopAction();
         }
-
     }
+
+    onLocationChange(args: LocationChangedEvent) {
+        if (args.characterId == this.entity.id) {//we are moving, disable all duo actions
+            const interactions = this.entity.require(BodyKey).getActiveInteractions()
+                .filter(interaction => interaction instanceof DuoTouchInteraction)
+
+            interactions.forEach(interaction => {
+                if (this.entity.id == PLAYER_CHARACTER_ID) {
+                    interaction.deActivate();
+                    return
+                }
+                interaction?.deActivateFromStopAction();
+            })
+        }
+    }
+
+
 
 
 

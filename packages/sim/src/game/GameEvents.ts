@@ -11,13 +11,7 @@ export interface GameEvents {
         gameTimeMs: number
     },
 
-    "location.changed": {
-        characterId: string
-        locationId: string
-        subLocationId: string
-        previousLocationId?: string;
-        previousSubLocationId?: string;
-    },
+    "location.changed": LocationChangedEvent
 
     "pose.changed": {
         characterId: string
@@ -43,4 +37,12 @@ export interface GameEvents {
 
     "notification": Notif,//pushed by notification system
     "notification.add": Notif,//pushed by things to send to notification.... probably bad but im lazy todo remove this
+}
+
+export interface LocationChangedEvent {
+    characterId: string
+    locationId: string
+    subLocationId: string
+    previousLocationId?: string;
+    previousSubLocationId?: string;
 }
